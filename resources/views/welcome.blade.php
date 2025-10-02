@@ -41,7 +41,7 @@
                         </div>
                         <h5 class="card-title">Enter Score</h5>
                         <p class="card-text">Record your latest round and update your handicap automatically.</p>
-                        <a href="#" class="btn btn-primary">Add Score</a>
+                        <a href="{{ asset('admin/scores/create') }}" class="btn btn-primary">Add Score</a>
                     </div>
                 </div>
             </div>

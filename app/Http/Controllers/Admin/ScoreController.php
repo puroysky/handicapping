@@ -1,18 +1,18 @@
 <?php
 
-namespace App\Http\Controllers\admin;
+namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
-class PlayerController extends Controller
+class ScoreController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        return view('admin.players.players');
+        //
     }
 
     /**
@@ -20,7 +20,7 @@ class PlayerController extends Controller
      */
     public function create()
     {
-        return view('admin.players.create');
+        return view('admin.scores.create-score-form');
     }
 
     /**

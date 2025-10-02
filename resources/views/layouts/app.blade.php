@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="{{ asset('css/handicapping.css') }}">
 </head>
 
-<body>
+<body class="pt-5">
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
         <div class="container">
@@ -23,7 +23,7 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <a class="nav-link active" href="#">Home</a>
+                        <a class="nav-link active" href="{{ route('home') }}">Home</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#">My Scores</a>
@@ -68,10 +68,12 @@
         </div>
     </nav>
 
-    @yield('content')
+    <div class="container mt-5">
+        @yield('content')
+    </div>
 
     <!-- Footer -->
-    <footer class="bg-dark text-white py-4">
+    <footer class="bg-dark text-white py-4 d-none">
         <div class="container">
             <div class="row">
                 <div class="col-md-6">
