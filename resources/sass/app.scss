@@ -1,0 +1,7 @@
+// resources/sass/app.scss
+
+// Import your overrides before bootstrap (optional)
+@import "variables";
+
+// Import bootstrap from composer vendor folder
+@import "../../vendor/twbs/bootstrap/scss/bootstrap";
