@@ -342,6 +342,12 @@
 
     <!-- Font Awesome for icons -->
     <script src="https://kit.fontawesome.com/your-fontawesome-kit.js" crossorigin="anonymous"></script>
+
+    @include('partials.error-modal')
+
+
+
+
 </body>
 
 </html>

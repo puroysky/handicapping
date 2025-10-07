@@ -3,10 +3,20 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Scorecard;
 use Illuminate\Http\Request;
+use App\Services\ScoreService;
 
 class ScoreController extends Controller
 {
+
+    protected ScoreService $scoreService;
+
+    public function __construct(ScoreService $scoreService)
+    {
+        $this->scoreService = $scoreService;
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -20,7 +30,39 @@ class ScoreController extends Controller
      */
     public function create()
     {
-        return view('admin.scores.create-score-form');
+        $tee = 2; // Blue
+        $scorecard = Scorecard::with([
+
+            // Eager load courseRatings for the selected tee
+            'courseRatings' => function ($query) use ($tee) {
+                $query->where('tee_id', $tee);
+            },
+
+            // Eager load slopeRatings for the selected tee
+            'slopeRatings' => function ($query) use ($tee) {
+                $query->where('tee_id', $tee);
+            },
+
+            // Eager load scorecardDetails
+            'scorecardDetails' => function ($query) {
+                $query->leftJoin('scorecard_pars', 'scorecard_details.hole', '=', 'scorecard_pars.hole')
+                    ->select('scorecard_details.*', 'scorecard_pars.par');
+            },
+
+            // Eager load scorecardPars
+            'scorecardPars'
+        ])
+            ->where('scorecard_id', 1)
+            ->first();
+
+
+
+
+        // echo '<pre>';
+        // print_r($scorecard->toArray());
+        // echo '</pre>';
+        // return;
+        return view('admin.scores.create-score-form', compact('scorecard'));
     }
 
     /**
@@ -28,7 +70,16 @@ class ScoreController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        // Example usage (wire this when your form posts real data):
+        // $validated = $request->validate([
+        //     'scores' => 'array',
+        //     'scores.*' => 'nullable|string', // digits or x
+        //     'pars' => 'array',
+        //     'pars.*' => 'required|integer|min:3|max:5',
+        // ]);
+        // $service = app(\App\Services\ScoreService::class);
+        // $result = $service->computeRound($validated['scores'] ?? [], $validated['pars'] ?? []);
+        // return back()->with('computed', $result);
     }
 
     /**
