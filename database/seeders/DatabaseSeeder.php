@@ -2,7 +2,9 @@
 
 namespace Database\Seeders;
 
+use App\Models\PlayerProfile;
 use App\Models\User;
+use App\Models\UserProfile;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -15,11 +17,43 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        User::factory()->create([
-            'name' => 'Test User',
+        User::create([
+            'id' => 1,
             'email' => 'test@example.com',
+            'role' => 'admin',
+            'default_account' => true,
+            'password' => bcrypt('123123123'),
             'created_by' => 1,
         ]);
+
+        UserProfile::create([
+            'user_profile_id' => 1,
+            'user_id' => 1,
+            'first_name' => 'Admin',
+            'middle_name' => 'Istrator',
+            'last_name' => 'User',
+            'birthdate' => '1990-01-01',
+            'sex' => 'MALE',
+            'user_desc' => 'Test User Admin',
+            'remarks' => 'No remarks',
+            'phone' => '1234567890',
+            'address' => '123 Test St, Test City',
+            'avatar' => 'default-avatar.png',
+            'created_by' => 1,
+        ]);
+
+
+        PlayerProfile::create([
+            'player_profile_id' => 1,
+            'user_id' => 1,
+            'user_profile_id' => 1,
+            'account_no' => 'ACC1001',
+            'whs_no' => 1001,
+            'created_by' => 1,
+        ]);
+
+
+
 
 
 

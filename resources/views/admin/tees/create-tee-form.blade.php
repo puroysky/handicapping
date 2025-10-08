@@ -11,35 +11,35 @@
                 <div class="form-body">
                     <h3 class="mb-2 mt-0 text-center text-primary">
                         <i class="fas fa-plus-circle me-2 text-primary"></i>
-                        Add New Golf Course
+                        Add New Golf Tee
                     </h3>
-                    <p class="text-muted text-center mb-1">Create a new golf course in the system</p>
+                    <p class="text-muted text-center mb-1">Create a new golf tee in the system</p>
 
                     <form class="needs-validation" novalidate id="mainForm">
                         @csrf
-                        <!-- Course Basic Information Section -->
+                        <!-- Tee Basic Information Section -->
                         <div class="form-section">
                             <div class="section-title">
                                 <i class="fas fa-info-circle"></i>
-                                Course Information
+                                Tee Information
                             </div>
 
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-floating">
-                                        <input type="text" class="form-control" id="course_name" name="course_name" placeholder="Course Name" required>
-                                        <label for="course_name">Course Name *</label>
+                                        <input type="text" class="form-control" id="tee_name" name="tee_name" placeholder="Tee Name" required>
+                                        <label for="tee_name">Tee Name *</label>
                                         <div class="invalid-feedback">
-                                            Please provide a valid course name.
+                                            Please provide a valid tee name.
                                         </div>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-floating">
-                                        <input type="text" class="form-control" id="course_code" name="course_code" placeholder="Course Code" required minlength="2" maxlength="10">
-                                        <label for="course_code">Course Code *</label>
+                                        <input type="text" class="form-control" id="tee_code" name="tee_code" placeholder="Tee Code" required minlength="2" maxlength="10">
+                                        <label for="tee_code">Tee Code *</label>
                                         <div class="invalid-feedback">
-                                            Please provide a valid course code (2-10 characters).
+                                            Please provide a valid tee code (2-10 characters).
                                         </div>
                                     </div>
                                 </div>
@@ -48,17 +48,17 @@
                             <div class="row">
                                 <div class="col-12">
                                     <div class="form-floating">
-                                        <textarea class="form-control" id="course_desc" name="course_desc" placeholder="Course Description" style="height: 120px;" maxlength="500"></textarea>
-                                        <label for="course_desc">Course Description</label>
+                                        <textarea class="form-control" id="tee_desc" name="tee_desc" placeholder="Tee Description" style="height: 120px;" maxlength="500"></textarea>
+                                        <label for="tee_desc">Tee Description</label>
                                         <div class="invalid-feedback">
-                                            Course description cannot exceed 500 characters.
+                                            Tee description cannot exceed 500 characters.
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Course Settings Section -->
+                        <!-- Tee Settings Section -->
                         <div class="form-section">
                             <div class="section-title">
                                 <i class="fas fa-cog"></i>
@@ -68,36 +68,27 @@
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-floating">
-                                        <select class="form-select" id="course_type" name="course_type" required>
+                                        <select class="form-select" id="course_id" name="course_id" required>
                                             <option value="">Choose...</option>
-                                            <option value="public">Public Course</option>
-                                            <option value="private">Private Course</option>
-                                            <option value="semi_private">Semi-Private Course</option>
-                                            <option value="resort">Resort Course</option>
+                                            @foreach($courses as $course)
+                                            <option value="{{ $course->course_id }}">{{ $course->course_name }} ({{ $course->course_code }})</option>
+                                            @endforeach
                                         </select>
-                                        <label for="course_type">Course Type *</label>
+                                        <label for="course">Course *</label>
                                         <div class="invalid-feedback">
-                                            Please select a course type.
+                                            Please select a course.
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-md-6">
-                                    <div class="form-floating">
-                                        <input type="number" class="form-control" id="total_holes" name="total_holes" placeholder="18" min="9" max="36" value="18" required>
-                                        <label for="total_holes">Total Holes *</label>
-                                        <div class="invalid-feedback">
-                                            Please enter a valid number of holes (9-36).
-                                        </div>
-                                    </div>
-                                </div>
+
                             </div>
 
                             <div class="form-check-modern">
                                 <input class="form-check-input" type="checkbox" id="active_status" name="active_status" checked>
                                 <label class="form-check-label" for="active_status">
-                                    <strong>Active Course</strong>
+                                    <strong>Active Tee</strong>
                                     <br>
-                                    <small class="text-muted">Check if this course is currently active for scoring</small>
+                                    <small class="text-muted">Check if this tee is currently active for scoring</small>
                                 </label>
                             </div>
                         </div>
@@ -112,8 +103,8 @@
                             </div>
 
                             <div class="form-floating">
-                                <textarea class="form-control" id="remarks" name="remarks" placeholder="Enter any additional remarks about this course..." maxlength="1000"></textarea>
-                                <label for="remarks">Course Remarks (Optional)</label>
+                                <textarea class="form-control" id="remarks" name="remarks" placeholder="Enter any additional remarks about this tee..." maxlength="1000"></textarea>
+                                <label for="remarks">Remarks (Optional)</label>
                                 <div class="invalid-feedback">
                                     Remarks cannot exceed 1000 characters.
                                 </div>
@@ -131,7 +122,7 @@
                                 <button type="submit" class="btn btn-primary-modern text-white" id="submitBtn">
                                     <span class="btn-text">
                                         <i class="fas fa-plus me-2"></i>
-                                        Create Course
+                                        Create Tee
                                     </span>
                                     <span class="btn-loading d-none">
                                         <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
@@ -146,7 +137,6 @@
         </div>
     </div>
 </div>
-
 
 
 <style>
@@ -218,7 +208,7 @@
 
             // Make AJAX request
             $.ajax({
-                url: '{{ route("admin.courses.store") }}',
+                url: '{{ route("admin.tees.store") }}',
                 type: 'POST',
                 data: formData,
                 headers: {
@@ -229,7 +219,7 @@
                     // Success handling
                     if (response.success) {
                         // Show success message
-                        showModal('success', 'Success!', 'Course created successfully!');
+                        showModal('success', 'Success!', 'Tee created successfully!');
 
                         // Reset form
                         form.reset();
@@ -240,10 +230,10 @@
 
                         // Redirect after delay
                         setTimeout(function() {
-                            window.location.href = response.redirect || '/admin/courses';
+                            window.location.href = response.redirect || '/admin/tees';
                         }, 2000);
                     } else {
-                        showModal('error', 'Error', response.message || 'An error occurred while creating the course.');
+                        showModal('error', 'Error', response.message || 'An error occurred while creating the tee.');
                     }
                 },
                 error: function(xhr, status, error) {
@@ -315,10 +305,10 @@
             });
         });
 
-        // Custom validation for course code (uppercase and alphanumeric)
-        const courseCodeInput = document.getElementById('course_code');
-        if (courseCodeInput) {
-            courseCodeInput.addEventListener('input', function() {
+        // Custom validation for tee code (uppercase and alphanumeric)
+        const teeCodeInput = document.getElementById('course_code');
+        if (teeCodeInput) {
+            teeCodeInput.addEventListener('input', function() {
                 // Convert to uppercase
                 this.value = this.value.toUpperCase();
 
@@ -329,7 +319,7 @@
                     if (isValid) {
                         this.setCustomValidity('');
                     } else {
-                        this.setCustomValidity('Course code must be alphanumeric (letters and numbers only)');
+                        this.setCustomValidity('Tee code must be alphanumeric (letters and numbers only)');
                     }
                 }
             });
@@ -338,7 +328,7 @@
         // Cancel button functionality
         $('#cancelBtn').on('click', function() {
             if (!isSubmitting && confirm('Are you sure you want to cancel? Any unsaved changes will be lost.')) {
-                window.location.href = '/admin/courses';
+                window.location.href = '/admin/tees';
             }
         });
     });

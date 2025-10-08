@@ -71,13 +71,13 @@
                                 <h5 class="mb-0 fw-bold text-dark">Scorecard</h5>
                             </div>
 
-                            <div class="table-responsive border-0 rounded-3 overflow-hidden" style="box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+                            <div class="table-responsive border-0 rounded-3 overflow-hidden" style="box-shadow: 0 4px 12px rgba(118, 35, 35, 0.05);">
                                 <table class="table table-sm align-middle text-center mb-0 score-table">
-                                    <thead style="background: linear-gradient(135deg, #495057 0%, #343a40 100%);">
+                                    <thead class="bg-primary text-white">
                                         <tr>
-                                            <th class="text-start ps-3 text-dark fw-semibold py-2 small">Hole</th>
+                                            <th class="text-start ps-3 text-dark fw-semibold py-2 small text-white">Hole</th>
                                             @foreach($scorecard->scorecardDetails as $detail)
-                                            <th class="{{ $detail->hole == 10 ? 'border-start border-2 border-warning' : '' }} text-primary fw-semibold py-2 small column-header" data-column="{{ $detail->hole }}">{{ $detail->hole }}</th>
+                                            <th class="{{ $detail->hole == 10 ? 'border-start border-2 border-warning' : '' }} text-white fw-semibold py-2 small column-header" data-column="{{ $detail->hole }}">{{ $detail->hole }}</th>
                                             @endforeach
                                         </tr>
                                     </thead>
@@ -86,7 +86,7 @@
                                             <td class="text-start ps-3 fw-bold text-primary py-2 small">PAR</td>
                                             @foreach($scorecard->scorecardDetails as $detail)
                                             <td class="{{ $detail->hole == 10 ? 'border-start border-2 border-warning' : '' }} py-2 column-cell" data-column="{{ $detail->hole }}">
-                                                <span class="badge rounded-pill" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 4px 8px; font-size: 0.75rem;" data-hole="{{ $detail->hole }}" data-par-value="{{ $detail->par }}">{{ $detail->par }}</span>
+                                                <span class="rounded-pill" style="padding: 4px 8px; font-size: 0.75rem;" data-hole="{{ $detail->hole }}" data-par-value="{{ $detail->par }}">{{ $detail->par }}</span>
                                             </td>
                                             @endforeach
                                         </tr>

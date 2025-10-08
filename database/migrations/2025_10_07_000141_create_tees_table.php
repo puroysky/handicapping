@@ -18,6 +18,10 @@ return new class extends Migration
             $table->string('tee_desc', 255)->nullable()->default(null);
             $table->unsignedBigInteger('course_id');
 
+            $table->text('remarks')->nullable()->default(null);
+            $table->boolean('active')->default(true);
+
+
 
             $table->unique(['tee_code', 'course_id'], 'unique_tee_code_course')->comment('Ensure unique combination of tee code and course');
 

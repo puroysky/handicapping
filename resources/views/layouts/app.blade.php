@@ -25,7 +25,7 @@
 
 <body class="pt-5">
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-success fixed-top">
         <div class="container">
             <a class="navbar-brand fw-bold" href="#">
                 <i class="fas fa-golf-ball me-2"></i>Handicapping System
@@ -81,7 +81,7 @@
         </div>
     </nav>
 
-    <div class="container mt-5">
+    <div class="container mt-3">
         @yield('content')
     </div>
 
@@ -352,6 +352,33 @@
             </div>
         </div>
     </div>
+
+
+    <!-- Compact Bootstrap Modal for Messages -->
+    <div class="modal fade" id="messageModal" tabindex="-1" aria-labelledby="messageModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-sm compact">
+            <div class="modal-content">
+                <div class="modal-header py-2">
+                    <h6 class="modal-title" id="messageModalLabel">
+                        <i class="fas fa-info-circle me-2" id="modalIcon"></i>
+                        <span id="modalTitle">Notification</span>
+                    </h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body py-3">
+                    <p class="mb-0" id="modalMessage">Message content here</p>
+                    <div id="errorList" class="mt-2" style="display: none;">
+                        <small class="text-muted">Validation errors:</small>
+                        <ul class="list-unstyled mt-1" id="errorItems"></ul>
+                    </div>
+                </div>
+                <div class="modal-footer py-2">
+                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 
     <!-- Font Awesome for icons -->
     <script src="https://kit.fontawesome.com/your-fontawesome-kit.js" crossorigin="anonymous"></script>

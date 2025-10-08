@@ -45,4 +45,14 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function profile()
+    {
+        return $this->hasOne(UserProfile::class, 'user_id', 'id');
+    }
+
+    public function player()
+    {
+        return $this->hasOne(PlayerProfile::class, 'user_id', 'id');
+    }
 }
