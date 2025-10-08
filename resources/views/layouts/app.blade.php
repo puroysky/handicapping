@@ -5,7 +5,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Valley Golf Handicapping System</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     @vite(['resources/sass/app.scss', 'resources/js/app.js'])
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet">
+
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script>
+
+    </script>
+
     <script src="{{ asset('js/handicapping.js') }}"></script>
     <link rel="stylesheet" href="{{ asset('css/handicapping.css') }}">
 </head>
@@ -342,6 +355,74 @@
 
     <!-- Font Awesome for icons -->
     <script src="https://kit.fontawesome.com/your-fontawesome-kit.js" crossorigin="anonymous"></script>
+    <script>
+        // Function to show modal messages
+        function showModal(type, title, message, errors = null) {
+            const modal = $("#messageModal");
+            const modalContent = modal.find(".modal-content");
+            const modalIcon = $("#modalIcon");
+            const modalTitle = $("#modalTitle");
+            const modalMessage = $("#modalMessage");
+            const errorList = $("#errorList");
+            const errorItems = $("#errorItems");
+
+            // Reset modal classes
+            modalContent.removeClass(
+                "modal-success modal-error modal-warning modal-info"
+            );
+
+            // Set modal type and icon
+            switch (type) {
+                case "success":
+                    modalContent.addClass("modal-success");
+                    modalIcon.removeClass().addClass("fas fa-check-circle me-2");
+                    break;
+                case "error":
+                    modalContent.addClass("modal-error");
+                    modalIcon
+                        .removeClass()
+                        .addClass("fas fa-exclamation-circle me-2");
+                    break;
+                case "warning":
+                    modalContent.addClass("modal-warning");
+                    modalIcon
+                        .removeClass()
+                        .addClass("fas fa-exclamation-triangle me-2");
+                    break;
+                case "info":
+                    modalContent.addClass("modal-info");
+                    modalIcon.removeClass().addClass("fas fa-info-circle me-2");
+                    break;
+                default:
+                    modalContent.addClass("modal-info");
+                    modalIcon.removeClass().addClass("fas fa-info-circle me-2");
+            }
+
+            // Set content
+            modalTitle.text(title);
+            modalMessage.text(message);
+
+            // Handle validation errors
+            if (errors && Object.keys(errors).length > 0) {
+                errorItems.empty();
+                $.each(errors, function(field, messages) {
+                    if (Array.isArray(messages)) {
+                        messages.forEach((msg) => {
+                            errorItems.append(`<li>${msg}</li>`);
+                        });
+                    } else {
+                        errorItems.append(`<li>${messages}</li>`);
+                    }
+                });
+                errorList.show();
+            } else {
+                errorList.hide();
+            }
+
+            // Show modal
+            modal.modal("show");
+        }
+    </script>
 
     @include('partials.error-modal')
 

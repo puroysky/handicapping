@@ -4,6 +4,9 @@
 <div class="container-fluid px-4 py-4">
     <div class="row justify-content-center">
         <div class="col-12">
+
+
+
             <!-- Modern Card Design -->
             <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
                 <!-- Compact Header -->
@@ -29,6 +32,9 @@
                     </div>
                 </div>
 
+
+
+
                 <!-- Compact Card Body -->
                 <div class="card-body p-3" style="background: linear-gradient(180deg, #f8f9fa 0%, #ffffff 100%);">
                     <form class="needs-validation" novalidate>
@@ -36,13 +42,15 @@
                         <div class="row mb-3">
                             <div class="col-md-4">
                                 <div class="bg-white rounded-2 p-2 border border-light shadow-sm">
-                                    <label for="player_id" class="form-label fw-semibold text-dark mb-1 small">
-                                        <i class="fas fa-user-golf text-primary me-1"></i>Mode
-                                    </label>
-                                    <select name="player_id" id="player_id" class="form-select form-select-sm border-0 bg-light" required>
-                                        <option value="hole_by_hole" disabled selected>Hole by Hole</option>
-                                        <option value="1">Gross Total</option>
-                                    </select>
+                                    <div class="form-floating">
+                                        <select name="player_id" id="player_id" class="form-select border-0 bg-light select2" required>
+                                            <option value="hole_by_hole" selected>Hole by Hole</option>
+                                            <option value="1">Gross Total</option>
+                                        </select>
+                                        <label for="player_id">
+                                            <i class="fas fa-user-golf text-primary me-1"></i>Mode
+                                        </label>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -108,7 +116,7 @@
 
                                         <tr style="background: linear-gradient(90deg, #f1f3f4 0%, #e9ecef 100%);">
                                             <td class="text-start ps-3 fw-bold text-muted py-2 small">
-                                                <i class="fas fa-calculator me-1"></i>Calc
+
                                             </td>
                                             @for ($i = 1; $i <= 18; $i++)
                                                 <td class="{{ $i == 10 ? 'border-start border-2 border-warning' : '' }} py-2 column-cell" data-column="{{ $i }}">
@@ -195,6 +203,14 @@
 </div>
 
 <style>
+    .form-floating.has-value>label {
+        opacity: .65;
+        transform: scale(.85) translateY(-0.75rem) translateX(0.15rem);
+    }
+
+
+
+
     /* Enhanced styling for score inputs */
     .score-input:focus {
         border-color: #2F4A3C !important;
@@ -402,6 +418,26 @@
                 }
             });
         }
+    });
+
+    $(document).ready(function() {
+
+        $('.select2').select2({
+            theme: 'bootstrap-5',
+            width: '100%',
+
+
+        });
+
+
+        $('.select2').on('select2:open select2:close change', function() {
+            let parent = $(this).closest('.form-floating');
+            if ($(this).val() && $(this).val().length > 0) {
+                parent.addClass('has-value');
+            } else {
+                parent.removeClass('has-value');
+            }
+        });
     });
 </script>
 @endsection

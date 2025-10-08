@@ -3,5 +3,12 @@
 // Import your overrides before bootstrap (optional)
 @import "variables";
 
+
+// Import your overrides before bootstrap (optional)
+@import "customized";
+
+//Import compact modal styles
+@import "compact-modal";
+
 // Import bootstrap from composer vendor folder
 @import "../../vendor/twbs/bootstrap/scss/bootstrap";

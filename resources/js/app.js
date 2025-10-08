@@ -1,10 +1,9 @@
-import './bootstrap'; //default Laravel bootstrap file
+import "./bootstrap"; //default Laravel bootstrap file
 
-import '../../vendor/twbs/bootstrap/dist/js/bootstrap.bundle';
+//bootstrap js
+import "../../vendor/twbs/bootstrap/dist/js/bootstrap.bundle";
 
-
-
-import './handicapping.js';
-import './error-modal.js';
-console.log('Bootstrap loaded!');
-
+//user defined scripts
+import "./handicapping.js";
+import "./error-modal.js";
+import "./compact-modal.js";

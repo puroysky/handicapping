@@ -1,0 +1,123 @@
+ /* ===========================================
+   COMPACT MODAL STYLES
+   =========================================== */
+
+    /* Compact Modal Structure */
+    .modal-dialog.compact {
+        max-width: 350px;
+    }
+
+    .modal-dialog.compact .modal-content {
+        border-radius: 8px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        border: none;
+    }
+
+    /* Compact Modal Header */
+    .modal-dialog.compact .modal-header {
+        border-bottom: 1px solid #e9ecef;
+        background-color: #f8f9fa;
+        padding: 0.5rem 1rem;
+        min-height: auto;
+    }
+
+    .modal-dialog.compact .modal-title {
+        font-weight: 600;
+        color: #495057;
+        font-size: 0.95rem;
+    }
+
+    .modal-dialog.compact .btn-close {
+        padding: 0.25rem;
+        font-size: 0.75rem;
+    }
+
+    /* Compact Modal Body */
+    .modal-dialog.compact .modal-body {
+        font-size: 0.9rem;
+        padding: 0.75rem 1rem;
+    }
+
+    /* Compact Modal Footer */
+    .modal-dialog.compact .modal-footer {
+        padding: 0.5rem 1rem;
+        border-top: 1px solid #e9ecef;
+        justify-content: center;
+    }
+
+    /* Error List Styling */
+    #errorList ul {
+        margin-bottom: 0;
+    }
+
+    #errorList li {
+        color: #dc3545;
+        font-size: 0.875rem;
+        padding: 2px 0;
+    }
+
+    #errorList li:before {
+        content: "• ";
+        color: #dc3545;
+        font-weight: bold;
+    }
+
+    /* ===========================================
+   COMPACT MODAL VARIANTS
+   =========================================== */
+
+    /* Success Modal */
+    .modal-dialog.compact .modal-success .modal-header {
+        background-color: #d1edff;
+        border-bottom-color: #b6d7ff;
+    }
+
+    .modal-dialog.compact .modal-success .modal-title {
+        color: #0a4275;
+    }
+
+    .modal-dialog.compact .modal-success #modalIcon {
+        color: #1a7038;
+    }
+
+    /* Error Modal */
+    .modal-dialog.compact .modal-error .modal-header {
+        background-color: #f8d7da;
+        border-bottom-color: #f1aeb5;
+    }
+
+    .modal-dialog.compact .modal-error .modal-title {
+        color: #721c24;
+    }
+
+    .modal-dialog.compact .modal-error #modalIcon {
+        color: #dc3545;
+    }
+
+    /* Warning Modal */
+    .modal-dialog.compact .modal-warning .modal-header {
+        background-color: #fff3cd;
+        border-bottom-color: #ffeaa7;
+    }
+
+    .modal-dialog.compact .modal-warning .modal-title {
+        color: #856404;
+    }
+
+    .modal-dialog.compact .modal-warning #modalIcon {
+        color: #ffc107;
+    }
+
+    /* Info Modal */
+    .modal-dialog.compact .modal-info .modal-header {
+        background-color: #cce7ff;
+        border-bottom-color: #99d6ff;
+    }
+
+    .modal-dialog.compact .modal-info .modal-title {
+        color: #0c5460;
+    }
+
+    .modal-dialog.compact .modal-info #modalIcon {
+        color: #0dcaf0;
+    }

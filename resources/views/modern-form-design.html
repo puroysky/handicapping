@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Form with Floating Labels</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2f4a3c;
+            --secondary-color: #8da66e;
+            --success-color: #5e7c4c;
+            --light-bg: #f8fafc;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--light-bg) 0%, #e8f5e8 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .form-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(47, 74, 60, 0.1);
+            overflow: hidden;
+            border: 1px solid rgba(47, 74, 60, 0.1);
+        }
+
+        .form-body {
+            padding: 2.5rem;
+        }
+
+        /* Floating Label Styles */
+        .form-floating {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-floating > .form-control,
+        .form-floating > .form-select {
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            height: 60px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background-color: #fafbfc;
+         
+        }
+
+        .form-floating > .form-control:focus,
+        .form-floating > .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(47, 74, 60, 0.15);
+            background-color: white;
+        }
+
+        .form-floating > label {
+            color: #6c757d;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .form-floating > .form-control:focus ~ label,
+        .form-floating > .form-control:not(:placeholder-shown) ~ label,
+        .form-floating > .form-select:focus ~ label,
+        .form-floating > .form-select:not([value=""]) ~ label {
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        /* Textarea specific */
+        .form-floating textarea.form-control {
+            height: 120px;
+            resize: vertical;
+        }
+
+        /* Checkbox Styles */
+        .form-check-modern {
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 12px;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .form-check-modern:hover {
+            background: #e9ecef;
+            border-color: var(--primary-color);
+        }
+
+        .form-check-modern .form-check-input {
+            width: 1.2em;
+            height: 1.2em;
+            border: 2px solid #dee2e6;
+            border-radius: 6px;
+        }
+
+        .form-check-modern .form-check-input:checked {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .form-check-modern .form-check-label {
+            font-weight: 500;
+            color: #495057;
+            margin-left: 0.5rem;
+        }
+
+        /* Button Styles */
+        .btn-primary-modern {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            border: none;
+            border-radius: 12px;
+            padding: 1rem 2rem;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(47, 74, 60, 0.2);
+        }
+
+        .btn-primary-modern:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(47, 74, 60, 0.3);
+            background: linear-gradient(135deg, #254033 0%, #7a9660 100%);
+        }
+
+        .btn-outline-modern {
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            background: transparent;
+            border-radius: 12px;
+            padding: 1rem 2rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-outline-modern:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(47, 74, 60, 0.3);
+        }
+
+        /* Form Section Dividers */
+        .form-section {
+            border-bottom: 1px solid #e9ecef;
+            padding-bottom: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .section-title {
+            color: var(--primary-color);
+            font-weight: 600;
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .section-title i {
+            margin-right: 0.5rem;
+            width: 20px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container-fluid {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+            
+            .form-body {
+                padding: 1.5rem;
+            }
+
+            .btn-primary-modern,
+            .btn-outline-modern {
+                width: 100%;
+                margin-bottom: 0.5rem;
+            }
+        }
+
+        @media (min-width: 1200px) {
+            .form-body {
+                padding: 3rem 4rem;
+            }
+        }
+
+        /* Animation */
+        .fade-in {
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid py-5 px-2">
+        <div class="row">
+            <div class="col-12">
+                <div class="form-container fade-in">
+                    <!-- Form Body -->
+                    <div class="form-body">
+                        <h3 class="mb-2 mt-0 text-center">
+                            <i class="fas fa-golf-ball me-2 text-primary"></i>
+                            Golf Score Entry
+                        </h3>
+                        <p class="text-muted text-center mb-1">Record your round and track your handicap progress</p>
+                        
+                        <form>
+                            <!-- Course Information Section -->
+                            <div class="form-section">
+                                <div class="section-title">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    Course Information
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-floating">
+                                            <select class="form-select" id="course">
+                                                <option value="">Choose...</option>
+                                                <option value="1">Pebble Beach Golf Links</option>
+                                                <option value="2">Augusta National Golf Club</option>
+                                                <option value="3">St. Andrews Old Course</option>
+                                                <option value="4">Cypress Point Club</option>
+                                                <option value="5">Bethpage Black</option>
+                                                <option value="6">Pinehurst No. 2</option>
+                                                <option value="7">TPC Sawgrass</option>
+                                                <option value="8">Whistling Straits</option>
+                                            </select>
+                                            <label for="course">Golf Course</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-floating">
+                                            <select class="form-select" id="tee">
+                                                <option value="">Choose...</option>
+                                                <option value="black">Championship (Black)</option>
+                                                <option value="blue">Blue Tees</option>
+                                                <option value="white">White Tees</option>
+                                                <option value="red">Red Tees</option>
+                                            </select>
+                                            <label for="tee">Tee Color</label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                     
+                                        <div class="form-floating">
+                                            <input type="date" class="form-control" id="date_played">
+                                            <label for="date_played">Date Played</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-floating">
+                                            <input type="number" class="form-control" id="total_score" placeholder="85" min="50" max="150">
+                                            <label for="total_score">Total Score</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Round Details Section -->
+                            <div class="form-section">
+                                <div class="section-title">
+                                    <i class="fas fa-cloud-sun"></i>
+                                    Round Details
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-floating">
+                                            <select class="form-select" id="conditions">
+                                                <option value="">Choose...</option>
+                                                <option selected value="excellent">Excellent</option>
+                                                <option value="good">Good</option>
+                                                <option value="fair">Fair</option>
+                                                <option value="poor">Poor (Wind/Rain)</option>
+                                            </select>
+                                            <label for="conditions">Playing Conditions</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-floating">
+                                            <input type="number" class="form-control" id="putts" placeholder="32" min="18" max="50">
+                                            <label for="putts">Total Putts</label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-check-modern">
+                                    <input class="form-check-input" type="checkbox" id="tournament">
+                                    <label class="form-check-label" for="tournament">
+                                        <strong>Tournament Round</strong>
+                                        <br>
+                                        <small class="text-muted">Check if this was an official tournament score</small>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Hole Scores Section -->
+                            <div class="form-section">
+                                <div class="section-title">
+                                    <i class="fas fa-list-ol"></i>
+                                    Hole-by-Hole Scores
+                                </div>
+
+                                <!-- Front Nine -->
+                                <h6 class="text-muted mb-3">Front Nine</h6>
+                                <div class="row g-2 mb-4">
+                                    <div class="col-4 col-sm-3 col-md-2">
+                                        <div class="form-floating">
+                                            <input type="number" class="form-control text-center" id="hole1" min="1" max="12">
+                                            <label for="hole1">Hole 1</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-4 col-sm-3 col-md-2">
+                                        <div class="form-floating">
+                                            <input type="number" class="form-control text-center" id="hole2" min="1" max="12">
+                                            <label for="hole2">Hole 2</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-4 col-sm-3 col-md-2">
+                                        <div class="form-floating">
+                                            <input type="number" class="form-control text-center" id="hole3" min="1" max="12">
+                                            <label for="hole3">Hole 3</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-4 col-sm-3 col-md-2">
+                                        <div class="form-floating">
+                                            <input type="number" class="form-control text-center" id="hole4" min="1" max="12">
+                                            <label for="hole4">Hole 4</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-4 col-sm-3 col-md-2">
+                                        <div class="form-floating">
+                                            <input type="number" class="form-control text-center" id="hole5" min="1" max="12">
+                                            <label for="hole5">Hole 5</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-4 col-sm-3 col-md-2">
+                                        <div class="form-floating">
+                                            <input type="number" class="form-control text-center" id="hole6" min="1" max="12">
+                                            <label for="hole6">Hole 6</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-4 col-sm-3 col-md-2">
+                                        <div class="form-floating">
+                                            <input type="number" class="form-control text-center" id="hole7" min="1" max="12">
+                                            <label for="hole7">Hole 7</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-4 col-sm-3 col-md-2">
+                                        <div class="form-floating">
+                                            <input type="number" class="form-control text-center" id="hole8" min="1" max="12">
+                                            <label for="hole8">Hole 8</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-4 col-sm-3 col-md-2">
+                                        <div class="form-floating">
+                                            <input type="number" class="form-control text-center" id="hole9" min="1" max="12">
+                                            <label for="hole9">Hole 9</label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Back Nine -->
+                                <h6 class="text-muted mb-3">Back Nine</h6>
+                                <div class="row g-2 mb-4">
+                                    <div class="col-4 col-sm-3 col-md-2">
+                                        <div class="form-floating">
+                                            <input type="number" class="form-control text-center" id="hole10" min="1" max="12">
+                                            <label for="hole10">Hole 10</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-4 col-sm-3 col-md-2">
+                                        <div class="form-floating">
+                                            <input type="number" class="form-control text-center" id="hole11" min="1" max="12">
+                                            <label for="hole11">Hole 11</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-4 col-sm-3 col-md-2">
+                                        <div class="form-floating">
+                                            <input type="number" class="form-control text-center" id="hole12" min="1" max="12">
+                                            <label for="hole12">Hole 12</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-4 col-sm-3 col-md-2">
+                                        <div class="form-floating">
+                                            <input type="number" class="form-control text-center" id="hole13" min="1" max="12">
+                                            <label for="hole13">Hole 13</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-4 col-sm-3 col-md-2">
+                                        <div class="form-floating">
+                                            <input type="number" class="form-control text-center" id="hole14" min="1" max="12">
+                                            <label for="hole14">Hole 14</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-4 col-sm-3 col-md-2">
+                                        <div class="form-floating">
+                                            <input type="number" class="form-control text-center" id="hole15" min="1" max="12">
+                                            <label for="hole15">Hole 15</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-4 col-sm-3 col-md-2">
+                                        <div class="form-floating">
+                                            <input type="number" class="form-control text-center" id="hole16" min="1" max="12">
+                                            <label for="hole16">Hole 16</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-4 col-sm-3 col-md-2">
+                                        <div class="form-floating">
+                                            <input type="number" class="form-control text-center" id="hole17" min="1" max="12">
+                                            <label for="hole17">Hole 17</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-4 col-sm-3 col-md-2">
+                                        <div class="form-floating">
+                                            <input type="number" class="form-control text-center" id="hole18" min="1" max="12">
+                                            <label for="hole18">Hole 18</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Notes Section -->
+                            <div class="form-section">
+                                <div class="section-title">
+                                    <i class="fas fa-sticky-note"></i>
+                                    Additional Notes
+                                </div>
+
+                                <div class="form-floating">
+                                    <textarea class="form-control" id="notes" placeholder="Enter any additional notes about your round..."></textarea>
+                                    <label for="notes">Round Notes (Optional)</label>
+                                </div>
+                            </div>
+
+                            <!-- Form Actions -->
+                            <div class="d-flex justify-content-between flex-wrap gap-3">
+                                <button type="button" class="btn btn-outline-modern">
+                                    <i class="fas fa-save me-2"></i>
+                                    Save
+                                </button>
+                                <div class="d-flex gap-2">
+                                    <button type="button" class="btn btn-outline-modern">
+                                        <i class="fas fa-times me-2"></i>
+                                        Cancel
+                                    </button>
+                                    <button type="submit" class="btn btn-primary-modern">
+                                        <i class="fas fa-check me-2"></i>
+                                        Submit
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Auto-calculate total score
+        document.addEventListener('DOMContentLoaded', function() {
+            const holeInputs = document.querySelectorAll('input[id^="hole"]');
+            const totalScoreInput = document.getElementById('total_score');
+
+            function calculateTotal() {
+                let total = 0;
+                holeInputs.forEach(input => {
+                    const value = parseInt(input.value) || 0;
+                    total += value;
+                });
+
+                if (total > 0) {
+                    totalScoreInput.value = total;
+                }
+            }
+
+            holeInputs.forEach(input => {
+                input.addEventListener('input', calculateTotal);
+            });
+
+            // Form submission handling
+            const forms = document.querySelectorAll('form');
+            forms.forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const submitBtn = form.querySelector('button[type="submit"]');
+                    const originalText = submitBtn.innerHTML;
+                    
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Submitting...';
+                    
+                    setTimeout(() => {
+                        alert('Form submitted successfully!');
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = originalText;
+                    }, 2000);
+                });
+            });
+
+      
+        });
+    </script>
+</body>
+</html>
