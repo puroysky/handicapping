@@ -18,4 +18,9 @@ class TournamentCourse extends Model
     {
         return $this->belongsTo(Course::class, 'course_id', 'course_id');
     }
+
+    public function tournament()
+    {
+        return $this->belongsTo(Tournament::class, 'tournament_id', 'tournament_id');
+    }
 }

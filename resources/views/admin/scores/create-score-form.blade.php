@@ -4,35 +4,8 @@
 <div class="container-fluid px-4 py-4">
     <div class="row justify-content-center">
         <div class="col-12">
-
-
-
             <!-- Modern Card Design -->
             <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
-                <!-- Compact Header -->
-                <div class="card-header bg-gradient border-0 py-2" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div class="d-flex align-items-center">
-                            <div class="bg-white bg-opacity-20 rounded-2 p-1 me-2">
-                                <i class="fas fa-golf-ball text-white"></i>
-                            </div>
-                            <div>
-                                <h1 class="text-primary mb-0 h5 fw-bold">Score Entry</h1>
-                                <p class="text-success-50 mb-0 small">Hole by hole scoring</p>
-                            </div>
-                        </div>
-                        <div class="d-flex gap-2">
-                            <button type="button" class="btn btn-outline-light btn-sm rounded-pill px-3" id="clearScoresBtn">
-                                <i class="fas fa-eraser me-1"></i>Clear
-                            </button>
-                            <button type="button" class="btn btn-outline-light btn-sm rounded-pill px-3" onclick="window.showErrorModal && window.showErrorModal({ message: 'Example error', details: 'This is a demo of the compact error modal.' })">
-                                <i class="fas fa-bug me-1"></i>Test
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-
 
 
                 <!-- Compact Card Body -->
@@ -41,26 +14,47 @@
                         <!-- Course Selection Section -->
                         <div class="row mb-3">
                             <div class="col-md-4">
-                                <div class="bg-white rounded-2 p-2 border border-light shadow-sm">
-                                    <div class="form-floating">
-                                        <select name="player_id" id="player_id" class="form-select border-0 bg-light select2" required>
-                                            <option value="hole_by_hole" selected>Hole by Hole</option>
-                                            <option value="1">Gross Total</option>
-                                        </select>
-                                        <label for="player_id">
-                                            <i class="fas fa-user-golf text-primary me-1"></i>Mode
-                                        </label>
-                                    </div>
+                                <div class="form-floating bg-white rounded-2 border border-light shadow-sm">
+                                    <select name="player_id" id="player_id" class="form-select form-select-sm border-0 bg-light" required>
+                                        <option value="hole_by_hole" disabled selected>Hole by Hole</option>
+                                        <option value="1">Gross Total</option>
+                                    </select>
+                                    <label for="player_id" class="fw-semibold text-dark small">
+                                        <i class="fas fa-user-golf text-primary me-1"></i>Mode
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-floating bg-white rounded-2 border border-light shadow-sm">
+                                    <select name="player_id" id="player_id" class="form-select form-select-sm border-0 bg-light" required>
+                                        @foreach($tournaments as $tournament)
+                                        <option value="{{ $tournament->id }}">{{ $tournament->tournament->tournament_name }} - {{ $tournament->course->course_name }}</option>
+                                        @endforeach
+                                    </select>
+                                    <label for="player_id" class="fw-semibold text-dark small">
+                                        <i class="fas fa-user-golf text-primary me-1"></i>Tournament
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="form-floating bg-white rounded-2 border border-light shadow-sm">
+                                    <select name="player_id" id="player_id" class="form-select form-select-sm border-0 bg-light" required>
+                                        @foreach($tournaments as $tournament)
+                                        <option value="{{ $tournament->id }}">{{ $tournament->tournament->tournament_name }} - {{ $tournament->course->course_name }}</option>
+                                        @endforeach
+                                    </select>
+                                    <label for="player_id" class="fw-semibold text-dark small">
+                                        <i class="fas fa-user-golf text-primary me-1"></i>Tee
+                                    </label>
                                 </div>
                             </div>
                         </div>
-                        <?php
-                        // Demo PAR data (replace with real PARs later)
-                        $parArray = [];
-                        for ($i = 0; $i < 18; $i++) {
-                            $parArray[] = rand(3, 5);
-                        }
-                        ?>
+
+
+
+
+
 
                         <!-- Compact Scorecard Section -->
                         <div class="bg-white rounded-3 p-2 border border-light shadow-sm mb-3">
@@ -71,13 +65,13 @@
                                 <h5 class="mb-0 fw-bold text-dark">Scorecard</h5>
                             </div>
 
-                            <div class="table-responsive border-0 rounded-3 overflow-hidden" style="box-shadow: 0 4px 12px rgba(118, 35, 35, 0.05);">
+                            <div class="table-responsive border-0 rounded-3 overflow-hidden" style="box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
                                 <table class="table table-sm align-middle text-center mb-0 score-table">
-                                    <thead class="bg-primary text-white">
+                                    <thead class="bg-primary">
                                         <tr>
-                                            <th class="text-start ps-3 text-dark fw-semibold py-2 small text-white">Hole</th>
+                                            <th class="text-start ps-3 text-white fw-semibold py-2 small">Hole</th>
                                             @foreach($scorecard->scorecardDetails as $detail)
-                                            <th class="{{ $detail->hole == 10 ? 'border-start border-2 border-warning' : '' }} text-white fw-semibold py-2 small column-header" data-column="{{ $detail->hole }}">{{ $detail->hole }}</th>
+                                            <th class="{{ $detail->hole == 10 ? 'border-start border-2 border-warning' : '' }} text-primary fw-semibold py-2 small column-header text-white" data-column="{{ $detail->hole }}">{{ $detail->hole }}</th>
                                             @endforeach
                                         </tr>
                                     </thead>
@@ -86,7 +80,7 @@
                                             <td class="text-start ps-3 fw-bold text-primary py-2 small">PAR</td>
                                             @foreach($scorecard->scorecardDetails as $detail)
                                             <td class="{{ $detail->hole == 10 ? 'border-start border-2 border-warning' : '' }} py-2 column-cell" data-column="{{ $detail->hole }}">
-                                                <span class="rounded-pill" style="padding: 4px 8px; font-size: 0.75rem;" data-hole="{{ $detail->hole }}" data-par-value="{{ $detail->par }}">{{ $detail->par }}</span>
+                                                <span class=" rounded-pill" style="padding: 4px 8px; font-size: 0.75rem;" data-hole="{{ $detail->hole }}" data-par-value="{{ $detail->par }}">{{ $detail->par }}</span>
                                             </td>
                                             @endforeach
                                         </tr>
@@ -133,53 +127,62 @@
                                     </tbody>
                                 </table>
                             </div>
-                        </div>
 
-                        <!-- Compact Summary Section -->
-                        <div class="bg-white rounded-3 p-2 border border-light shadow-sm mb-3">
-                            <div class="d-flex align-items-center mb-2">
-                                <div class="bg-success bg-opacity-10 rounded-2 p-1 me-2">
-                                    <i class="fas fa-calculator text-success"></i>
-                                </div>
-                                <h6 class="mb-0 fw-bold text-dark">Summary</h6>
-                            </div>
-
-                            <div class="row g-2">
+                            <!-- Enhanced Total Section -->
+                            <div class="row g-3 mt-3 mb-2">
                                 <div class="col-md-6">
-                                    <div class="bg-gradient rounded-2 p-2" style="background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);">
-                                        <div class="d-flex align-items-center mb-1">
-                                            <i class="fas fa-edit text-primary me-1"></i>
-                                            <label class="form-label mb-0 fw-semibold text-primary small">Entered Total</label>
+                                    <div class="total-card bg-gradient rounded-3 p-3 border-0 shadow-sm" style="background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);">
+                                        <div class="d-flex align-items-center mb-2">
+                                            <div class="total-icon bg-primary bg-opacity-20 rounded-circle p-2 me-3">
+                                                <i class="fas fa-edit text-primary fs-5"></i>
+                                            </div>
+                                            <div>
+                                                <label for="manualTotal" class="form-label fw-bold text-primary mb-0">Entered Total</label>
+                                                <small class="d-block text-primary opacity-75">Manual score entry</small>
+                                            </div>
                                         </div>
-                                        <input type="number" name="score[total]" min="18" max="180"
-                                            class="form-control text-center fw-bold border-1 border-primary"
+                                        <input type="number" name="score[total]" id="manualTotal" min="18" max="180"
+                                            class="form-control form-control-lg text-center fw-bold border-2 border-primary shadow-sm"
                                             placeholder="0"
-                                            style="background: rgba(255,255,255,0.9); font-size: 1.25rem; border-radius: 6px;">
+                                            style="background: rgba(255,255,255,0.95); font-size: 1.5rem; border-radius: 12px; height: 60px; transition: all 0.3s ease;">
                                     </div>
                                 </div>
                                 <div class="col-md-6">
-                                    <div class="bg-gradient rounded-2 p-2" style="background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);">
-                                        <div class="d-flex align-items-center mb-1">
-                                            <i class="fas fa-robot me-1" style="color: #7b1fa2;"></i>
-                                            <label class="form-label mb-0 fw-semibold small" style="color: #7b1fa2;">Computed Total</label>
+                                    <div class="total-card bg-gradient rounded-3 p-3 border-0 shadow-sm" style="background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);">
+                                        <div class="d-flex align-items-center mb-2">
+                                            <div class="total-icon bg-purple bg-opacity-20 rounded-circle p-2 me-3" style="background-color: rgba(123, 31, 162, 0.2) !important;">
+                                                <i class="fas fa-calculator fs-5" style="color: #7b1fa2;"></i>
+                                            </div>
+                                            <div>
+                                                <label class="form-label fw-bold mb-0" style="">Computed Total</label>
+                                                <small class="d-block opacity-75" style="">Auto-calculated from holes</small>
+                                            </div>
                                         </div>
-                                        <input type="number"
-                                            class="form-control text-center fw-bold score-input-display-total border-0"
+                                        <input type="number" id="computedTotal"
+                                            class="form-control form-control-lg text-center fw-bold border-0 shadow-sm score-input-display-total"
                                             placeholder="0" readonly
-                                            style="background: rgba(255,255,255,0.9); font-size: 1.25rem; border-radius: 6px; color: #7b1fa2;">
+                                            style="background: rgba(255,255,255,0.95); font-size: 1.5rem; border-radius: 12px; color: #7b1fa2; height: 60px; cursor: default;">
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="alert alert-info border-0 mt-2 mb-0 py-2 rounded-2" style="background: linear-gradient(135deg, #e8f4fd 0%, #d1ecf1 100%);">
+                            <!-- Score Summary Info -->
+                            <div class="alert alert-info border-0 mt-2 mb-0 py-3 rounded-3" style="background: linear-gradient(135deg, #e8f4fd 0%, #d1ecf1 100%);">
                                 <div class="d-flex align-items-center">
-                                    <i class="fas fa-lightbulb text-info me-2"></i>
-                                    <small class="text-info mb-0">
-                                        <strong>Tip:</strong> Enter numbers or 'x' for penalty (auto-calculated).
-                                    </small>
+                                    <div class="me-3">
+                                        <i class="fas fa-lightbulb text-info fs-4"></i>
+                                    </div>
+                                    <div>
+                                        <div class="fw-semibold text-info mb-1">Scoring Tips</div>
+                                        <small class="text-info mb-0">
+                                            Enter numbers (1-9) or 'x' for penalty strokes. Computed total updates automatically as you enter hole scores.
+                                        </small>
+                                    </div>
                                 </div>
                             </div>
                         </div>
+
+
 
                         <!-- Compact Action Buttons -->
                         <div class="d-flex justify-content-between align-items-center gap-2">
@@ -203,14 +206,6 @@
 </div>
 
 <style>
-    .form-floating.has-value>label {
-        opacity: .65;
-        transform: scale(.85) translateY(-0.75rem) translateX(0.15rem);
-    }
-
-
-
-
     /* Enhanced styling for score inputs */
     .score-input:focus {
         border-color: #2F4A3C !important;
@@ -222,6 +217,53 @@
     .score-input:valid {
         border-color: #5E7C4C !important;
         background: rgba(141, 166, 110, 0.05);
+    }
+
+    /* Enhanced Total Cards */
+    .total-card {
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .total-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        transition: left 0.5s ease;
+    }
+
+    .total-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15) !important;
+    }
+
+    .total-card:hover::before {
+        left: 100%;
+    }
+
+    .total-icon {
+        transition: all 0.3s ease;
+    }
+
+    .total-card:hover .total-icon {
+        transform: scale(1.1) rotate(5deg);
+    }
+
+    /* Enhanced total input styling */
+    .total-card input[type="number"]:focus {
+        transform: scale(1.02);
+        box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25) !important;
+        border-color: #007bff !important;
+    }
+
+    .total-card input[readonly]:focus {
+        box-shadow: 0 0 0 3px rgba(123, 31, 162, 0.25) !important;
+        border-color: #7b1fa2 !important;
     }
 
     /* Hover effects for badges */
@@ -277,7 +319,6 @@
         background: linear-gradient(135deg, rgba(141, 166, 110, 0.15) 0%, rgba(94, 124, 76, 0.15) 100%) !important;
         border-left: 3px solid #2F4A3C !important;
         border-right: 3px solid #2F4A3C !important;
-        /* transition: all 0.3s ease !important; */
         box-shadow: inset 0 0 10px rgba(47, 74, 60, 0.1);
     }
 
@@ -287,6 +328,42 @@
         transform: scale(1.05);
         box-shadow: 0 2px 8px rgba(47, 74, 60, 0.4);
         border: 1px solid #8DA66E;
+    }
+
+    /* Enhanced alert styling */
+    .alert-info {
+        border-left: 4px solid #17a2b8;
+    }
+
+    /* Total input number spinner removal */
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    input[type="number"] {
+        appearance: textfield;
+        -moz-appearance: textfield;
+    }
+
+    /* Pulse animation for computed total when updating */
+    @keyframes pulse-update {
+        0% {
+            transform: scale(1);
+        }
+
+        50% {
+            transform: scale(1.05);
+        }
+
+        100% {
+            transform: scale(1);
+        }
+    }
+
+    .total-updating {
+        animation: pulse-update 0.3s ease-in-out;
     }
 </style>
 
@@ -362,6 +439,8 @@
                 // Clear totals
                 const totalInput = document.querySelector('input[name="score[total]"]');
                 if (totalInput) totalInput.value = '';
+                const computedTotal = document.querySelector('.score-input-display-total');
+                if (computedTotal) computedTotal.value = '';
 
                 // Clear any column highlights
                 clearColumnHighlights();
@@ -419,25 +498,8 @@
             });
         }
     });
-
-    $(document).ready(function() {
-
-        $('.select2').select2({
-            theme: 'bootstrap-5',
-            width: '100%',
-
-
-        });
-
-
-        $('.select2').on('select2:open select2:close change', function() {
-            let parent = $(this).closest('.form-floating');
-            if ($(this).val() && $(this).val().length > 0) {
-                parent.addClass('has-value');
-            } else {
-                parent.removeClass('has-value');
-            }
-        });
-    });
 </script>
+
+<!-- Include handicapping calculation script -->
+<script src="{{ asset('js/handicapping.js') }}"></script>
 @endsection

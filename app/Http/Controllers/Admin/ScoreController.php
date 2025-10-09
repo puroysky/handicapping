@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Scorecard;
+use App\Models\Tournament;
+use App\Models\TournamentCourse;
 use Illuminate\Http\Request;
 use App\Services\ScoreService;
 
@@ -56,13 +58,21 @@ class ScoreController extends Controller
             ->first();
 
 
+        $tournaments = TournamentCourse::with('tournament', 'course')
+            ->whereHas('tournament', function ($query) {
+                $query->whereDate('tournament_start', '<=', now());
+            })
+
+            ->limit(5)
+            ->get();
+
 
 
         // echo '<pre>';
-        // print_r($scorecard->toArray());
+        // print_r($tournaments->toArray());
         // echo '</pre>';
         // return;
-        return view('admin.scores.create-score-form', compact('scorecard'));
+        return view('admin.scores.create-score-form', compact('scorecard', 'tournaments'));
     }
 
     /**

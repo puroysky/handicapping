@@ -26,7 +26,7 @@ return new class extends Migration
 
 
             $table->text('remarks')->nullable()->default(null);
-            $table->boolean('active')->default(true)->comment('True if tournament is active; false if inactive or cancelled');
+            $table->enum('active', ['active', 'completed', 'cancelled'])->default('active');
 
 
 
