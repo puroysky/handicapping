@@ -16,4 +16,5 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::resource('scores', App\Http\Controllers\Admin\ScoreController::class);
     Route::resource('courses', App\Http\Controllers\Admin\CourseController::class);
     Route::resource('tees', App\Http\Controllers\Admin\TeeController::class);
+    Route::resource('tournaments', App\Http\Controllers\Admin\TournamentController::class);
 });

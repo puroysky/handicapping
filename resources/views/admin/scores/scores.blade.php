@@ -7,18 +7,18 @@
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
-                    <h6 class="header-title">Users Management</h6>
+                    <h6 class="header-title">Scores Management</h6>
                     <p class="header-subtitle">
                         <i class="fas fa-users me-2"></i>
-                        Manage system users and their golf profiles
+                        Manage system scores and their golf profiles
                     </p>
                 </div>
                 <div class="d-flex gap-2">
                     <button class="btn btn-outline-secondary btn-modern" onclick="exportUsers()">
                         <i class="fas fa-download me-1"></i>Export
                     </button>
-                    <a href="{{ route('admin.users.create') }}" class="btn btn-primary btn-modern">
-                        <i class="fas fa-plus me-2"></i>Add New User
+                    <a href="{{ route('admin.scores.create') }}" class="btn btn-primary btn-modern">
+                        <i class="fas fa-plus me-2"></i>Add New Score
                     </a>
                 </div>
             </div>
@@ -35,13 +35,13 @@
                         <div class="col-md-6">
                             <div class="search-wrapper">
                                 <i class="fas fa-search search-icon"></i>
-                                <input type="text" class="search-input" id="tableSearch" placeholder="Search users..." autocomplete="off">
+                                <input type="text" class="search-input" id="tableSearch" placeholder="Search scores..." autocomplete="off">
                             </div>
                         </div>
                         <div class="col-md-6 text-end">
                             <div class="table-info">
                                 <small class="text-muted">
-                                    Showing <span id="showing-count">{{ count($users) }}</span> of <span id="total-count">{{ count($users) }}</span> users
+                                    Showing <span id="showing-count">{{ count($scores) }}</span> of <span id="total-count">{{ count($scores) }}</span> scores
                                 </small>
                             </div>
                         </div>
@@ -61,23 +61,35 @@
                                 </th>
                                 <th class="sortable" data-column="1">
                                     <div class="d-flex align-items-center justify-content-between">
-                                        <span>Email</span>
+                                        <span>Description</span>
+                                        <i class="fas fa-sort sort-icon"></i>
+                                    </div>
+                                </th>
+                                <th class="sortable" data-column="1">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <span>Course</span>
                                         <i class="fas fa-sort sort-icon"></i>
                                     </div>
                                 </th>
                                 <th class="sortable" data-column="2">
                                     <div class="d-flex align-items-center justify-content-between">
-                                        <span>Role</span>
+                                        <span>Start Date</span>
                                         <i class="fas fa-sort sort-icon"></i>
                                     </div>
                                 </th>
                                 <th class="sortable" data-column="3">
                                     <div class="d-flex align-items-center justify-content-between">
-                                        <span>Status</span>
+                                        <span>End Date</span>
                                         <i class="fas fa-sort sort-icon"></i>
                                     </div>
                                 </th>
                                 <th class="sortable" data-column="4">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <span>Status</span>
+                                        <i class="fas fa-sort sort-icon"></i>
+                                    </div>
+                                </th>
+                                <th class="sortable" data-column="5">
                                     <div class="d-flex align-items-center justify-content-between">
                                         <span>Created At</span>
                                         <i class="fas fa-sort sort-icon"></i>
@@ -89,44 +101,29 @@
                             </tr>
                         </thead>
                         <tbody id="mainTableBody">
-                            @foreach ($users as $user)
+                            @foreach ($scores as $score)
                             <tr class="table-row">
                                 <td class="name-cell">
-                                    <div class="d-flex align-items-center">
-                                        <div class="user-avatar me-3">
-                                            @if($user->profile->avatar !== null)
-                                            <img src="{{ $user->profile->avatar }}" alt="Avatar" class="avatar-img">
-                                            @else
-                                            <div class="avatar-placeholder">
-                                                {{ strtoupper(
-                                                    (isset($user->profile->first_name) ? substr($user->profile->first_name, 0, 1) : '') . 
-                                                    (isset($user->profile->last_name) ? substr($user->profile->last_name, 0, 1) : '')
-                                                ) ?: 'U' }}
-                                            </div>
-                                            @endif
-                                            <!-- Status Indicator -->
-                                            <div class="status-indicator {{ $user->active ? 'status-online' : 'status-offline' }}"
-                                                title="{{ $user->active ? 'Active User' : 'Inactive User' }}">
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <div class="user-name">{{ ($user->profile->first_name ?? '') . ' ' . ($user->profile->last_name ?? '') }}</div>
-                                            @if($user->profile->phone)
-                                            <small class="user-whs-no">{{ $user->player->whs_no }}</small>
-                                            @endif
-                                        </div>
-                                    </div>
+                                    <span class="user-name">{{ $score->score_name ?? 'N/A' }}</span>
                                 </td>
-                                <td class="email-cell">
-                                    <span class="user-email">{{ $user->email }}</span>
-                                </td>
-                                <td class="role-cell">
-                                    <span class="badge-modern role-{{ $user->role }}">
-                                        {{ ucfirst($user->role) }}
+                                <td class="">
+                                    <span class="">
+                                        {{ $score->score_desc ?? '-' }}
                                     </span>
                                 </td>
+                                <td>
+                                    @foreach ($score->courses as $course)
+                                    <span class="badge bg-secondary me-1 mb-1">{{ $course->course->course_name }}</span>
+                                    @endforeach
+                                </td>
+                                <td class="">
+                                    <span class="">{{ $score->score_start }}</span>
+                                </td>
+                                <td class="">
+                                    <span class="">{{ $score->score_end }}</span>
+                                </td>
                                 <td class="status-cell">
-                                    @if ($user->active)
+                                    @if ($score->active)
                                     <span class="status-badge status-active">
                                         <i class="fas fa-check-circle me-1"></i>Active
                                     </span>
@@ -137,14 +134,14 @@
                                     @endif
                                 </td>
                                 <td class="date-cell">
-                                    <span class="cell-text-date">{{ \Carbon\Carbon::parse($user->created_at)->format('M d, Y') }}</span>
-                                    <small class="cell-text-time d-block">{{ \Carbon\Carbon::parse($user->created_at)->format('g:i A') }}</small>
+                                    <span class="cell-text-date">{{ \Carbon\Carbon::parse($score->created_at)->format('M d, Y') }}</span>
+                                    <small class="cell-text-time d-block">{{ \Carbon\Carbon::parse($score->created_at)->format('g:i A') }}</small>
                                 </td>
                                 <td class="action-cell text-center">
                                     <div class="action-wrapper">
                                         <button class="btn btn-outline-secondary btn-context-menu"
                                             type="button"
-                                            onclick="showUserContextMenu({{ $user->id }}, '{{ ($user->profile->first_name ?? '') . ' ' . ($user->profile->last_name ?? '') }}', event)"
+                                            onclick="showUserContextMenu({{ $score->score_id }}, '{{ $score->score_name }}', event)"
                                             title="Actions"
                                             data-label="Actions">
                                             <i class="fas fa-ellipsis-v me-1"></i>
@@ -274,28 +271,28 @@
         }, 10);
     }
 
-    // User-specific context menu
+    // Score-specific context menu
     function showUserContextMenu(userId, userName, event) {
         event.preventDefault();
         event.stopPropagation();
 
         modernContext({
             "data": {
-                "title": "User Actions",
+                "title": "Score Actions",
                 "subtitle": userName
             },
             "recordId": userId,
             "items": [{
                     "label": "View Details",
-                    "description": "View complete user profile",
+                    "description": "View complete score profile",
                     "icon": "eye",
                     "action": function(id) {
                         viewRecord(id);
                     }
                 },
                 {
-                    "label": "Edit User",
-                    "description": "Modify user information",
+                    "label": "Edit Score",
+                    "description": "Modify score information",
                     "icon": "edit",
                     "action": function(id) {
                         editRecord(id);
@@ -306,7 +303,7 @@
                     "description": "Update golf profile settings",
                     "icon": "user-cog",
                     "action": function(id) {
-                        window.location.href = `/admin/users/${id}/profile`;
+                        window.location.href = `/admin/scores/${id}/profile`;
                     }
                 },
                 {
@@ -314,15 +311,15 @@
                     "description": "Check current handicap status",
                     "icon": "golf-ball",
                     "action": function(id) {
-                        window.location.href = `/admin/users/${id}/handicap`;
+                        window.location.href = `/admin/scores/${id}/handicap`;
                     }
                 },
                 {
                     "label": "---"
                 },
                 {
-                    "label": "Delete User",
-                    "description": "Permanently remove user",
+                    "label": "Delete Score",
+                    "description": "Permanently remove score",
                     "icon": "trash",
                     "action": function(id) {
                         deleteRecord(id);
@@ -333,19 +330,19 @@
     }
 
     function viewRecord(id) {
-        window.location.href = `/admin/users/${id}`;
+        window.location.href = `/admin/scores/${id}`;
     }
 
     function editRecord(id) {
-        window.location.href = `/admin/users/${id}/edit`;
+        window.location.href = `/admin/scores/${id}/edit`;
     }
 
     function deleteRecord(id) {
-        if (confirm('Are you sure you want to delete this user?')) {
+        if (confirm('Are you sure you want to delete this score?')) {
             // Create a form and submit it for DELETE request
             const form = document.createElement('form');
             form.method = 'POST';
-            form.action = `/admin/users/${id}`;
+            form.action = `/admin/scores/${id}`;
 
             // Add CSRF token
             const csrfToken = document.createElement('input');
@@ -367,7 +364,7 @@
     }
 
     function exportUsers() {
-        console.log('Export users functionality');
+        console.log('Export scores functionality');
         // Implement export logic here
     }
 

@@ -38,7 +38,7 @@ class DatabaseSeeder extends Seeder
             'remarks' => 'No remarks',
             'phone' => '1234567890',
             'address' => '123 Test St, Test City',
-            'avatar' => 'default-avatar.png',
+            'avatar' => null,
             'created_by' => 1,
         ]);
 

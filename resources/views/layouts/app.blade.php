@@ -39,10 +39,16 @@
                         <a class="nav-link active" href="{{ route('home') }}">Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">My Scores</a>
+                        <a class="nav-link" href="{{ route('admin.scores.index') }}">Scores</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Handicap</a>
+                        <a class="nav-link" href="{{ route('admin.players.index') }}">Players</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('admin.users.index') }}">Users</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('admin.tournaments.index') }}">Tournaments</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#">Settings</a>
@@ -81,7 +87,7 @@
         </div>
     </nav>
 
-    <div class="container mt-3">
+    <div class="container-fluid p-2 mt-3">
         @yield('content')
     </div>
 

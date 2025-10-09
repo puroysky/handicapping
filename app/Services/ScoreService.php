@@ -12,6 +12,15 @@ class ScoreService
         $this->xStrokePenalty = $xStrokePenalty;
     }
 
+
+    public function index()
+    {
+
+        $scores = \App\Models\Score::with('user')->orderBy('created_at', 'desc')->get();
+        $title = 'Scores';
+        return view('admin.scores.scores', compact('scores', 'title'));
+    }
+
     /**
      * Compute a single hole's score based on raw input and par.
      * Rules:

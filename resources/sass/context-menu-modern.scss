@@ -1,0 +1,316 @@
+/* Context Menu Styling - Enhanced with Label Action */
+.action-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.btn-context-menu {
+    min-width: 80px;
+    height: 32px;
+    padding: 0 0.75rem;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-color: var(--golf-medium-green);
+    color: var(--golf-medium-green);
+    transition: all 0.3s ease;
+    font-size: 0.75rem;
+    position: relative;
+    background: rgba(94, 124, 76, 0.05);
+    font-weight: 500;
+}
+
+.btn-context-menu .action-text {
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.btn-context-menu:hover {
+    background: var(--golf-medium-green);
+    border-color: var(--golf-medium-green);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.btn-context-menu:focus {
+    outline: none;
+    background: var(--golf-medium-green);
+    border-color: var(--golf-medium-green);
+    color: white;
+    box-shadow: 0 0 0 3px rgba(94, 124, 76, 0.2);
+}
+
+/* Action Label */
+.action-label {
+    position: absolute;
+    bottom: -25px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--golf-dark-green);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 500;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    z-index: 1000;
+    pointer-events: none;
+}
+
+.action-label::before {
+    content: "";
+    position: absolute;
+    top: -4px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-bottom: 4px solid var(--golf-dark-green);
+}
+
+.action-wrapper:hover .action-label,
+.btn-context-menu:focus + .action-label {
+    opacity: 1;
+    visibility: visible;
+    bottom: -30px;
+}
+
+/* Enhanced interaction states */
+.btn-context-menu::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 6px;
+    background: linear-gradient(
+        135deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.1) 100%
+    );
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.btn-context-menu:hover::after {
+    opacity: 1;
+}
+
+/* Accessibility improvements */
+.btn-context-menu:focus-visible {
+    outline: 2px solid var(--golf-medium-green);
+    outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .btn-context-menu,
+    .action-label {
+        transition: none;
+    }
+}
+
+.context-menu {
+    border-radius: 10px;
+    border: 1px solid var(--golf-light-green);
+    box-shadow: 0 8px 25px rgba(47, 74, 60, 0.15);
+    padding: 0.5rem 0;
+    min-width: 180px;
+}
+
+.context-menu .dropdown-item {
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+    border-radius: 0;
+}
+
+.context-menu .dropdown-item:hover {
+    background: rgba(47, 74, 60, 0.08);
+    color: var(--golf-dark-green);
+}
+
+.context-menu .dropdown-item.text-danger:hover {
+    background: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+}
+
+.context-menu .dropdown-divider {
+    margin: 0.5rem 0;
+    border-color: var(--golf-light-green);
+}
+
+.context-menu .dropdown-item i {
+    width: 16px;
+    text-align: center;
+}
+
+/* Modern Context Menu Styling */
+.modern-context-menu {
+    position: absolute;
+    z-index: 9999;
+    background: var(--golf-white);
+    border-radius: 12px;
+    box-shadow: 0 20px 40px rgba(47, 74, 60, 0.15),
+        0 8px 16px rgba(47, 74, 60, 0.1);
+    border: 1px solid rgba(47, 74, 60, 0.1);
+    min-width: 240px;
+    max-width: 280px;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+        sans-serif;
+    animation: contextMenuFadeIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    backdrop-filter: blur(10px);
+    transform-origin: top left;
+}
+
+.modern-context-menu.menu-left {
+    transform-origin: top right;
+    animation: contextMenuFadeInLeft 0.2s
+        cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.modern-context-menu.menu-right {
+    transform-origin: top left;
+    animation: contextMenuFadeInRight 0.2s
+        cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes contextMenuFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-8px) scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes contextMenuFadeInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(8px) translateY(-8px) scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0) translateY(0) scale(1);
+    }
+}
+
+@keyframes contextMenuFadeInRight {
+    from {
+        opacity: 0;
+        transform: translateX(-8px) translateY(-8px) scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0) translateY(0) scale(1);
+    }
+}
+
+.modern-context-header {
+    padding: 12px 16px 8px;
+    border-bottom: 1px solid rgba(47, 74, 60, 0.1);
+    background: linear-gradient(
+        135deg,
+        rgba(47, 74, 60, 0.03),
+        rgba(94, 124, 76, 0.03)
+    );
+}
+
+.context-title {
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: var(--golf-dark-green);
+    margin-bottom: 2px;
+}
+
+.context-subtitle {
+    font-size: 0.75rem;
+    color: var(--golf-medium-green);
+    opacity: 0.8;
+}
+
+.modern-context-items {
+    padding: 8px 0;
+}
+
+.modern-context-item {
+    display: flex;
+    align-items: center;
+    padding: 10px 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-radius: 0;
+    margin: 0 8px;
+    border-radius: 6px;
+}
+
+.modern-context-item:hover {
+    background: rgba(47, 74, 60, 0.06);
+    transform: translateX(2px);
+}
+
+.modern-context-item[data-action*="danger"]:hover,
+.modern-context-item:has(.fa-trash):hover {
+    background: rgba(220, 53, 69, 0.08);
+    color: #dc3545;
+}
+
+.context-item-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 12px;
+    background: rgba(47, 74, 60, 0.08);
+    color: var(--golf-medium-green);
+    font-size: 0.875rem;
+    flex-shrink: 0;
+}
+
+.modern-context-item:hover .context-item-icon {
+    background: var(--golf-medium-green);
+    color: var(--golf-white);
+}
+
+.modern-context-item[data-action*="danger"]:hover .context-item-icon,
+.modern-context-item:has(.fa-trash):hover .context-item-icon {
+    background: #dc3545;
+    color: white;
+}
+
+.context-item-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.context-item-label {
+    font-weight: 500;
+    font-size: 0.875rem;
+    color: var(--golf-dark-green);
+    margin-bottom: 2px;
+    line-height: 1.2;
+}
+
+.context-item-description {
+    font-size: 0.75rem;
+    color: var(--golf-medium-green);
+    opacity: 0.7;
+    line-height: 1.3;
+}
+
+.modern-context-item:hover .context-item-description {
+    opacity: 0.9;
+}

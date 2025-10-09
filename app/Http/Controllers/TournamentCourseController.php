@@ -1,28 +1,17 @@
 <?php
 
-namespace App\Http\Controllers\admin;
+namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Services\PlayerService;
 
-class PlayerController extends Controller
+class TournamentCourseController extends Controller
 {
-
-    protected $playerService;
-
-
-    public function __construct(PlayerService $playerService)
-    {
-        $this->playerService = $playerService;
-    }
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-
-        return $this->playerService->index();
+        //
     }
 
     /**
@@ -30,7 +19,7 @@ class PlayerController extends Controller
      */
     public function create()
     {
-        return view('admin.players.create');
+        //
     }
 
     /**

@@ -16,13 +16,11 @@ class UserService
     {
 
         $users = User::with('profile', 'player')
+            ->where('role', 'user')
             ->orderBy('created_at', 'desc')
             ->get();
 
-        // echo '<pre>';
-        // print_r($users->toArray());
-        // echo '</pre>';
-        // return;
+
         return view('admin.users.users', compact('users'));
     }
 
@@ -64,7 +62,7 @@ class UserService
 
             DB::rollback();
             return response()->json([
-                'message' => 'Error creating user: ' . $e->getMessage(),
+                'message' => 'Error creating user',
             ], 500);
         }
     }
@@ -81,7 +79,7 @@ class UserService
             'remarks' => $request['remarks'] ?? null,
             'phone' => $request['phone'] ?? null,
             'address' => $request['address'] ?? null,
-            'avatar' => 'default-avatar.png', // Default avatar
+            'avatar' => null,
             'created_by' => Auth::id(),
         ]);
     }

@@ -11,21 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('tournaments', function (Blueprint $table) {
-            $table->id('tournament_id');
-            $table->string('tournament_name', 100);
-            $table->string('tournament_desc', 255)->nullable()->default(null);
+        Schema::create('tournament_courses', function (Blueprint $table) {
+            $table->id('tournament_course_id');
+            $table->unsignedBigInteger('tournament_id');
+            $table->unsignedBigInteger('course_id');
 
-            $table->date('tournament_start');
-            $table->date('tournament_end');
-
-
-            $table->datetime('cancelled_at')->nullable()->default(null);
-            $table->unsignedBigInteger('cancelled_by')->nullable()->default(null);
-            $table->string('cancel_reason', 255)->nullable()->default(null);
-
-
-            $table->text('remarks')->nullable()->default(null);
             $table->boolean('active')->default(true)->comment('True if tournament is active; false if inactive or cancelled');
 
 
@@ -37,7 +27,7 @@ return new class extends Migration
 
             $table->foreign('created_by')->references('id')->on('users')->onDelete('restrict');
             $table->foreign('updated_by')->references('id')->on('users')->onDelete('restrict');
-            $table->foreign('cancelled_by')->references('id')->on('users')->onDelete('restrict');
+            $table->foreign('course_id')->references('course_id')->on('courses')->onDelete('restrict');
         });
     }
 
@@ -46,6 +36,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('tournaments');
+        Schema::dropIfExists('tournament_courses');
     }
 };
