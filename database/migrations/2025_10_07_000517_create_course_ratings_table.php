@@ -17,8 +17,6 @@ return new class extends Migration
             $table->unsignedBigInteger('scorecard_id');
             $table->unsignedBigInteger('tee_id');
 
-
-
             $table->unique(['scorecard_id', 'tee_id'], 'scorecard_course_rating_key');
             $table->decimal('course_rating', 5, 2)->unsigned();
 

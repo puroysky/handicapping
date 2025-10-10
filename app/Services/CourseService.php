@@ -39,4 +39,11 @@ class CourseService
             'redirect' => route('admin.courses.index')
         ], 201);
     }
+
+    public function getTees(Request $request, $courseId)
+    {
+        $tees = \App\Models\Tee::where('course_id', $courseId)->where('active', true)->orderBy('tee_name')->get();
+
+        return response()->json($tees);
+    }
 }

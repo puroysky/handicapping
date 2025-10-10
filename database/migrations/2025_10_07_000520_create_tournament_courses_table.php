@@ -19,6 +19,7 @@ return new class extends Migration
             $table->boolean('active')->default(true)->comment('True if tournament is active; false if inactive or cancelled');
 
 
+            $table->unique(['tournament_id', 'course_id']);
 
             $table->unsignedBigInteger('created_by');
             $table->unsignedBigInteger('updated_by')->nullable()->default(null);

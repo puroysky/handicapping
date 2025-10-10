@@ -83,4 +83,9 @@ class TeeController extends Controller
     {
         //
     }
+
+    public function getTees(Request $request, $teeId)
+    {
+        return $this->teeService->getTees($request, $teeId);
+    }
 }

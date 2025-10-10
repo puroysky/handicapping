@@ -8,9 +8,9 @@ class Scorecard extends Model
 {
 
 
-    public function scorecardDetails()
+    public function holes()
     {
-        return $this->hasMany(ScorecardDetail::class, 'scorecard_id', 'scorecard_id');
+        return $this->hasMany(ScorecardHole::class, 'scorecard_id', 'scorecard_id');
     }
 
     public function courseRatings()
@@ -22,8 +22,9 @@ class Scorecard extends Model
     {
         return $this->hasMany(SlopeRating::class, 'scorecard_id', 'scorecard_id');
     }
-    public function scorecardPars()
+
+    public function yardages()
     {
-        return $this->hasMany(ScorecardPar::class, 'scorecard_id', 'scorecard_id');
+        return $this->hasMany(ScorecardYard::class, 'scorecard_id', 'scorecard_id');
     }
 }

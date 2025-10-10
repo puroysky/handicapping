@@ -85,4 +85,9 @@ class TournamentController extends Controller
     {
         //
     }
+
+    public function getCourses(Request $request, $tournamentId)
+    {
+        return $this->tournamentService->getCourses($request, $tournamentId);
+    }
 }

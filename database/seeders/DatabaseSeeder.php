@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\PlayerProfile;
+use App\Models\Tournament;
 use App\Models\User;
 use App\Models\UserProfile;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -61,10 +62,13 @@ class DatabaseSeeder extends Seeder
             CourseSeeder::class,
             TeeSeeder::class,
             ScorecardSeeder::class,
-            ScorecardDetailSeeder::class,
+            ScorecardHoleSeeder::class,
+            ScorecardYardSeeder::class,
             CourseRatingSeeder::class,
             SlopeRatingSeeder::class,
-            ScorecardParSeeder::class,
+
+            TournamentSeeder::class,
+            TournamentCourseSeeder::class,
         ]);
     }
 }

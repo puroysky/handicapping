@@ -87,4 +87,9 @@ class CourseController extends Controller
     {
         //
     }
+
+    public function getTees(Request $request, $courseId)
+    {
+        return $this->courseService->getTees($request, $courseId);
+    }
 }

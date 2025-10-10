@@ -11,15 +11,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('scorecard_details', function (Blueprint $table) {
-            $table->id('scorecard_detail_id');
+        Schema::create('scorecard_yards', function (Blueprint $table) {
+            $table->id('scorecard_yard_id');
             $table->unsignedBigInteger('scorecard_id');
+            $table->unsignedBigInteger('scorecard_hole_id');
             $table->unsignedBigInteger('tee_id');
-            $table->unsignedTinyInteger('hole');
-            $table->decimal('yardage', 5, 1)->unsigned();
+            $table->unsignedSmallInteger('yardage');
+
+
 
             // Composite unique key for scorecard, tee, and hole
-            $table->unique(['scorecard_id', 'tee_id', 'hole'], 'scorecardd_detail_key')->comment('Ensure unique combination of scorecard, tee, and hole');
+            // Ensure unique combination of scorecard, tee, and hole
+            $table->unique(['scorecard_hole_id', 'tee_id'], 'scorecard_yards_unique');
 
             $table->unsignedBigInteger('created_by');
             $table->unsignedBigInteger('updated_by')->nullable()->default(null);
@@ -30,6 +33,7 @@ return new class extends Migration
             $table->foreign('updated_by')->references('id')->on('users')->onDelete('restrict');
 
             $table->foreign('scorecard_id')->references('scorecard_id')->on('scorecards')->onDelete('restrict');
+            $table->foreign('scorecard_hole_id')->references('scorecard_hole_id')->on('scorecard_holes')->onDelete('restrict');
             $table->foreign('tee_id')->references('tee_id')->on('tees')->onDelete('restrict');
         });
     }
@@ -39,6 +43,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('scorecard_tees');
+        Schema::dropIfExists('scorecard_yards');
     }
 };

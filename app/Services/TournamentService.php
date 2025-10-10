@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\TournamentCourse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -19,10 +20,10 @@ class TournamentService
 
     public function create()
     {
-
+        $scorecards = \App\Models\Scorecard::where('active', true)->orderBy('scorecard_name')->get();
         $courses = \App\Models\Course::where('active', true)->orderBy('course_name')->get();
         $title = 'Create New Tournament';
-        return view('admin.tournaments.create-tournament-form', compact('courses', 'title'));
+        return view('admin.tournaments.create-tournament-form', compact('courses', 'title', 'scorecards'));
     }
 
     public function store($request)
@@ -68,6 +69,28 @@ class TournamentService
                 'course_id' => $courseId,
                 'created_by' => Auth::id()
             ]);
+        }
+    }
+
+    public function getCourses($request, $tournamentId)
+    {
+
+        try {
+            $courses = TournamentCourse::with('course')
+                ->where('tournament_id', $tournamentId)
+                ->where('active', true)
+                ->get();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Courses fetched successfully',
+                'courses' => $courses
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error('Error fetching tournament courses: ' . $e->getMessage());
+            return response()->json([
+                'message' => 'Error fetching tournament courses: ' . $e->getMessage(),
+            ], 500);
         }
     }
 }

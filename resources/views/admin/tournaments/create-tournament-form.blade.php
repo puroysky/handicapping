@@ -124,6 +124,23 @@
                             </div>
                         </div>
 
+                        <!-- Scorecard Configuration Section -->
+                        <div class="form-section">
+                            <div class="section-title">
+                                <i class="fas fa-table"></i>
+                                Scorecard Configuration
+                            </div>
+
+                            <div class="alert alert-info" id="scorecard-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                Please select courses first to configure scorecards for each course.
+                            </div>
+
+                            <div id="scorecard-selections" class="row g-3" style="display: none;">
+                                <!-- Dynamic scorecard selections will be added here -->
+                            </div>
+                        </div>
+
                         <!-- Additional Remarks Section -->
                         <div class="form-section">
                             <div class="section-title">
@@ -240,6 +257,42 @@
             grid-template-columns: 1fr;
         }
     }
+
+    /* Course Scorecard Selection Styling */
+    .course-scorecard-selection .card {
+        transition: all 0.3s ease;
+        border: 2px solid #007bff;
+    }
+
+    .course-scorecard-selection .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 123, 255, 0.2);
+    }
+
+    .course-scorecard-selection .card-header {
+        border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .course-scorecard-selection .card-header h6 {
+        font-weight: 600;
+        font-size: 0.95rem;
+    }
+
+    .course-scorecard-selection .form-floating {
+        margin-bottom: 0;
+    }
+
+    #scorecard-info {
+        background-color: #e7f3ff;
+        border-color: #b3d9ff;
+        color: #0c5460;
+    }
+
+    @media (max-width: 768px) {
+        .course-scorecard-selection {
+            margin-bottom: 1rem;
+        }
+    }
 </style>
 
 <script>
@@ -305,10 +358,102 @@
                     courseOption.classList.remove('selected');
                 }
 
-                // Validate selection
+                // Validate selection and update scorecard options
                 validateCourseSelection();
+                updateScorecardSelections();
             });
         });
+
+        // Function to update scorecard selections based on selected courses
+        function updateScorecardSelections() {
+            const selectedCourses = Array.from(document.querySelectorAll('input[name="course_ids[]"]:checked'));
+            const scorecardContainer = document.getElementById('scorecard-selections');
+            const scorecardInfo = document.getElementById('scorecard-info');
+
+            // Clear existing scorecard selections
+            scorecardContainer.innerHTML = '';
+
+            if (selectedCourses.length === 0) {
+                scorecardContainer.style.display = 'none';
+                scorecardInfo.style.display = 'block';
+                scorecardInfo.innerHTML = '<i class="fas fa-info-circle me-2"></i>Please select courses first to configure scorecards for each course.';
+                return;
+            }
+
+            scorecardContainer.style.display = 'block';
+            scorecardInfo.style.display = 'none';
+
+            // Create scorecard selection for each selected course
+            selectedCourses.forEach(courseCheckbox => {
+                const courseId = courseCheckbox.value;
+                const courseName = courseCheckbox.closest('.course-option').querySelector('strong').textContent;
+
+                const scorecardHtml = `
+                    <div class="col-md-6 course-scorecard-selection" data-course-id="${courseId}">
+                        <div class="card border-primary">
+                            <div class="card-header bg-primary text-white py-2">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-golf-ball me-2"></i>
+                                    ${courseName}
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-floating">
+                                    <select class="form-control course-scorecard-select" 
+                                            name="course_scorecards[${courseId}]" 
+                                            id="scorecard_${courseId}" 
+                                            required>
+                                        <option value="">Select Scorecard for ${courseName}</option>
+                                        @if(isset($scorecards))
+                                            @foreach($scorecards as $scorecard)
+                                                <option value="{{ $scorecard->scorecard_id }}">{{ $scorecard->scorecard_name }}</option>
+                                            @endforeach
+                                        @else
+                                            <option value="1">Standard Scorecard</option>
+                                            <option value="2">Tournament Scorecard</option>
+                                            <option value="3">Championship Scorecard</option>
+                                            <option value="4">Executive Scorecard</option>
+                                        @endif
+                                    </select>
+                                    <label for="scorecard_${courseId}">Scorecard Template *</label>
+                                    <div class="invalid-feedback">
+                                        Please select a scorecard for ${courseName}.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                scorecardContainer.insertAdjacentHTML('beforeend', scorecardHtml);
+            });
+
+            // Add event listeners to new scorecard selects
+            document.querySelectorAll('.course-scorecard-select').forEach(select => {
+                select.addEventListener('change', validateScorecardSelection);
+            });
+        }
+
+        // Custom validation for scorecard selection
+        function validateScorecardSelection() {
+            const scorecardSelects = document.querySelectorAll('.course-scorecard-select');
+            let isValid = true;
+
+            if (scorecardSelects.length === 0) {
+                return true; // No courses selected, skip scorecard validation
+            }
+
+            scorecardSelects.forEach(select => {
+                if (!select.value) {
+                    select.setCustomValidity('Please select a scorecard template');
+                    isValid = false;
+                } else {
+                    select.setCustomValidity('');
+                }
+            });
+
+            return isValid;
+        }
 
         // Custom validation for date range
         function validateDateRange() {
@@ -345,7 +490,7 @@
             const form = this;
 
             // Validate form including custom validations
-            if (!form.checkValidity() || !validateDateRange() || !validateCourseSelection()) {
+            if (!form.checkValidity() || !validateDateRange() || !validateCourseSelection() || !validateScorecardSelection()) {
                 form.classList.add('was-validated');
                 return false;
             }

@@ -11,16 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('scores', function (Blueprint $table) {
-            $table->id('score_id');
-            $table->unsignedBigInteger('tournament_course_id');
-            $table->enum('score_type', ['hole by hole', 'gross score'])->default('hole by hole')->comment('Type of score: hole by hole or gross score');
-            $table->boolean('imported')->default(false)->comment('True if score was imported; false if manually entered');
-
-            $table->decimal('gross_score', 5, 2)->nullable()->default(null);
-            $table->decimal('adjusted_score', 5, 2);
+        Schema::create('scorecard_holes', function (Blueprint $table) {
+            $table->id('scorecard_hole_id');
+            $table->unsignedBigInteger('scorecard_id');
+            $table->unsignedTinyInteger('hole');
+            $table->unsignedTinyInteger('par');
 
 
+
+            // Composite unique key for scorecard, tee, and hole
+            $table->unique(['scorecard_id', 'hole'], 'scorecardd_detail_key')->comment('Ensure unique combination of scorecard, and hole');
 
             $table->unsignedBigInteger('created_by');
             $table->unsignedBigInteger('updated_by')->nullable()->default(null);
@@ -29,6 +29,8 @@ return new class extends Migration
 
             $table->foreign('created_by')->references('id')->on('users')->onDelete('restrict');
             $table->foreign('updated_by')->references('id')->on('users')->onDelete('restrict');
+
+            $table->foreign('scorecard_id')->references('scorecard_id')->on('scorecards')->onDelete('restrict');
         });
     }
 
@@ -37,6 +39,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('score_cards');
+        Schema::dropIfExists('scorecard_tees');
     }
 };

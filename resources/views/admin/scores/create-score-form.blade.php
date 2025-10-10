@@ -13,7 +13,7 @@
                     <form class="needs-validation" novalidate>
                         <!-- Course Selection Section -->
                         <div class="row mb-3">
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <div class="form-floating bg-white rounded-2 border border-light shadow-sm">
                                     <select name="player_id" id="player_id" class="form-select form-select-sm border-0 bg-light" required>
                                         <option value="hole_by_hole" disabled selected>Hole by Hole</option>
@@ -24,28 +24,38 @@
                                     </label>
                                 </div>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <div class="form-floating bg-white rounded-2 border border-light shadow-sm">
-                                    <select name="player_id" id="player_id" class="form-select form-select-sm border-0 bg-light" required>
+                                    <select name="tournament_id" id="tournament_id" class="form-select form-select-sm border-0 bg-light" required>
+                                        <option value="">Select Tournament</option>
                                         @foreach($tournaments as $tournament)
-                                        <option value="{{ $tournament->id }}">{{ $tournament->tournament->tournament_name }} - {{ $tournament->course->course_name }}</option>
+                                        <option value="{{ $tournament->tournament_id}}">{{ $tournament->tournament_name }}</option>
                                         @endforeach
                                     </select>
-                                    <label for="player_id" class="fw-semibold text-dark small">
-                                        <i class="fas fa-user-golf text-primary me-1"></i>Tournament
+                                    <label for="tournament_id" class="fw-semibold text-dark small">
+                                        <i class="fas fa-trophy text-primary me-1"></i>Tournament
                                     </label>
                                 </div>
                             </div>
 
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <div class="form-floating bg-white rounded-2 border border-light shadow-sm">
-                                    <select name="player_id" id="player_id" class="form-select form-select-sm border-0 bg-light" required>
-                                        @foreach($tournaments as $tournament)
-                                        <option value="{{ $tournament->id }}">{{ $tournament->tournament->tournament_name }} - {{ $tournament->course->course_name }}</option>
-                                        @endforeach
+                                    <select name="course_id" id="course_id" class="form-select form-select-sm border-0 bg-light" required disabled>
+                                        <option value="">Select Course</option>
                                     </select>
-                                    <label for="player_id" class="fw-semibold text-dark small">
-                                        <i class="fas fa-user-golf text-primary me-1"></i>Tee
+                                    <label for="course_id" class="fw-semibold text-dark small">
+                                        <i class="fas fa-golf-ball text-primary me-1"></i>Course
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="col-md-3">
+                                <div class="form-floating bg-white rounded-2 border border-light shadow-sm">
+                                    <select name="tee_id" id="tee_id" class="form-select form-select-sm border-0 bg-light" required>
+
+                                    </select>
+                                    <label for="tee_id" class="fw-semibold text-dark small">
+                                        <i class="fas fa-flag text-primary me-1"></i>Tee
                                     </label>
                                 </div>
                             </div>
@@ -70,42 +80,42 @@
                                     <thead class="bg-primary">
                                         <tr>
                                             <th class="text-start ps-3 text-white fw-semibold py-2 small">Hole</th>
-                                            @foreach($scorecard->scorecardDetails as $detail)
-                                            <th class="{{ $detail->hole == 10 ? 'border-start border-2 border-warning' : '' }} text-primary fw-semibold py-2 small column-header text-white" data-column="{{ $detail->hole }}">{{ $detail->hole }}</th>
+                                            @foreach($scorecard->holes as $hole)
+                                            <th class="{{ $hole->hole == 10 ? 'border-start border-2 border-warning' : '' }} text-primary fw-semibold py-2 small column-header text-white" data-column="{{ $hole->hole }}">{{ $hole->hole }}</th>
                                             @endforeach
                                         </tr>
                                     </thead>
                                     <tbody style="background: #ffffff;">
                                         <tr style="background: linear-gradient(90deg, #f8f9fa 0%, #ffffff 100%);">
                                             <td class="text-start ps-3 fw-bold text-primary py-2 small">PAR</td>
-                                            @foreach($scorecard->scorecardDetails as $detail)
-                                            <td class="{{ $detail->hole == 10 ? 'border-start border-2 border-warning' : '' }} py-2 column-cell" data-column="{{ $detail->hole }}">
-                                                <span class=" rounded-pill" style="padding: 4px 8px; font-size: 0.75rem;" data-hole="{{ $detail->hole }}" data-par-value="{{ $detail->par }}">{{ $detail->par }}</span>
+                                            @foreach($scorecard->holes as $hole)
+                                            <td class="{{ $hole->par == 10 ? 'border-start border-2 border-warning' : '' }} py-2 column-cell" data-column="{{ $hole->hole }}">
+                                                <span class=" rounded-pill" style="padding: 4px 8px; font-size: 0.75rem;" data-hole="{{ $hole->hole }}" data-par-value="{{ $hole->par }}">{{ $hole->par }}</span>
                                             </td>
                                             @endforeach
                                         </tr>
 
                                         <tr style="background: linear-gradient(90deg, #e9ecef 0%, #f8f9fa 100%);">
                                             <td class="text-start ps-3 fw-bold text-info py-2 small">Yards</td>
-                                            @foreach($scorecard->scorecardDetails as $detail)
-                                            <td class="{{ $detail->hole == 10 ? 'border-start border-2 border-warning' : '' }} py-2 column-cell" data-column="{{ $detail->hole }}">
-                                                <span class="rounded-pill text-primary px-2 py-1" style="font-size: 0.65rem;" data-hole="{{ $detail->hole }}" data-yardage="{{ $detail->yardage }}">{{ number_format($detail->yardage, 0) }}</span>
+                                            @foreach($scorecard->holes as $hole)
+                                            <td class="{{ $hole->hole == 10 ? 'border-start border-2 border-warning' : '' }} py-2 column-cell" data-column="{{ $hole->hole }}">
+                                                <span class="rounded-pill text-primary px-2 py-1" style="font-size: 0.65rem;" data-hole="{{ $hole->hole }}" data-yardage="{{ $hole->yardage->yardage }}">{{ number_format($hole->yardage->yardage, 0) }}</span>
                                             </td>
                                             @endforeach
                                         </tr>
 
                                         <tr style="background: #ffffff;">
                                             <td class="text-start ps-3 fw-bold text-dark py-2 small">Score</td>
-                                            @for ($i = 1; $i <= 18; $i++)
-                                                <td class="{{ $i == 10 ? 'border-start border-2 border-warning' : '' }} py-2 column-cell" data-column="{{ $i }}">
-                                                <input type="text" name="score[{{ $i }}]"
+                                            @foreach ($scorecard->holes as $hole)
+                                            <td class="{{ $hole->hole == 10 ? 'border-start border-2 border-warning' : '' }} py-2 column-cell" data-column="{{ $hole->hole }}">
+                                                <input type="text" name="score[{{ $hole->hole }}]"
                                                     class="form-control form-control-sm text-center score-input border-1 border-primary"
                                                     placeholder="–"
-                                                    aria-label="Score hole {{ $i }}"
-                                                    data-hole="{{ $i }}"
+                                                    aria-label="Score hole {{ $hole->hole }}"
+                                                    data-hole="{{ $hole->hole }}"
                                                     style="min-width: 40px; height: 35px; font-weight: 600; font-size: 1rem; border-radius: 6px; transition: all 0.2s ease;">
-                                                </td>
-                                                @endfor
+                                            </td>
+                                            @endforeach
                                         </tr>
 
                                         <tr style="background: linear-gradient(90deg, #f1f3f4 0%, #e9ecef 100%);">
@@ -382,6 +392,9 @@
 
                 // Highlight the entire column
                 highlightColumn(holeNumber);
+
+                // Select all text in the input for easy replacement
+                this.select();
             });
 
             input.addEventListener('blur', function() {
@@ -411,6 +424,26 @@
                 element.classList.remove('column-highlighted');
             });
         }
+
+
+
+        // Add select-on-focus functionality to manual total input
+        const manualTotalInput = document.getElementById('manualTotal');
+        if (manualTotalInput) {
+            manualTotalInput.addEventListener('focus', function() {
+                // Select all text in the input for easy replacement
+                this.select();
+            });
+        }
+
+        // Add select-on-focus functionality to all number inputs
+        const numberInputs = document.querySelectorAll('input[type="number"]');
+        numberInputs.forEach(input => {
+            input.addEventListener('focus', function() {
+                // Select all text in the input for easy replacement
+                this.select();
+            });
+        });
 
         // Add keyboard navigation enhancement
         scoreInputs.forEach((input, index) => {
@@ -496,10 +529,194 @@
                     }, 1000);
                 }
             });
-        }
+
+            // Tournament-Course dynamic loading handlers
+            console.log('Setting up tournament/course/tee handlers');
+
+            const tournamentSelect = document.getElementById('tournament_id');
+            const courseSelect = document.getElementById('course_id');
+            const teeSelect = document.getElementById('tee_id');
+
+            if (tournamentSelect && courseSelect && teeSelect) {
+
+                tournamentSelect.addEventListener('change', function() {
+                    console.log('Tournament changed:', this.value);
+                    const tournamentId = this.value;
+
+                    // Clear and reset course selection
+                    courseSelect.innerHTML = '<option value="">Select Course</option>';
+                    courseSelect.value = '';
+                    courseSelect.disabled = true;
+
+                    // Clear and reset tee selection
+                    teeSelect.innerHTML = '<option value="">Select Tee</option>';
+                    teeSelect.value = '';
+                    teeSelect.disabled = true;
+
+                    if (tournamentId) {
+                        // Enable course select and show loading state
+                        courseSelect.disabled = false;
+                        courseSelect.innerHTML = '<option value="">Loading courses...</option>';
+
+                        // Fetch courses from API
+                        console.log('Fetching courses for tournament:', tournamentId);
+
+                        fetch(`${BASE_URL}/admin/tournaments/${tournamentId}/courses`)
+                            .then(response => {
+                                console.log('API Response status:', response.status);
+                                if (!response.ok) {
+                                    throw new Error(`HTTP error! status: ${response.status}`);
+                                }
+                                return response.json();
+                            })
+                            .then(data => {
+                                console.log('API Response data:', data);
+                                courseSelect.innerHTML = '<option value="">Select Course</option>';
+
+                                if (data.success && data.courses && data.courses.length > 0) {
+                                    data.courses.forEach(courseData => {
+                                        const option = document.createElement('option');
+                                        option.value = courseData.course_id;
+                                        option.textContent = courseData.course.course_name;
+                                        courseSelect.appendChild(option);
+                                        console.log('Added course option:', courseData.course.course_name, 'with value:', courseData.course_id);
+                                    });
+                                    console.log(`Loaded ${data.courses.length} courses from API`);
+                                    courseSelect.disabled = false; // Ensure it's enabled
+                                } else {
+                                    courseSelect.innerHTML = '<option value="">No courses available</option>';
+                                    courseSelect.disabled = true;
+                                    console.log('No courses found in API response');
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error fetching courses from API:', error);
+
+                                // Fallback to static data if API fails
+                                console.log('Using fallback courses due to API error');
+                                courseSelect.innerHTML = '<option value="">Select Course</option>';
+                                courseSelect.disabled = false; // Enable for fallback options
+
+                                const fallbackCourses = [{
+                                        course_id: 1,
+                                        course_name: 'North Course'
+                                    },
+                                    {
+                                        course_id: 2,
+                                        course_name: 'South Course'
+                                    },
+                                    {
+                                        course_id: 3,
+                                        course_name: 'East Course'
+                                    },
+                                    {
+                                        course_id: 4,
+                                        course_name: 'West Course'
+                                    }
+                                ];
+
+                                fallbackCourses.forEach(course => {
+                                    const option = document.createElement('option');
+                                    option.value = course.course_id;
+                                    option.textContent = course.course_name;
+                                    courseSelect.appendChild(option);
+                                });
+                                console.log('Fallback courses loaded after API error');
+                            });
+                    }
+                });
+
+                // Course-Tee dynamic loading
+                courseSelect.addEventListener('change', function() {
+                    console.log('Course changed:', this.value);
+                    const courseId = this.value;
+
+                    // Clear and reset tee selection
+                    teeSelect.innerHTML = '<option value="">Select Tee</option>';
+                    teeSelect.value = '';
+                    teeSelect.disabled = true;
+
+                    if (courseId) {
+                        // Enable tee select and show loading state
+                        teeSelect.disabled = false;
+                        teeSelect.innerHTML = '<option value="">Loading tees...</option>';
+
+                        // Fetch tees from API
+                        console.log('Fetching tees for course:', courseId);
+                        fetch(`${BASE_URL}/admin/courses/${courseId}/tees`)
+                            .then(response => {
+                                console.log('Tees API Response status:', response.status);
+                                if (!response.ok) {
+                                    throw new Error(`HTTP error! status: ${response.status}`);
+                                }
+                                return response.json();
+                            })
+                            .then(data => {
+                                console.log('Tees API Response data:', data);
+                                teeSelect.innerHTML = '<option value="">Select Tee</option>';
+
+                                if (data.success && data.tees && data.tees.length > 0) {
+                                    data.tees.forEach(tee => {
+                                        const option = document.createElement('option');
+                                        option.value = tee.tee_id;
+                                        option.textContent = `${tee.tee_name} (${tee.tee_color})`;
+                                        teeSelect.appendChild(option);
+                                    });
+                                    console.log(`Loaded ${data.tees.length} tees from API`);
+                                } else {
+                                    teeSelect.innerHTML = '<option value="">No tees available</option>';
+                                    teeSelect.disabled = true;
+                                    console.log('No tees found in API response');
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error fetching tees from API:', error);
+
+                                // Fallback to static data if API fails
+                                console.log('Using fallback tees due to API error');
+                                teeSelect.innerHTML = '<option value="">Select Tee</option>';
+                                const fallbackTees = [{
+                                        tee_id: 1,
+                                        tee_name: 'Championship Tees',
+                                        tee_color: 'Black'
+                                    },
+                                    {
+                                        tee_id: 2,
+                                        tee_name: 'Tournament Tees',
+                                        tee_color: 'Blue'
+                                    },
+                                    {
+                                        tee_id: 3,
+                                        tee_name: 'Regular Tees',
+                                        tee_color: 'White'
+                                    },
+                                    {
+                                        tee_id: 4,
+                                        tee_name: 'Forward Tees',
+                                        tee_color: 'Red'
+                                    },
+                                    {
+                                        tee_id: 5,
+                                        tee_name: 'Senior Tees',
+                                        tee_color: 'Gold'
+                                    }
+                                ];
+
+                                fallbackTees.forEach(tee => {
+                                    const option = document.createElement('option');
+                                    option.value = tee.tee_id;
+                                    option.textContent = `${tee.tee_name} (${tee.tee_color})`;
+                                    teeSelect.appendChild(option);
+                                });
+                                console.log('Fallback tees loaded after API error');
+                            });
+                    }
+                });
+            } else {
+                console.error('Tournament, course, or tee select elements not found');
+            }
+        };
     });
 </script>
 
-<!-- Include handicapping calculation script -->
-<script src="{{ asset('js/handicapping.js') }}"></script>
 @endsection

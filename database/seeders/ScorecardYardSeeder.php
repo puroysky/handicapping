@@ -2,149 +2,144 @@
 
 namespace Database\Seeders;
 
-use App\Models\ScorecardPar;
+use App\Models\ScorecardYard;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
-class ScorecardParSeeder extends Seeder
+class ScorecardYardSeeder extends Seeder
 {
     /**
      * Run the database seeds.
      */
     public function run(): void
     {
-
-
-
-        ScorecardPar::insert([
+        ScorecardYard::insert([
             [
                 'scorecard_id' => 1,
-                'hole' => 1,
-                'par' => 4,
+                'scorecard_hole_id' => 1,
+                'tee_id' => 2,
+                'yardage' => 360,
                 'created_by' => 1, // Assuming admin user ID is 1
             ],
-
             [
                 'scorecard_id' => 1,
-                'hole' => 2,
-                'par' => 4,
+                'scorecard_hole_id' => 2,
+                'yardage' => 346,
+                'tee_id' => 2,
                 'created_by' => 1, // Assuming admin user ID is 1
             ],
-
             [
                 'scorecard_id' => 1,
-                'hole' => 3,
-                'par' => 3,
+                'scorecard_hole_id' => 3,
+                'yardage' => 192,
+                'tee_id' => 2,
                 'created_by' => 1, // Assuming admin user ID is 1
             ],
-
             [
                 'scorecard_id' => 1,
-                'hole' => 4,
-                'par' => 3,
+                'scorecard_hole_id' => 4,
+                'yardage' => 130,
+                'tee_id' => 2,
                 'created_by' => 1, // Assuming admin user ID is 1
             ],
-
             [
                 'scorecard_id' => 1,
-                'hole' => 5,
-                'par' => 5,
+                'scorecard_hole_id' => 5,
+                'yardage' => 521,
+                'tee_id' => 2,
                 'created_by' => 1, // Assuming admin user ID is 1
             ],
-
             [
                 'scorecard_id' => 1,
-                'hole' => 6,
-                'par' => 3,
+                'scorecard_hole_id' => 6,
+                'yardage' => 208,
+                'tee_id' => 2,
                 'created_by' => 1, // Assuming admin user ID is 1
             ],
-
             [
                 'scorecard_id' => 1,
-                'hole' => 7,
-                'par' => 5,
+                'scorecard_hole_id' => 7,
+                'yardage' => 403,
+                'tee_id' => 2,
                 'created_by' => 1, // Assuming admin user ID is 1
             ],
-
             [
                 'scorecard_id' => 1,
-                'hole' => 8,
-                'par' => 3,
+                'scorecard_hole_id' => 8,
+                'yardage' => 150,
+                'tee_id' => 2,
                 'created_by' => 1, // Assuming admin user ID is 1
             ],
-
             [
                 'scorecard_id' => 1,
-                'hole' => 9,
-                'par' => 5,
+                'scorecard_hole_id' => 9,
+                'yardage' => 370,
+                'tee_id' => 2,
                 'created_by' => 1, // Assuming admin user ID is 1
             ],
-
             [
                 'scorecard_id' => 1,
-                'hole' => 10,
-                'par' => 5,
+                'scorecard_hole_id' => 10,
+                'yardage' => 403,
+                'tee_id' => 2,
                 'created_by' => 1, // Assuming admin user ID is 1
             ],
-
             [
                 'scorecard_id' => 1,
-                'hole' => 11,
-                'par' => 3,
+                'scorecard_hole_id' => 11,
+                'yardage' => 151,
+                'tee_id' => 2,
                 'created_by' => 1, // Assuming admin user ID is 1
             ],
-
             [
                 'scorecard_id' => 1,
-                'hole' => 12,
-                'par' => 3,
+                'scorecard_hole_id' => 12,
+                'yardage' => 145,
+                'tee_id' => 2,
                 'created_by' => 1, // Assuming admin user ID is 1
             ],
-
             [
                 'scorecard_id' => 1,
-                'hole' => 13,
-                'par' => 5,
+                'scorecard_hole_id' => 13,
+                'yardage' => 475,
+                'tee_id' => 2,
                 'created_by' => 1, // Assuming admin user ID is 1
             ],
-
             [
                 'scorecard_id' => 1,
-                'hole' => 14,
-                'par' => 4,
+                'scorecard_hole_id' => 14,
+                'yardage' => 288,
+                'tee_id' => 2,
                 'created_by' => 1, // Assuming admin user ID is 1
             ],
-
             [
                 'scorecard_id' => 1,
-                'hole' => 15,
-                'par' => 3,
+                'scorecard_hole_id' => 15,
+                'yardage' => 155,
+                'tee_id' => 2,
                 'created_by' => 1, // Assuming admin user ID is 1
             ],
-
             [
                 'scorecard_id' => 1,
-                'hole' => 16,
-                'par' => 5,
+                'scorecard_hole_id' => 16,
+                'yardage' => 427,
+                'tee_id' => 2,
                 'created_by' => 1, // Assuming admin user ID is 1
             ],
-
             [
                 'scorecard_id' => 1,
-                'hole' => 17,
-                'par' => 4,
+                'scorecard_hole_id' => 17,
+                'yardage' => 382,
+                'tee_id' => 2,
                 'created_by' => 1, // Assuming admin user ID is 1
             ],
-
             [
                 'scorecard_id' => 1,
-                'hole' => 18,
-                'par' => 4,
+                'scorecard_hole_id' => 18,
+                'yardage' => 348,
+                'tee_id' => 2,
                 'created_by' => 1, // Assuming admin user ID is 1
             ],
-
-
-
         ]);
     }
 }

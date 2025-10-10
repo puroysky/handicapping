@@ -21,7 +21,9 @@ return new class extends Migration
             $table->unsignedBigInteger('course_id');
 
             $table->unsignedTinyInteger('total_holes')->default(18)->comment('Total number of holes on the scorecard, typically 9 or 18');
+            $table->unsignedTinyInteger('x_value')->default(0);
 
+            $table->boolean('active')->default(true);
             $table->unsignedBigInteger('created_by');
             $table->unsignedBigInteger('updated_by')->nullable()->default(null);
             $table->timestamp('created_at')->useCurrent();

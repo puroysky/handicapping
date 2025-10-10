@@ -45,31 +45,24 @@ class ScoreController extends Controller
                 $query->where('tee_id', $tee);
             },
 
-            // Eager load scorecardDetails
-            'scorecardDetails' => function ($query) {
-                $query->leftJoin('scorecard_pars', 'scorecard_details.hole', '=', 'scorecard_pars.hole')
-                    ->select('scorecard_details.*', 'scorecard_pars.par');
+            'holes.yardage' => function ($query) use ($tee) {
+                $query->where('tee_id', $tee);
             },
 
-            // Eager load scorecardPars
-            'scorecardPars'
         ])
             ->where('scorecard_id', 1)
             ->first();
 
 
-        $tournaments = TournamentCourse::with('tournament', 'course')
-            ->whereHas('tournament', function ($query) {
-                $query->whereDate('tournament_start', '<=', now());
-            })
-
+        $tournaments = Tournament::with('courses.course')
+            ->whereDate('tournament_start', '<=', now())
             ->limit(5)
             ->get();
 
 
 
         // echo '<pre>';
-        // print_r($tournaments->toArray());
+        // print_r($scorecard->toArray());
         // echo '</pre>';
         // return;
         return view('admin.scores.create-score-form', compact('scorecard', 'tournaments'));

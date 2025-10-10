@@ -28,7 +28,7 @@ return new class extends Migration
             $table->text('remarks')->nullable()->default(null);
             $table->enum('active', ['active', 'completed', 'cancelled'])->default('active');
 
-
+            $table->unsignedBigInteger('scorecard_id')->nullable()->default(null);
 
             $table->unsignedBigInteger('created_by');
             $table->unsignedBigInteger('updated_by')->nullable()->default(null);
@@ -38,6 +38,7 @@ return new class extends Migration
             $table->foreign('created_by')->references('id')->on('users')->onDelete('restrict');
             $table->foreign('updated_by')->references('id')->on('users')->onDelete('restrict');
             $table->foreign('cancelled_by')->references('id')->on('users')->onDelete('restrict');
+            $table->foreign('scorecard_id')->references('scorecard_id')->on('scorecards')->onDelete('restrict');
         });
     }
 
