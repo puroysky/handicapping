@@ -89,7 +89,7 @@ class TournamentService
         } catch (\Exception $e) {
             Log::error('Error fetching tournament courses: ' . $e->getMessage());
             return response()->json([
-                'message' => 'Error fetching tournament courses: ' . $e->getMessage(),
+                'message' => 'Error fetching tournament courses',
             ], 500);
         }
     }

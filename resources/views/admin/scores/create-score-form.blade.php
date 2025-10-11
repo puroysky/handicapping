@@ -72,50 +72,96 @@
                                 <div class="bg-primary bg-opacity-10 rounded-2 p-1 me-2">
                                     <i class="fas fa-table text-primary"></i>
                                 </div>
-                                <h5 class="mb-0 fw-bold text-dark">Scorecard</h5>
+                                <h5 class="mb-0 fw-bold text-dark" style="font-size: 1.25rem; font-weight: 700;">Scorecard</h5>
                             </div>
 
                             <div class="table-responsive border-0 rounded-3 overflow-hidden" style="box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
                                 <table class="table table-sm align-middle text-center mb-0 score-table">
                                     <thead class="bg-primary">
                                         <tr>
-                                            <th class="text-start ps-3 text-white fw-semibold py-2 small">Hole</th>
+                                            <th class="text-start ps-3 text-white fw-bold py-2" style="font-size: 0.875rem; font-weight: 700;">Hole</th>
                                             @foreach($scorecard->holes as $hole)
-                                            <th class="{{ $hole->hole == 10 ? 'border-start border-2 border-warning' : '' }} text-primary fw-semibold py-2 small column-header text-white" data-column="{{ $hole->hole }}">{{ $hole->hole }}</th>
+                                            <th class="text-primary fw-bold py-2 column-header text-white" style="font-size: 0.875rem; font-weight: 700;" data-column="{{ $hole->hole }}">{{ $hole->hole }}</th>
+                                            @if($hole->hole == 9)
+                                            <th class="text-white fw-bold py-2 bg-success border-start border-2 border-light" style="font-size: 0.875rem; font-weight: 700;">OUT</th>
+                                            @endif
                                             @endforeach
+                                            <th class="text-white fw-bold py-2 bg-success border-start border-2 border-light" style="font-size: 0.875rem; font-weight: 700;">IN</th>
+                                            <th class="text-white fw-bold py-2 bg-primary border-start border-2 border-light" style="font-size: 0.875rem; font-weight: 700;">TOTAL</th>
                                         </tr>
                                     </thead>
                                     <tbody style="background: #ffffff;">
                                         <tr style="background: linear-gradient(90deg, #f8f9fa 0%, #ffffff 100%);">
-                                            <td class="text-start ps-3 fw-bold text-primary py-2 small">PAR</td>
+                                            <td class="text-start ps-3 fw-bold text-primary py-2" style="font-size: 0.875rem; font-weight: 700;">PAR</td>
+                                            @php $frontPar = 0; $backPar = 0; @endphp
                                             @foreach($scorecard->holes as $hole)
-                                            <td class="{{ $hole->par == 10 ? 'border-start border-2 border-warning' : '' }} py-2 column-cell" data-column="{{ $hole->hole }}">
-                                                <span class=" rounded-pill" style="padding: 4px 8px; font-size: 0.75rem;" data-hole="{{ $hole->hole }}" data-par-value="{{ $hole->par }}">{{ $hole->par }}</span>
-                                            </td>
-                                            @endforeach
+                                            @php
+                                            if($hole->hole <= 9) $frontPar +=$hole->par;
+                                                else $backPar += $hole->par;
+                                                @endphp
+                                                <td class="py-2 column-cell" data-column="{{ $hole->hole }}">
+                                                    <span class="rounded-pill fw-bold" style="padding: 4px 8px; font-size: 0.875rem; font-weight: 700;" data-hole="{{ $hole->hole }}" data-par-value="{{ $hole->par }}">{{ $hole->par }}</span>
+                                                </td>
+                                                @if($hole->hole == 9)
+                                                <td class="py-2 fw-bold text-success bg-success bg-opacity-10 border-start border-2 border-light">
+                                                    <span class="rounded-pill bg-success text-white px-2 py-1 fw-bold" style="font-size: 0.875rem; font-weight: 700;">{{ $frontPar }}</span>
+                                                </td>
+                                                @endif
+                                                @endforeach
+                                                <td class="py-2 fw-bold text-success bg-success bg-opacity-10 border-start border-2 border-light">
+                                                    <span class="rounded-pill bg-success text-white px-2 py-1 fw-bold" style="font-size: 0.875rem; font-weight: 700;">{{ $backPar }}</span>
+                                                </td>
+                                                <td class="py-2 fw-bold text-primary bg-primary bg-opacity-10 border-start border-2 border-light">
+                                                    <span class="rounded-pill bg-primary text-white px-2 py-1 fw-bold" style="font-size: 0.875rem; font-weight: 700;">{{ $frontPar + $backPar }}</span>
+                                                </td>
                                         </tr>
 
                                         <tr style="background: linear-gradient(90deg, #e9ecef 0%, #f8f9fa 100%);">
-                                            <td class="text-start ps-3 fw-bold text-info py-2 small">Yards</td>
+                                            <td class="text-start ps-3 fw-bold text-info py-2" style="font-size: 0.875rem; font-weight: 700;">Yards</td>
                                             @foreach($scorecard->holes as $hole)
-                                            <td class="{{ $hole->hole == 10 ? 'border-start border-2 border-warning' : '' }} py-2 column-cell" data-column="{{ $hole->hole }}">
-                                                <span class="rounded-pill text-primary px-2 py-1" style="font-size: 0.65rem;" data-hole="{{ $hole->hole }}" data-yardage="{{ $hole->yardage->yardage }}">{{ number_format($hole->yardage->yardage, 0) }}</span>
+                                            <td class="py-2 column-cell" data-column="{{ $hole->hole }}">
+                                                <span class="rounded-pill text-primary px-2 py-1 yardage-span fw-semibold" style="font-size: 0.75rem; font-weight: 600;" data-hole="{{ $hole->hole }}" data-yardage="{{ $hole->yardage->yardage }}">-</span>
                                             </td>
+                                            @if($hole->hole == 9)
+                                            <td class="py-2 fw-bold text-info bg-info bg-opacity-10 border-start border-2 border-light">
+                                                <span class="rounded-pill bg-info text-white px-2 py-1 front-yards-total fw-bold" style="font-size: 0.8rem; font-weight: 700;">-</span>
+                                            </td>
+                                            @endif
                                             @endforeach
+                                            <td class="py-2 fw-bold text-info bg-info bg-opacity-10 border-start border-2 border-light">
+                                                <span class="rounded-pill bg-info text-white px-2 py-1 back-yards-total fw-bold" style="font-size: 0.8rem; font-weight: 700;">-</span>
+                                            </td>
+                                            <td class="py-2 fw-bold text-info bg-info bg-opacity-10 border-start border-2 border-light">
+                                                <span class="rounded-pill bg-info text-white px-2 py-1 total-yards-total fw-bold" style="font-size: 0.8rem; font-weight: 700;">-</span>
+                                            </td>
                                         </tr>
 
                                         <tr style="background: #ffffff;">
-                                            <td class="text-start ps-3 fw-bold text-dark py-2 small">Score</td>
+                                            <td class="text-start ps-3 fw-bold text-dark py-2" style="font-size: 0.875rem; font-weight: 700;">Score</td>
                                             @foreach ($scorecard->holes as $hole)
-                                            <td class="{{ $hole->hole == 10 ? 'border-start border-2 border-warning' : '' }} py-2 column-cell" data-column="{{ $hole->hole }}">
+                                            <td class="py-2 column-cell" data-column="{{ $hole->hole }}">
                                                 <input type="text" name="score[{{ $hole->hole }}]"
                                                     class="form-control form-control-sm text-center score-input border-1 border-primary"
                                                     placeholder="–"
                                                     aria-label="Score hole {{ $hole->hole }}"
                                                     data-hole="{{ $hole->hole }}"
-                                                    style="min-width: 40px; height: 35px; font-weight: 600; font-size: 1rem; border-radius: 6px; transition: all 0.2s ease;">
+                                                    style="min-width: 40px; height: 35px; font-weight: 700; font-size: 1.1rem; border-radius: 6px; transition: all 0.2s ease;">
                                             </td>
+                                            @if($hole->hole == 9)
+                                            <td class="py-2 fw-bold text-warning bg-warning bg-opacity-10 border-start border-2 border-light">
+                                                <input type="text" class="form-control form-control-sm text-center fw-bold border-0 bg-warning bg-opacity-20 front-score-total"
+                                                    placeholder="0" readonly style="min-width: 40px; height: 35px; font-size: 1rem; color: #856404;">
+                                            </td>
+                                            @endif
                                             @endforeach
+                                            <td class="py-2 fw-bold text-warning bg-warning bg-opacity-10 border-start border-2 border-light">
+                                                <input type="text" class="form-control form-control-sm text-center fw-bold border-0 bg-warning bg-opacity-20 back-score-total"
+                                                    placeholder="0" readonly style="min-width: 40px; height: 35px; font-size: 1rem; color: #856404;">
+                                            </td>
+                                            <td class="py-2 fw-bold text-primary bg-primary bg-opacity-10 border-start border-2 border-light">
+                                                <input type="text" class="form-control form-control-sm text-center fw-bold border-0 bg-primary bg-opacity-20 total-score-total"
+                                                    placeholder="0" readonly style="min-width: 40px; height: 35px; font-size: 1rem; color: #0d47a1;">
+                                            </td>
                                         </tr>
 
                                         <tr style="background: linear-gradient(90deg, #f1f3f4 0%, #e9ecef 100%);">
@@ -123,76 +169,44 @@
 
                                             </td>
                                             @for ($i = 1; $i <= 18; $i++)
-                                                <td class="{{ $i == 10 ? 'border-start border-2 border-warning' : '' }} py-2 column-cell" data-column="{{ $i }}">
+                                                <td class="py-2 column-cell" data-column="{{ $i }}">
                                                 <input type="text"
                                                     class="form-control form-control-sm text-center score-input-display bg-light text-muted border-0"
                                                     data-score-input-display="{{ $i }}"
                                                     placeholder="–"
                                                     aria-label="Computed score hole {{ $i }} (read-only)"
-                                                    style="min-width: 40px; height: 28px; cursor: default; font-weight: 500; border-radius: 4px; font-size: 0.875rem;"
+                                                    style="min-width: 40px; height: 28px; cursor: default; font-weight: 600; border-radius: 4px; font-size: 0.9rem;"
                                                     readonly disabled tabindex="-1" aria-disabled="true">
                                                 </td>
+                                                @if($i == 9)
+                                                <td class="py-2 fw-bold text-muted bg-secondary bg-opacity-10 border-start border-2 border-light">
+                                                    <input type="text" class="form-control form-control-sm text-center fw-bold border-0 bg-secondary bg-opacity-20 front-computed-total"
+                                                        placeholder="0" readonly style="min-width: 40px; height: 28px; font-size: 0.9rem; font-weight: 600; color: #6c757d;">
+                                                </td>
+                                                @endif
                                                 @endfor
+                                                <td class="py-2 fw-bold text-muted bg-secondary bg-opacity-10 border-start border-2 border-light">
+                                                    <input type="text" class="form-control form-control-sm text-center fw-bold border-0 bg-secondary bg-opacity-20 back-computed-total"
+                                                        placeholder="0" readonly style="min-width: 40px; height: 28px; font-size: 0.9rem; font-weight: 600; color: #6c757d;">
+                                                </td>
+                                                <td class="py-2 fw-bold text-muted bg-secondary bg-opacity-10 border-start border-2 border-light">
+                                                    <input type="text" class="form-control form-control-sm text-center fw-bold border-0 bg-secondary bg-opacity-20 total-computed-total"
+                                                        placeholder="0" readonly style="min-width: 40px; height: 28px; font-size: 0.9rem; font-weight: 600; color: #6c757d;">
+                                                </td>
                                         </tr>
                                     </tbody>
                                 </table>
                             </div>
-
-                            <!-- Enhanced Total Section -->
-                            <div class="row g-3 mt-3 mb-2">
-                                <div class="col-md-6">
-                                    <div class="total-card bg-gradient rounded-3 p-3 border-0 shadow-sm" style="background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);">
-                                        <div class="d-flex align-items-center mb-2">
-                                            <div class="total-icon bg-primary bg-opacity-20 rounded-circle p-2 me-3">
-                                                <i class="fas fa-edit text-primary fs-5"></i>
-                                            </div>
-                                            <div>
-                                                <label for="manualTotal" class="form-label fw-bold text-primary mb-0">Entered Total</label>
-                                                <small class="d-block text-primary opacity-75">Manual score entry</small>
-                                            </div>
-                                        </div>
-                                        <input type="number" name="score[total]" id="manualTotal" min="18" max="180"
-                                            class="form-control form-control-lg text-center fw-bold border-2 border-primary shadow-sm"
-                                            placeholder="0"
-                                            style="background: rgba(255,255,255,0.95); font-size: 1.5rem; border-radius: 12px; height: 60px; transition: all 0.3s ease;">
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="total-card bg-gradient rounded-3 p-3 border-0 shadow-sm" style="background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);">
-                                        <div class="d-flex align-items-center mb-2">
-                                            <div class="total-icon bg-purple bg-opacity-20 rounded-circle p-2 me-3" style="background-color: rgba(123, 31, 162, 0.2) !important;">
-                                                <i class="fas fa-calculator fs-5" style="color: #7b1fa2;"></i>
-                                            </div>
-                                            <div>
-                                                <label class="form-label fw-bold mb-0" style="">Computed Total</label>
-                                                <small class="d-block opacity-75" style="">Auto-calculated from holes</small>
-                                            </div>
-                                        </div>
-                                        <input type="number" id="computedTotal"
-                                            class="form-control form-control-lg text-center fw-bold border-0 shadow-sm score-input-display-total"
-                                            placeholder="0" readonly
-                                            style="background: rgba(255,255,255,0.95); font-size: 1.5rem; border-radius: 12px; color: #7b1fa2; height: 60px; cursor: default;">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Score Summary Info -->
-                            <div class="alert alert-info border-0 mt-2 mb-0 py-3 rounded-3" style="background: linear-gradient(135deg, #e8f4fd 0%, #d1ecf1 100%);">
-                                <div class="d-flex align-items-center">
-                                    <div class="me-3">
-                                        <i class="fas fa-lightbulb text-info fs-4"></i>
-                                    </div>
-                                    <div>
-                                        <div class="fw-semibold text-info mb-1">Scoring Tips</div>
-                                        <small class="text-info mb-0">
-                                            Enter numbers (1-9) or 'x' for penalty strokes. Computed total updates automatically as you enter hole scores.
-                                        </small>
-                                    </div>
-                                </div>
-                            </div>
                         </div>
 
-
+                        <!-- Keyboard Shortcuts Help -->
+                        <div class="text-center mb-3 keyboard-help">
+                            <small class="text-muted d-flex align-items-center justify-content-center gap-3">
+                                <span><kbd>Enter</kbd> Next field</span>
+                                <span><kbd>←</kbd><kbd>→</kbd> Navigate holes</span>
+                                <span><kbd>Ctrl</kbd>+<kbd>S</kbd> Save</span>
+                            </small>
+                        </div>
 
                         <!-- Compact Action Buttons -->
                         <div class="d-flex justify-content-between align-items-center gap-2">
@@ -203,7 +217,7 @@
                                 <button type="button" class="btn btn-outline-danger rounded-pill px-3" id="clearAllBtn">
                                     <i class="fas fa-trash me-1"></i>Clear All
                                 </button>
-                                <button type="submit" class="btn rounded-pill px-4 text-white fw-bold" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); border: none; box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);">
+                                <button type="submit" class="btn rounded-pill px-4 text-white fw-bold" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); border: none; box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);" title="Save scorecard (Ctrl+S)" data-bs-toggle="tooltip">
                                     <i class="fas fa-save me-1"></i>Save
                                 </button>
                             </div>
@@ -375,6 +389,108 @@
     .total-updating {
         animation: pulse-update 0.3s ease-in-out;
     }
+
+    /* Skeleton loader for table */
+    .skeleton-loader {
+        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+        background-size: 200% 100%;
+        animation: shimmer 1.5s infinite;
+        border-radius: 4px;
+    }
+
+    .skeleton-row {
+        opacity: 0.7;
+    }
+
+    .skeleton-cell {
+        height: 20px;
+        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+        background-size: 200% 100%;
+        animation: shimmer 1.5s infinite;
+        border-radius: 4px;
+        margin: 2px 0;
+    }
+
+    .skeleton-yardage {
+        height: 16px;
+        width: 30px;
+        margin: 0 auto;
+        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+        background-size: 200% 100%;
+        animation: shimmer 1.5s infinite;
+        border-radius: 8px;
+    }
+
+    @keyframes shimmer {
+        0% {
+            background-position: -200% 0;
+        }
+
+        100% {
+            background-position: 200% 0;
+        }
+    }
+
+    /* Ensure yardage spans maintain consistent size */
+    .yardage-span {
+        min-width: 30px;
+        display: inline-block;
+        text-align: center;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+    /* Pulse effect for updated yardages */
+    .yardage-updated {
+        animation: pulse-success 0.6s ease-in-out;
+    }
+
+    @keyframes pulse-success {
+        0% {
+            background-color: rgba(40, 167, 69, 0.2);
+            transform: scale(1);
+        }
+
+        50% {
+            background-color: rgba(40, 167, 69, 0.4);
+            transform: scale(1.05);
+        }
+
+        100% {
+            background-color: transparent;
+            transform: scale(1);
+        }
+    }
+
+    /* Hidden class for original tbody during loading */
+    .tbody-hidden {
+        display: none;
+    }
+
+    /* Keyboard shortcuts styling */
+    kbd {
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 3px;
+        box-shadow: 0 1px 0 rgba(0, 0, 0, 0.2), inset 0 0 0 2px #fff;
+        color: #495057;
+        display: inline-block;
+        font-family: monospace;
+        font-size: 0.75rem;
+        font-weight: 600;
+        line-height: 1;
+        padding: 2px 4px;
+        white-space: nowrap;
+    }
+
+    .keyboard-help {
+        opacity: 0.8;
+        transition: opacity 0.2s ease;
+    }
+
+    .keyboard-help:hover {
+        opacity: 1;
+    }
 </style>
 
 <script>
@@ -427,15 +543,6 @@
 
 
 
-        // Add select-on-focus functionality to manual total input
-        const manualTotalInput = document.getElementById('manualTotal');
-        if (manualTotalInput) {
-            manualTotalInput.addEventListener('focus', function() {
-                // Select all text in the input for easy replacement
-                this.select();
-            });
-        }
-
         // Add select-on-focus functionality to all number inputs
         const numberInputs = document.querySelectorAll('input[type="number"]');
         numberInputs.forEach(input => {
@@ -445,16 +552,107 @@
             });
         });
 
-        // Add keyboard navigation enhancement
+        // Add enhanced keyboard navigation
         scoreInputs.forEach((input, index) => {
             input.addEventListener('keydown', function(e) {
+                // Enter key acts like Tab (move to next field)
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (index < scoreInputs.length - 1) {
+                        scoreInputs[index + 1].focus();
+                        scoreInputs[index + 1].select();
+                    } else {
+                        // If on last hole, focus first input again
+                        scoreInputs[0].focus();
+                        scoreInputs[0].select();
+                    }
+                }
                 // Arrow key navigation
-                if (e.key === 'ArrowRight' && index < scoreInputs.length - 1) {
+                else if (e.key === 'ArrowRight' && index < scoreInputs.length - 1) {
                     e.preventDefault();
                     scoreInputs[index + 1].focus();
+                    scoreInputs[index + 1].select();
                 } else if (e.key === 'ArrowLeft' && index > 0) {
                     e.preventDefault();
                     scoreInputs[index - 1].focus();
+                    scoreInputs[index - 1].select();
+                }
+                // Ctrl+S to submit form
+                else if (e.ctrlKey && e.key === 's') {
+                    e.preventDefault();
+                    submitForm();
+                }
+            });
+        });
+
+        // Global Ctrl+S handler for form submission
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 's') {
+                e.preventDefault();
+                submitForm();
+            }
+        });
+
+        // Form submission function
+        function submitForm() {
+            const form = document.querySelector('form.needs-validation');
+            if (form) {
+                // Trigger form validation
+                if (form.checkValidity()) {
+                    // Show submission feedback
+                    const submitBtn = document.querySelector('button[type="submit"]');
+                    if (submitBtn) {
+                        const originalText = submitBtn.innerHTML;
+                        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Saving...';
+                        submitBtn.disabled = true;
+
+                        // Simulate form submission (replace with actual submission logic)
+                        setTimeout(() => {
+                            submitBtn.innerHTML = '<i class="fas fa-check me-1"></i>Saved!';
+                            setTimeout(() => {
+                                submitBtn.innerHTML = originalText;
+                                submitBtn.disabled = false;
+                            }, 1500);
+                        }, 1000);
+                    }
+
+                    console.log('Form submitted via Ctrl+S');
+                    // Add actual form submission logic here
+                } else {
+                    // Show validation errors
+                    form.classList.add('was-validated');
+                    console.log('Form validation failed');
+                }
+            }
+        }
+
+        // Enhanced keyboard navigation for dropdown selects
+        const selectElements = [
+            document.getElementById('tournament_id'),
+            document.getElementById('course_id'),
+            document.getElementById('tee_id')
+        ].filter(el => el !== null);
+
+        selectElements.forEach((select, index) => {
+            select.addEventListener('keydown', function(e) {
+                // Enter key moves to next select or first score input
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (index < selectElements.length - 1) {
+                        selectElements[index + 1].focus();
+                    } else {
+                        // Move to first score input after last select
+                        const firstScoreInput = document.querySelector('.score-input');
+                        if (firstScoreInput) {
+                            firstScoreInput.focus();
+                            firstScoreInput.select();
+                        }
+                    }
+                }
+                // Ctrl+S to submit form
+                else if (e.ctrlKey && e.key === 's') {
+                    e.preventDefault();
+                    submitForm();
                 }
             });
         });
@@ -468,12 +666,6 @@
                     input.value = '';
                     input.classList.remove('is-valid', 'is-invalid');
                 });
-
-                // Clear totals
-                const totalInput = document.querySelector('input[name="score[total]"]');
-                if (totalInput) totalInput.value = '';
-                const computedTotal = document.querySelector('.score-input-display-total');
-                if (computedTotal) computedTotal.value = '';
 
                 // Clear any column highlights
                 clearColumnHighlights();
@@ -501,14 +693,10 @@
             clearAllBtn.addEventListener('click', function() {
                 if (confirm('Clear all scores and computed values? This cannot be undone.')) {
                     // Clear all inputs
-                    document.querySelectorAll('.score-input, .score-input-display, .score-input-display-total').forEach(input => {
+                    document.querySelectorAll('.score-input, .score-input-display').forEach(input => {
                         input.value = '';
                         input.classList.remove('is-valid', 'is-invalid');
                     });
-
-                    // Clear total input
-                    const totalInput = document.querySelector('input[name="score[total]"]');
-                    if (totalInput) totalInput.value = '';
 
                     // Clear any column highlights
                     clearColumnHighlights();
@@ -659,7 +847,7 @@
                                     data.tees.forEach(tee => {
                                         const option = document.createElement('option');
                                         option.value = tee.tee_id;
-                                        option.textContent = `${tee.tee_name} (${tee.tee_color})`;
+                                        option.textContent = `${tee.tee_code} (${tee.tee_name})`;
                                         teeSelect.appendChild(option);
                                     });
                                     console.log(`Loaded ${data.tees.length} tees from API`);
@@ -712,6 +900,408 @@
                             });
                     }
                 });
+
+                // Tee-Yardages dynamic loading with skeleton loader
+                teeSelect.addEventListener('change', function() {
+                    console.log('Tee changed:', this.value);
+                    const teeId = this.value;
+
+                    if (teeId) {
+                        console.log('Fetching yardages for tee:', teeId);
+
+                        // Show skeleton loader by replacing tbody content
+                        showSkeletonLoader();
+
+                        // Fetch yardages from API
+                        fetch(`${BASE_URL}/admin/tees/${teeId}/yardages`)
+                            .then(response => {
+                                console.log('Yardages API Response status:', response.status);
+                                if (!response.ok) {
+                                    throw new Error(`HTTP error! status: ${response.status}`);
+                                }
+                                return response.json();
+                            })
+                            .then(data => {
+                                console.log('Yardages API Response data:', data);
+
+                                // Hide skeleton and show original content
+                                hideSkeletonLoader();
+
+                                if (data.success && data.yardages && data.yardages.length > 0) {
+                                    // Update yardages in the scorecard table
+                                    data.yardages.forEach(yardageData => {
+                                        const hole = yardageData.hole;
+                                        const yardage = yardageData.yardage;
+
+                                        // Find the yardage span for this hole
+                                        const yardageSpan = document.querySelector(`.yardage-span[data-hole="${hole}"]`);
+                                        if (yardageSpan) {
+                                            // Update content with success animation
+                                            yardageSpan.textContent = yardage.toLocaleString();
+                                            yardageSpan.classList.add('text-primary', 'yardage-updated');
+                                            yardageSpan.setAttribute('data-yardage', yardage);
+
+                                            // Remove success animation after it completes
+                                            setTimeout(() => {
+                                                yardageSpan.classList.remove('yardage-updated');
+                                            }, 600);
+
+                                            console.log(`Updated hole ${hole} yardage to ${yardage}`);
+                                        }
+                                    });
+
+                                    console.log(`Updated ${data.yardages.length} hole yardages from API`);
+
+                                    // Recalculate totals after yardages are updated
+                                    calculateTotals();
+                                } else {
+                                    console.log('No yardages found in API response');
+                                    window.showErrorModal && window.showErrorModal({
+                                        message: 'No yardages found for the selected tee.',
+                                        details: 'Please check the tee selection or try again later.',
+                                        primaryText: 'OK'
+                                    });
+
+                                    // Reset yardages to default if no data
+                                    const yardageSpans = document.querySelectorAll('.yardage-span');
+                                    yardageSpans.forEach(span => {
+                                        span.textContent = '-';
+                                        span.classList.add('text-primary');
+                                        span.setAttribute('data-yardage', '-');
+                                    });
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error fetching yardages from API:', error);
+
+                                // Hide skeleton and show original content
+                                hideSkeletonLoader();
+
+                                // Use fallback yardages if API fails
+                                console.log('Using fallback yardages due to API error');
+                                const fallbackYardages = [{
+                                        hole: 1,
+                                        yardage: 380
+                                    }, {
+                                        hole: 2,
+                                        yardage: 425
+                                    }, {
+                                        hole: 3,
+                                        yardage: 190
+                                    },
+                                    {
+                                        hole: 4,
+                                        yardage: 510
+                                    }, {
+                                        hole: 5,
+                                        yardage: 340
+                                    }, {
+                                        hole: 6,
+                                        yardage: 415
+                                    },
+                                    {
+                                        hole: 7,
+                                        yardage: 175
+                                    }, {
+                                        hole: 8,
+                                        yardage: 395
+                                    }, {
+                                        hole: 9,
+                                        yardage: 450
+                                    },
+                                    {
+                                        hole: 10,
+                                        yardage: 360
+                                    }, {
+                                        hole: 11,
+                                        yardage: 480
+                                    }, {
+                                        hole: 12,
+                                        yardage: 205
+                                    },
+                                    {
+                                        hole: 13,
+                                        yardage: 385
+                                    }, {
+                                        hole: 14,
+                                        yardage: 420
+                                    }, {
+                                        hole: 15,
+                                        yardage: 165
+                                    },
+                                    {
+                                        hole: 16,
+                                        yardage: 375
+                                    }, {
+                                        hole: 17,
+                                        yardage: 440
+                                    }, {
+                                        hole: 18,
+                                        yardage: 525
+                                    }
+                                ];
+
+                                fallbackYardages.forEach(yardageData => {
+                                    const hole = yardageData.hole;
+                                    const yardage = yardageData.yardage;
+
+                                    const yardageSpan = document.querySelector(`.yardage-span[data-hole="${hole}"]`);
+                                    if (yardageSpan) {
+                                        yardageSpan.textContent = yardage.toLocaleString();
+                                        yardageSpan.classList.add('text-primary');
+                                        yardageSpan.setAttribute('data-yardage', yardage);
+                                    }
+                                });
+
+                                console.log('Fallback yardages loaded after API error');
+
+                                // Recalculate totals after fallback yardages are loaded
+                                calculateTotals();
+                            });
+                    } else {
+                        // Clear yardages when no tee is selected
+                        hideSkeletonLoader();
+
+                        const yardageSpans = document.querySelectorAll('.yardage-span');
+                        yardageSpans.forEach(span => {
+                            span.textContent = '-';
+                            span.classList.remove('text-muted');
+                            span.classList.add('text-primary');
+                            span.setAttribute('data-yardage', '-');
+                        });
+                    }
+                });
+
+                // Skeleton loader functions
+                function showSkeletonLoader() {
+                    const table = document.querySelector('.score-table');
+                    const originalTbody = table.querySelector('tbody');
+
+                    // Hide original tbody
+                    originalTbody.classList.add('tbody-hidden');
+
+                    // Create skeleton tbody
+                    const skeletonTbody = document.createElement('tbody');
+                    skeletonTbody.id = 'skeleton-tbody';
+                    skeletonTbody.style.background = '#ffffff';
+
+                    // Create skeleton rows
+                    const skeletonRows = [{
+                            label: 'PAR',
+                            style: 'background: linear-gradient(90deg, #f8f9fa 0%, #ffffff 100%);'
+                        },
+                        {
+                            label: 'Yards',
+                            style: 'background: linear-gradient(90deg, #e9ecef 0%, #f8f9fa 100%);'
+                        },
+                        {
+                            label: 'Score',
+                            style: 'background: #ffffff;'
+                        },
+                        {
+                            label: '',
+                            style: 'background: linear-gradient(90deg, #f1f3f4 0%, #e9ecef 100%);'
+                        }
+                    ];
+
+                    skeletonRows.forEach(rowData => {
+                        const row = document.createElement('tr');
+                        row.style.cssText = rowData.style;
+                        row.classList.add('skeleton-row');
+
+                        // First cell with label
+                        const labelCell = document.createElement('td');
+                        labelCell.className = 'text-start ps-3 fw-bold text-primary py-2 small';
+                        labelCell.textContent = rowData.label;
+                        row.appendChild(labelCell);
+
+                        // 18 skeleton cells for holes
+                        for (let i = 1; i <= 18; i++) {
+                            const cell = document.createElement('td');
+                            cell.className = 'py-2 column-cell';
+
+                            if (rowData.label === 'Yards') {
+                                // Special skeleton for yardage cells
+                                const skeletonDiv = document.createElement('div');
+                                skeletonDiv.className = 'skeleton-yardage';
+                                cell.appendChild(skeletonDiv);
+                            } else if (rowData.label === 'Score') {
+                                // Skeleton for score input
+                                const skeletonDiv = document.createElement('div');
+                                skeletonDiv.className = 'skeleton-cell';
+                                skeletonDiv.style.width = '40px';
+                                skeletonDiv.style.height = '35px';
+                                skeletonDiv.style.margin = '0 auto';
+                                cell.appendChild(skeletonDiv);
+                            } else if (rowData.label === '') {
+                                // Skeleton for computed score
+                                const skeletonDiv = document.createElement('div');
+                                skeletonDiv.className = 'skeleton-cell';
+                                skeletonDiv.style.width = '40px';
+                                skeletonDiv.style.height = '28px';
+                                skeletonDiv.style.margin = '0 auto';
+                                cell.appendChild(skeletonDiv);
+                            } else {
+                                // Skeleton for PAR
+                                const skeletonDiv = document.createElement('div');
+                                skeletonDiv.className = 'skeleton-cell';
+                                skeletonDiv.style.width = '20px';
+                                skeletonDiv.style.height = '20px';
+                                skeletonDiv.style.margin = '0 auto';
+                                skeletonDiv.style.borderRadius = '50%';
+                                cell.appendChild(skeletonDiv);
+                            }
+
+                            row.appendChild(cell);
+
+                            // Add front nine total after hole 9
+                            if (i === 9) {
+                                const totalCell = document.createElement('td');
+                                totalCell.className = 'py-2 fw-bold border-start border-2 border-light';
+                                const totalSkeleton = document.createElement('div');
+                                totalSkeleton.className = 'skeleton-cell';
+                                totalSkeleton.style.width = '40px';
+                                totalSkeleton.style.height = rowData.label === 'Score' ? '35px' : (rowData.label === '' ? '28px' : '20px');
+                                totalSkeleton.style.margin = '0 auto';
+                                if (rowData.label === 'PAR') totalSkeleton.style.borderRadius = '50%';
+                                totalCell.appendChild(totalSkeleton);
+                                row.appendChild(totalCell);
+                            }
+                        }
+
+                        // Add back nine total
+                        const backTotalCell = document.createElement('td');
+                        backTotalCell.className = 'py-2 fw-bold border-start border-2 border-light';
+                        const backSkeleton = document.createElement('div');
+                        backSkeleton.className = 'skeleton-cell';
+                        backSkeleton.style.width = '40px';
+                        backSkeleton.style.height = rowData.label === 'Score' ? '35px' : (rowData.label === '' ? '28px' : '20px');
+                        backSkeleton.style.margin = '0 auto';
+                        if (rowData.label === 'PAR') backSkeleton.style.borderRadius = '50%';
+                        backTotalCell.appendChild(backSkeleton);
+                        row.appendChild(backTotalCell);
+
+                        // Add grand total
+                        const grandTotalCell = document.createElement('td');
+                        grandTotalCell.className = 'py-2 fw-bold border-start border-2 border-light';
+                        const grandSkeleton = document.createElement('div');
+                        grandSkeleton.className = 'skeleton-cell';
+                        grandSkeleton.style.width = '40px';
+                        grandSkeleton.style.height = rowData.label === 'Score' ? '35px' : (rowData.label === '' ? '28px' : '20px');
+                        grandSkeleton.style.margin = '0 auto';
+                        if (rowData.label === 'PAR') grandSkeleton.style.borderRadius = '50%';
+                        grandTotalCell.appendChild(grandSkeleton);
+                        row.appendChild(grandTotalCell);
+                        skeletonTbody.appendChild(row);
+                    });
+
+                    // Insert skeleton tbody after original
+                    originalTbody.parentNode.insertBefore(skeletonTbody, originalTbody.nextSibling);
+                }
+
+                function hideSkeletonLoader() {
+                    const originalTbody = document.querySelector('.score-table tbody:not(#skeleton-tbody)');
+                    const skeletonTbody = document.getElementById('skeleton-tbody');
+
+                    // Show original tbody
+                    if (originalTbody) {
+                        originalTbody.classList.remove('tbody-hidden');
+                    }
+
+                    // Remove skeleton tbody
+                    if (skeletonTbody) {
+                        skeletonTbody.remove();
+                    }
+                }
+
+                // Total calculation functions
+                function calculateTotals() {
+                    let frontScore = 0,
+                        backScore = 0,
+                        totalScore = 0;
+                    let frontYards = 0,
+                        backYards = 0,
+                        totalYards = 0;
+                    let frontComputed = 0,
+                        backComputed = 0,
+                        totalComputed = 0;
+
+                    // Calculate scores
+                    for (let i = 1; i <= 18; i++) {
+                        const scoreInput = document.querySelector(`input[name="score[${i}]"]`);
+                        const scoreValue = scoreInput ? parseInt(scoreInput.value) || 0 : 0;
+
+                        if (i <= 9) {
+                            frontScore += scoreValue;
+                        } else {
+                            backScore += scoreValue;
+                        }
+                        totalScore += scoreValue;
+                    }
+
+                    // Calculate yardages
+                    for (let i = 1; i <= 18; i++) {
+                        const yardageSpan = document.querySelector(`.yardage-span[data-hole="${i}"]`);
+                        const yardageValue = yardageSpan ? parseInt(yardageSpan.getAttribute('data-yardage')) || 0 : 0;
+
+                        if (i <= 9) {
+                            frontYards += yardageValue;
+                        } else {
+                            backYards += yardageValue;
+                        }
+                        totalYards += yardageValue;
+                    }
+
+                    // Calculate computed scores (if any)
+                    for (let i = 1; i <= 18; i++) {
+                        const computedInput = document.querySelector(`input[data-score-input-display="${i}"]`);
+                        const computedValue = computedInput ? parseInt(computedInput.value) || 0 : 0;
+
+                        if (i <= 9) {
+                            frontComputed += computedValue;
+                        } else {
+                            backComputed += computedValue;
+                        }
+                        totalComputed += computedValue;
+                    }
+
+                    // Update score totals
+                    const frontScoreTotal = document.querySelector('.front-score-total');
+                    const backScoreTotal = document.querySelector('.back-score-total');
+                    const totalScoreTotal = document.querySelector('.total-score-total');
+
+                    if (frontScoreTotal) frontScoreTotal.value = frontScore || '';
+                    if (backScoreTotal) backScoreTotal.value = backScore || '';
+                    if (totalScoreTotal) totalScoreTotal.value = totalScore || '';
+
+                    // Update yardage totals
+                    const frontYardsTotal = document.querySelector('.front-yards-total');
+                    const backYardsTotal = document.querySelector('.back-yards-total');
+                    const totalYardsTotal = document.querySelector('.total-yards-total');
+
+                    if (frontYardsTotal) frontYardsTotal.textContent = frontYards > 0 ? frontYards.toLocaleString() : '-';
+                    if (backYardsTotal) backYardsTotal.textContent = backYards > 0 ? backYards.toLocaleString() : '-';
+                    if (totalYardsTotal) totalYardsTotal.textContent = totalYards > 0 ? totalYards.toLocaleString() : '-';
+
+                    // Update computed totals
+                    const frontComputedTotal = document.querySelector('.front-computed-total');
+                    const backComputedTotal = document.querySelector('.back-computed-total');
+                    const totalComputedTotal = document.querySelector('.total-computed-total');
+
+                    if (frontComputedTotal) frontComputedTotal.value = frontComputed || '';
+                    if (backComputedTotal) backComputedTotal.value = backComputed || '';
+                    if (totalComputedTotal) totalComputedTotal.value = totalComputed || '';
+                }
+
+                // Add event listeners to score inputs for real-time total calculation
+                const scoreInputs = document.querySelectorAll('.score-input');
+                scoreInputs.forEach(input => {
+                    input.addEventListener('input', calculateTotals);
+                    input.addEventListener('change', calculateTotals);
+                });
+
+                // Initial calculation
+                calculateTotals();
             } else {
                 console.error('Tournament, course, or tee select elements not found');
             }

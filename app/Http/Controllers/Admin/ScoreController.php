@@ -32,7 +32,8 @@ class ScoreController extends Controller
      */
     public function create()
     {
-        $tee = 2; // Blue
+        $tee = 1; // Blue
+        $scorecardId = 1; // Default scorecard ID (North)
         $scorecard = Scorecard::with([
 
             // Eager load courseRatings for the selected tee
@@ -50,7 +51,7 @@ class ScoreController extends Controller
             },
 
         ])
-            ->where('scorecard_id', 1)
+            ->where('scorecard_id', $scorecardId)
             ->first();
 
 

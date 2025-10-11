@@ -4,6 +4,7 @@ namespace App\Services;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class CourseService
 {
@@ -42,8 +43,21 @@ class CourseService
 
     public function getTees(Request $request, $courseId)
     {
-        $tees = \App\Models\Tee::where('course_id', $courseId)->where('active', true)->orderBy('tee_name')->get();
 
-        return response()->json($tees);
+
+        try {
+            $tees = \App\Models\Tee::where('course_id', $courseId)->where('active', true)->orderBy('tee_name')->get();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Tees fetched successfully',
+                'tees' => $tees
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error('Error fetching tournament tees: ' . $e->getMessage());
+            return response()->json([
+                'message' => 'Error fetching tournament tees',
+            ], 500);
+        }
     }
 }

@@ -11,14 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('scorecard_pars', function (Blueprint $table) {
-
-            $table->id('scorecard_par_id');
-
+        Schema::create('scorecard_hole_handicaps', function (Blueprint $table) {
+            $table->id('scorecard_hole_handicap_id');
             $table->unsignedBigInteger('scorecard_id');
-            $table->unsignedTinyInteger('hole')->unsigned();
-            $table->unsignedTinyInteger('par')->unsigned();
-            $table->unique(['scorecard_id', 'hole'], 'scorecard_par_key');
+            $table->unsignedBigInteger('scorecard_hole_id');
+            $table->enum('gender', ['M', 'F'])->comment('M = Male, F = Female');
+            $table->unsignedSmallInteger('handicap_hole')->nullable()->default(null)->comment('Handicap for the hole, typically 1-18, null if not assigned');
+
+            $table->unique(['scorecard_hole_id', 'gender'], 'scorecard_yards_unique');
 
             $table->unsignedBigInteger('created_by');
             $table->unsignedBigInteger('updated_by')->nullable()->default(null);
@@ -27,7 +27,9 @@ return new class extends Migration
 
             $table->foreign('created_by')->references('id')->on('users')->onDelete('restrict');
             $table->foreign('updated_by')->references('id')->on('users')->onDelete('restrict');
+
             $table->foreign('scorecard_id')->references('scorecard_id')->on('scorecards')->onDelete('restrict');
+            $table->foreign('scorecard_hole_id')->references('scorecard_hole_id')->on('scorecard_holes')->onDelete('restrict');
         });
     }
 
@@ -36,6 +38,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('pars');
+        Schema::dropIfExists('scorecard_hole_handicaps');
     }
 };

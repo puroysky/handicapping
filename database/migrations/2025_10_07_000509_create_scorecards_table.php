@@ -18,6 +18,8 @@ return new class extends Migration
             $table->string('scorecard_name', 100);
             $table->string('scorecard_desc', 255)->nullable()->default(null);
 
+
+
             $table->unsignedBigInteger('course_id');
 
             $table->unsignedTinyInteger('total_holes')->default(18)->comment('Total number of holes on the scorecard, typically 9 or 18');

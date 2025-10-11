@@ -84,8 +84,9 @@ class TeeController extends Controller
         //
     }
 
-    public function getTees(Request $request, $teeId)
+    public function getYardages(Request $request, $teeId)
     {
-        return $this->teeService->getTees($request, $teeId);
+
+        return $this->teeService->getYardages($request, $teeId);
     }
 }
