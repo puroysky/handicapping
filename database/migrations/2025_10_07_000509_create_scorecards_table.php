@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('scorecards', function (Blueprint $table) {
 
             $table->id('scorecard_id');
-            $table->string('scorecard_code', 10)->unique()->comment('Unique code for the scorecard ex: N, S, NRT, SRH');
+            $table->string('scorecard_version', 20)->unique()->comment('Unique code for the scorecard ex: N, S, NRT, SRH');
             $table->string('scorecard_name', 100);
             $table->string('scorecard_desc', 255)->nullable()->default(null);
 

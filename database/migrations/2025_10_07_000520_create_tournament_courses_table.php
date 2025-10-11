@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id('tournament_course_id');
             $table->unsignedBigInteger('tournament_id');
             $table->unsignedBigInteger('course_id');
+            $table->unsignedBigInteger('scorecard_id');
 
             $table->boolean('active')->default(true)->comment('True if tournament is active; false if inactive or cancelled');
 
@@ -29,6 +30,8 @@ return new class extends Migration
             $table->foreign('created_by')->references('id')->on('users')->onDelete('restrict');
             $table->foreign('updated_by')->references('id')->on('users')->onDelete('restrict');
             $table->foreign('course_id')->references('course_id')->on('courses')->onDelete('restrict');
+            $table->foreign('tournament_id')->references('tournament_id')->on('tournaments')->onDelete('restrict');
+            $table->foreign('scorecard_id')->references('scorecard_id')->on('scorecards')->onDelete('restrict');
         });
     }
 

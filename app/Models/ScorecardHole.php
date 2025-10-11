@@ -15,4 +15,14 @@ class ScorecardHole extends Model
     {
         return $this->hasOne(ScorecardYard::class, 'scorecard_hole_id', 'scorecard_hole_id');
     }
+
+    public function handicaps()
+    {
+        return $this->hasMany(ScorecardHoleHandicap::class, 'scorecard_hole_id', 'scorecard_hole_id');
+    }
+
+    public function handicap()
+    {
+        return $this->hasOne(ScorecardHoleHandicap::class, 'scorecard_hole_id', 'scorecard_hole_id');
+    }
 }

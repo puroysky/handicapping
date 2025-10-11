@@ -17,11 +17,20 @@ class ScorecardSeeder extends Seeder
         Scorecard::insert(
             [
                 [
-                    'scorecard_code' => 'NSCV1',
+                    'scorecard_version' => 'North v1.0.0',
                     'scorecard_name' => 'North Scorde Card',
                     'scorecard_desc' => 'The North Course Score Card Version 1',
                     'course_id' => 1, // Assuming North Course has ID 1
                     'x_value' => 2,
+                    'total_holes' => 18,
+                    'created_by' => 1, // Assuming admin user ID is 1
+                ],
+                [
+                    'scorecard_version' => 'South v1.0.0',
+                    'scorecard_name' => 'North Score Card',
+                    'scorecard_desc' => 'The North Course Score Card Version 1',
+                    'course_id' => 2, // Assuming North Course has ID 1
+                    'x_value' => 3,
                     'total_holes' => 18,
                     'created_by' => 1, // Assuming admin user ID is 1
                 ]

@@ -27,4 +27,9 @@ class Scorecard extends Model
     {
         return $this->hasMany(ScorecardYard::class, 'scorecard_id', 'scorecard_id');
     }
+
+    public function handicaps()
+    {
+        return $this->hasMany(ScorecardHoleHandicap::class, 'scorecard_id', 'scorecard_id');
+    }
 }

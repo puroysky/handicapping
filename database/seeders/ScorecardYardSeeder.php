@@ -266,6 +266,133 @@ class ScorecardYardSeeder extends Seeder
                 'yardage' => 313,
                 'tee_id' => 2,
                 'created_by' => 1, // Assuming admin user ID is 1
+            ],
+
+            [
+                'scorecard_id' => 1,
+                'scorecard_hole_id' => 1,
+                'tee_id' => 3,
+                'yardage' => 313,
+                'created_by' => 1, // Assuming admin user ID is 1
+            ],
+            [
+                'scorecard_id' => 1,
+                'scorecard_hole_id' => 2,
+                'yardage' => 268,
+                'tee_id' => 3,
+                'created_by' => 1, // Assuming admin user ID is 1
+            ],
+            [
+                'scorecard_id' => 1,
+                'scorecard_hole_id' => 3,
+                'yardage' => 138,
+                'tee_id' => 3,
+                'created_by' => 1, // Assuming admin user ID is 1
+            ],
+            [
+                'scorecard_id' => 1,
+                'scorecard_hole_id' => 4,
+                'yardage' => 110,
+                'tee_id' => 3,
+                'created_by' => 1, // Assuming admin user ID is 1
+            ],
+            [
+                'scorecard_id' => 1,
+                'scorecard_hole_id' => 5,
+                'yardage' => 481,
+                'tee_id' => 3,
+                'created_by' => 1, // Assuming admin user ID is 1
+            ],
+            [
+                'scorecard_id' => 1,
+                'scorecard_hole_id' => 6,
+                'yardage' => 114,
+                'tee_id' => 3,
+                'created_by' => 1, // Assuming admin user ID is 1
+            ],
+            [
+                'scorecard_id' => 1,
+                'scorecard_hole_id' => 7,
+                'yardage' => 335,
+                'tee_id' => 3,
+                'created_by' => 1, // Assuming admin user ID is 1
+            ],
+            [
+                'scorecard_id' => 1,
+                'scorecard_hole_id' => 8,
+                'yardage' => 112,
+                'tee_id' => 3,
+                'created_by' => 1, // Assuming admin user ID is 1
+            ],
+            [
+                'scorecard_id' => 1,
+                'scorecard_hole_id' => 9,
+                'yardage' => 416,
+                'tee_id' => 3,
+                'created_by' => 1, // Assuming admin user ID is 1
+            ],
+            [
+                'scorecard_id' => 1,
+                'scorecard_hole_id' => 10,
+                'yardage' => 376,
+                'tee_id' => 3,
+                'created_by' => 1, // Assuming admin user ID is 1
+            ],
+            [
+                'scorecard_id' => 1,
+                'scorecard_hole_id' => 11,
+                'yardage' => 122,
+                'tee_id' => 3,
+                'created_by' => 1, // Assuming admin user ID is 1
+            ],
+            [
+                'scorecard_id' => 1,
+                'scorecard_hole_id' => 12,
+                'yardage' => 109,
+                'tee_id' => 3,
+                'created_by' => 1, // Assuming admin user ID is 1
+            ],
+            [
+                'scorecard_id' => 1,
+                'scorecard_hole_id' => 13,
+                'yardage' => 390,
+                'tee_id' => 3,
+                'created_by' => 1, // Assuming admin user ID is 1
+            ],
+            [
+                'scorecard_id' => 1,
+                'scorecard_hole_id' => 14,
+                'yardage' => 257,
+                'tee_id' => 3,
+                'created_by' => 1, // Assuming admin user ID is 1
+            ],
+            [
+                'scorecard_id' => 1,
+                'scorecard_hole_id' => 15,
+                'yardage' => 126,
+                'tee_id' => 3,
+                'created_by' => 1, // Assuming admin user ID is 1
+            ],
+            [
+                'scorecard_id' => 1,
+                'scorecard_hole_id' => 16,
+                'yardage' => 389,
+                'tee_id' => 3,
+                'created_by' => 1, // Assuming admin user ID is 1
+            ],
+            [
+                'scorecard_id' => 1,
+                'scorecard_hole_id' => 17,
+                'yardage' => 299,
+                'tee_id' => 3,
+                'created_by' => 1, // Assuming admin user ID is 1
+            ],
+            [
+                'scorecard_id' => 1,
+                'scorecard_hole_id' => 18,
+                'yardage' => 292,
+                'tee_id' => 3,
+                'created_by' => 1, // Assuming admin user ID is 1
             ]
         ]);
     }

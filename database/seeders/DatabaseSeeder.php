@@ -64,6 +64,7 @@ class DatabaseSeeder extends Seeder
             ScorecardSeeder::class,
             ScorecardHoleSeeder::class,
             ScorecardYardSeeder::class,
+            ScorecardHoleHandicapSeeder::class,
             CourseRatingSeeder::class,
             SlopeRatingSeeder::class,
 
