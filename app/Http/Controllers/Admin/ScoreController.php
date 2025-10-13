@@ -46,7 +46,7 @@ class ScoreController extends Controller
                 $query->where('tee_id', $tee);
             },
 
-            'holes.yardage' => function ($query) use ($tee) {
+            'scorecardHoles.yardage' => function ($query) use ($tee) {
                 $query->where('tee_id', $tee);
             },
 
@@ -55,8 +55,7 @@ class ScoreController extends Controller
             ->first();
 
 
-        $tournaments = Tournament::with('courses.course')
-            ->whereDate('tournament_start', '<=', now())
+        $tournaments = Tournament::whereDate('tournament_start', '<=', now())
             ->limit(5)
             ->get();
 

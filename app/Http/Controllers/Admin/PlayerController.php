@@ -30,7 +30,7 @@ class PlayerController extends Controller
      */
     public function create()
     {
-        return view('admin.players.create');
+        return $this->playerService->create();
     }
 
     /**
@@ -71,5 +71,88 @@ class PlayerController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+
+    /**
+     * Search for players by name or email
+     */
+    public function search(Request $request)
+    {
+        try {
+            $searchTerm = $request->get('q', '');
+
+            if (strlen($searchTerm) < 2) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Search term must be at least 2 characters long',
+                    'players' => []
+                ]);
+            }
+
+            $players = $this->playerService->searchPlayers($searchTerm);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Players found successfully',
+                'players' => $players,
+                'count' => count($players)
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error searching players: ' . $e->getMessage(),
+                'players' => []
+            ], 500);
+        }
+    }
+
+    /**
+     * Get recent scores for a specific player
+     */
+    public function getRecentScores($playerId)
+    {
+        try {
+            $player = \App\Models\User::with('profile', 'player')->find($playerId);
+
+            if (!$player) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Player not found',
+                    'scores' => []
+                ]);
+            }
+
+            // Get recent scores for this player (last 5 scores)
+            $recentScores = \App\Models\Score::where('player_id', $playerId)
+                ->with(['tournament', 'course'])
+                ->orderBy('created_at', 'desc')
+                ->limit(5)
+                ->get()
+                ->map(function ($score) {
+                    return [
+                        'id' => $score->id,
+                        'entry_date' => $score->created_at->format('M d, Y'),
+                        'tournament_name' => $score->tournament->tournament_name ?? 'N/A',
+                        'course_name' => $score->course->course_name ?? 'N/A',
+                        'gross_score' => $score->gross_score ?? '-',
+                        'adjusted_score' => $score->adjusted_score ?? '-',
+                        'handicap' => $score->handicap ?? '-',
+                        'score_differential' => $score->score_differential ?? '-'
+                    ];
+                });
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Recent scores retrieved successfully',
+                'scores' => $recentScores,
+                'count' => $recentScores->count()
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error retrieving recent scores: ' . $e->getMessage(),
+                'scores' => []
+            ], 500);
+        }
     }
 }

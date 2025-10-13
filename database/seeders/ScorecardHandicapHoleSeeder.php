@@ -3,11 +3,12 @@
 namespace Database\Seeders;
 
 use App\Models\Scorecard;
+use App\Models\ScorecardHandicapHole;
 use App\Models\ScorecardHoleHandicap;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
-class ScorecardHoleHandicapSeeder extends Seeder
+class ScorecardHandicapHoleSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -20,12 +21,13 @@ class ScorecardHoleHandicapSeeder extends Seeder
         // $table->unsignedSmallInteger('handicap_hole')->nullable()->default(null)->comment('Handicap for the hole, typically 1-18, null if not assigned');
 
 
-        ScorecardHoleHandicap::insert([
+        ScorecardHandicapHole::insert([
             [
                 'scorecard_id' => 1,
                 'scorecard_hole_id' => 1,
                 'gender' => 'M',
                 'handicap_hole' => 3,
+                'scorecard_hole' => 1,
                 'created_by' => 1,
             ],
             [
@@ -33,6 +35,7 @@ class ScorecardHoleHandicapSeeder extends Seeder
                 'scorecard_hole_id' => 2,
                 'gender' => 'M',
                 'handicap_hole' => 5,
+                'scorecard_hole' => 2,
                 'created_by' => 1,
             ],
             [
@@ -40,6 +43,7 @@ class ScorecardHoleHandicapSeeder extends Seeder
                 'scorecard_hole_id' => 3,
                 'gender' => 'M',
                 'handicap_hole' => 11,
+                'scorecard_hole' => 3,
                 'created_by' => 1,
             ],
             [
@@ -47,6 +51,7 @@ class ScorecardHoleHandicapSeeder extends Seeder
                 'scorecard_hole_id' => 4,
                 'gender' => 'M',
                 'handicap_hole' => 13,
+                'scorecard_hole' => 4,
                 'created_by' => 1,
             ],
             [
@@ -54,6 +59,7 @@ class ScorecardHoleHandicapSeeder extends Seeder
                 'scorecard_hole_id' => 5,
                 'gender' => 'M',
                 'handicap_hole' => 1,
+                'scorecard_hole' => 5,
                 'created_by' => 1,
             ],
             [
@@ -61,6 +67,7 @@ class ScorecardHoleHandicapSeeder extends Seeder
                 'scorecard_hole_id' => 6,
                 'gender' => 'M',
                 'handicap_hole' => 7,
+                'scorecard_hole' => 6,
                 'created_by' => 1,
             ],
             [
@@ -68,6 +75,7 @@ class ScorecardHoleHandicapSeeder extends Seeder
                 'scorecard_hole_id' => 7,
                 'gender' => 'M',
                 'handicap_hole' => 17,
+                'scorecard_hole' => 7,
                 'created_by' => 1,
             ],
             [
@@ -75,6 +83,7 @@ class ScorecardHoleHandicapSeeder extends Seeder
                 'scorecard_hole_id' => 8,
                 'gender' => 'M',
                 'handicap_hole' => 15,
+                'scorecard_hole' => 8,
                 'created_by' => 1,
             ],
             [
@@ -82,6 +91,7 @@ class ScorecardHoleHandicapSeeder extends Seeder
                 'scorecard_hole_id' => 9,
                 'gender' => 'M',
                 'handicap_hole' => 9,
+                'scorecard_hole' => 9,
                 'created_by' => 1,
             ],
             [
@@ -89,6 +99,7 @@ class ScorecardHoleHandicapSeeder extends Seeder
                 'scorecard_hole_id' => 10,
                 'gender' => 'M',
                 'handicap_hole' => 12,
+                'scorecard_hole' => 10,
                 'created_by' => 1,
             ],
             [
@@ -96,6 +107,7 @@ class ScorecardHoleHandicapSeeder extends Seeder
                 'scorecard_hole_id' => 11,
                 'gender' => 'M',
                 'handicap_hole' => 18,
+                'scorecard_hole' => 11,
                 'created_by' => 1,
             ],
             [
@@ -103,6 +115,7 @@ class ScorecardHoleHandicapSeeder extends Seeder
                 'scorecard_hole_id' => 12,
                 'gender' => 'M',
                 'handicap_hole' => 10,
+                'scorecard_hole' => 12,
                 'created_by' => 1,
             ],
             [
@@ -110,6 +123,7 @@ class ScorecardHoleHandicapSeeder extends Seeder
                 'scorecard_hole_id' => 13,
                 'gender' => 'M',
                 'handicap_hole' => 6,
+                'scorecard_hole' => 13,
                 'created_by' => 1,
             ],
             [
@@ -117,6 +131,7 @@ class ScorecardHoleHandicapSeeder extends Seeder
                 'scorecard_hole_id' => 14,
                 'gender' => 'M',
                 'handicap_hole' => 14,
+                'scorecard_hole' => 14,
                 'created_by' => 1,
             ],
             [
@@ -124,6 +139,7 @@ class ScorecardHoleHandicapSeeder extends Seeder
                 'scorecard_hole_id' => 15,
                 'gender' => 'M',
                 'handicap_hole' => 16,
+                'scorecard_hole' => 15,
                 'created_by' => 1,
             ],
             [
@@ -131,6 +147,7 @@ class ScorecardHoleHandicapSeeder extends Seeder
                 'scorecard_hole_id' => 16,
                 'gender' => 'M',
                 'handicap_hole' => 8,
+                'scorecard_hole' => 16,
                 'created_by' => 1,
             ],
             [
@@ -138,6 +155,7 @@ class ScorecardHoleHandicapSeeder extends Seeder
                 'scorecard_hole_id' => 17,
                 'gender' => 'M',
                 'handicap_hole' => 4,
+                'scorecard_hole' => 17,
                 'created_by' => 1,
             ],
             [
@@ -145,6 +163,7 @@ class ScorecardHoleHandicapSeeder extends Seeder
                 'scorecard_hole_id' => 18,
                 'gender' => 'M',
                 'handicap_hole' => 2,
+                'scorecard_hole' => 18,
                 'created_by' => 1,
             ],
 
@@ -153,6 +172,7 @@ class ScorecardHoleHandicapSeeder extends Seeder
                 'scorecard_hole_id' => 1,
                 'gender' => 'F',
                 'handicap_hole' => 3,
+                'scorecard_hole' => 1,
                 'created_by' => 1,
             ],
             [
@@ -160,6 +180,7 @@ class ScorecardHoleHandicapSeeder extends Seeder
                 'scorecard_hole_id' => 2,
                 'gender' => 'F',
                 'handicap_hole' => 7,
+                'scorecard_hole' => 2,
                 'created_by' => 1,
             ],
             [
@@ -167,6 +188,7 @@ class ScorecardHoleHandicapSeeder extends Seeder
                 'scorecard_hole_id' => 3,
                 'gender' => 'F',
                 'handicap_hole' => 13,
+                'scorecard_hole' => 3,
                 'created_by' => 1,
             ],
             [
@@ -174,6 +196,7 @@ class ScorecardHoleHandicapSeeder extends Seeder
                 'scorecard_hole_id' => 4,
                 'gender' => 'F',
                 'handicap_hole' => 9,
+                'scorecard_hole' => 4,
                 'created_by' => 1,
             ],
             [
@@ -181,6 +204,7 @@ class ScorecardHoleHandicapSeeder extends Seeder
                 'scorecard_hole_id' => 5,
                 'gender' => 'F',
                 'handicap_hole' => 1,
+                'scorecard_hole' => 5,
                 'created_by' => 1,
             ],
             [
@@ -188,6 +212,7 @@ class ScorecardHoleHandicapSeeder extends Seeder
                 'scorecard_hole_id' => 6,
                 'gender' => 'F',
                 'handicap_hole' => 15,
+                'scorecard_hole' => 6,
                 'created_by' => 1,
             ],
             [
@@ -195,6 +220,7 @@ class ScorecardHoleHandicapSeeder extends Seeder
                 'scorecard_hole_id' => 7,
                 'gender' => 'F',
                 'handicap_hole' => 11,
+                'scorecard_hole' => 7,
                 'created_by' => 1,
             ],
             [
@@ -202,6 +228,7 @@ class ScorecardHoleHandicapSeeder extends Seeder
                 'scorecard_hole_id' => 8,
                 'gender' => 'F',
                 'handicap_hole' => 17,
+                'scorecard_hole' => 8,
                 'created_by' => 1,
             ],
             [
@@ -209,6 +236,7 @@ class ScorecardHoleHandicapSeeder extends Seeder
                 'scorecard_hole_id' => 9,
                 'gender' => 'F',
                 'handicap_hole' => 5,
+                'scorecard_hole' => 9,
                 'created_by' => 1,
             ],
             [
@@ -216,6 +244,7 @@ class ScorecardHoleHandicapSeeder extends Seeder
                 'scorecard_hole_id' => 10,
                 'gender' => 'F',
                 'handicap_hole' => 5,
+                'scorecard_hole' => 10,
                 'created_by' => 1,
             ],
             [
@@ -223,6 +252,7 @@ class ScorecardHoleHandicapSeeder extends Seeder
                 'scorecard_hole_id' => 11,
                 'gender' => 'F',
                 'handicap_hole' => 18,
+                'scorecard_hole' => 11,
                 'created_by' => 1,
             ],
             [
@@ -230,6 +260,7 @@ class ScorecardHoleHandicapSeeder extends Seeder
                 'scorecard_hole_id' => 12,
                 'gender' => 'F',
                 'handicap_hole' => 14,
+                'scorecard_hole' => 12,
                 'created_by' => 1,
             ],
             [
@@ -237,6 +268,7 @@ class ScorecardHoleHandicapSeeder extends Seeder
                 'scorecard_hole_id' => 13,
                 'gender' => 'F',
                 'handicap_hole' => 4,
+                'scorecard_hole' => 13,
                 'created_by' => 1,
             ],
             [
@@ -244,6 +276,7 @@ class ScorecardHoleHandicapSeeder extends Seeder
                 'scorecard_hole_id' => 14,
                 'gender' => 'F',
                 'handicap_hole' => 12,
+                'scorecard_hole' => 14,
                 'created_by' => 1,
             ],
             [
@@ -251,6 +284,7 @@ class ScorecardHoleHandicapSeeder extends Seeder
                 'scorecard_hole_id' => 15,
                 'gender' => 'F',
                 'handicap_hole' => 16,
+                'scorecard_hole' => 15,
                 'created_by' => 1,
             ],
             [
@@ -258,6 +292,7 @@ class ScorecardHoleHandicapSeeder extends Seeder
                 'scorecard_hole_id' => 16,
                 'gender' => 'F',
                 'handicap_hole' => 6,
+                'scorecard_hole' => 16,
                 'created_by' => 1,
             ],
             [
@@ -265,6 +300,7 @@ class ScorecardHoleHandicapSeeder extends Seeder
                 'scorecard_hole_id' => 17,
                 'gender' => 'F',
                 'handicap_hole' => 8,
+                'scorecard_hole' => 17,
                 'created_by' => 1,
             ],
             [
@@ -272,6 +308,7 @@ class ScorecardHoleHandicapSeeder extends Seeder
                 'scorecard_hole_id' => 18,
                 'gender' => 'F',
                 'handicap_hole' => 2,
+                'scorecard_hole' => 18,
                 'created_by' => 1,
             ]
         ]);

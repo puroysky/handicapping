@@ -76,8 +76,7 @@ class TournamentService
     {
 
         try {
-            $courses = TournamentCourse::with('course')
-                ->where('tournament_id', $tournamentId)
+            $courses = TournamentCourse::with('course')->where('tournament_id', $tournamentId)
                 ->where('active', true)
                 ->get();
 

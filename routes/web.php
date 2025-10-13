@@ -1,18 +1,39 @@
 <?php
 
+use App\Models\Scorecard;
+use App\Models\ScorecardHoleHandicap;
+use App\Models\Tournament;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
 })->name('home');
 
-Route::get('sample-table', function () {
-    return view('examples.table-usage');
-})->name('sample-table');
+Route::get('test', function () {
+
+
+
+    $courseId = 1; // Example course ID
+
+
+    $rr =         $tournaments = Tournament::with('tournamentCourses.course')
+        ->whereDate('tournament_start', '<=', now())
+        ->limit(5)
+        ->get();
+
+    echo '<pre>';
+    print_r($rr->toArray());
+    echo '</pre>';
+})->name('test');
 
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::resource('users', App\Http\Controllers\Admin\UserController::class);
+
+    // Player search route must come before resource routes to avoid conflicts
+    Route::get('players/search', [App\Http\Controllers\Admin\PlayerController::class, 'search'])->name('players.search');
+    Route::get('players/{player_id}/recent-scores', [App\Http\Controllers\Admin\PlayerController::class, 'getRecentScores'])->name('players.recent-scores');
     Route::resource('players', App\Http\Controllers\Admin\PlayerController::class);
+
     Route::resource('scores', App\Http\Controllers\Admin\ScoreController::class);
 
     Route::resource('courses', App\Http\Controllers\Admin\CourseController::class);

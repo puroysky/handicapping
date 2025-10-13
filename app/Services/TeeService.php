@@ -67,17 +67,6 @@ class TeeService
 
 
 
-            $handicapHoles = \App\Models\ScorecardHoleHandicap::select(
-                'scorecard_handicaps.scorecard_hole_id',
-                'scorecard_handicaps.handicap',
-                'scorecard_holes.hole',
-                'scorecard_holes.par',
-                'scorecard_holes.scorecard_id'
-            )
-                ->join('scorecard_holes', 'scorecard_handicaps.scorecard_hole_id', '=', 'scorecard_holes.scorecard_hole_id')
-                ->where('scorecard_handicaps.tee_id', $teeId)
-                ->orderBy('scorecard_holes.hole')
-                ->get();
 
             return response()->json([
                 'success' => true,

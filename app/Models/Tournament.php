@@ -10,7 +10,7 @@ class Tournament extends Model
     protected $primaryKey = 'tournament_id';
 
 
-    public function courses()
+    public function tournamentCourses()
     {
         return $this->hasMany(TournamentCourse::class, 'tournament_id', 'tournament_id');
     }

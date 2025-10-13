@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\PlayerProfile;
+use App\Models\ScorecardHandicapHole;
 use App\Models\Tournament;
 use App\Models\User;
 use App\Models\UserProfile;
@@ -34,7 +35,7 @@ class DatabaseSeeder extends Seeder
             'middle_name' => 'Istrator',
             'last_name' => 'User',
             'birthdate' => '1990-01-01',
-            'sex' => 'MALE',
+            'sex' => 'M',
             'user_desc' => 'Test User Admin',
             'remarks' => 'No remarks',
             'phone' => '1234567890',
@@ -64,7 +65,7 @@ class DatabaseSeeder extends Seeder
             ScorecardSeeder::class,
             ScorecardHoleSeeder::class,
             ScorecardYardSeeder::class,
-            ScorecardHoleHandicapSeeder::class,
+            ScorecardHandicapHoleSeeder::class,
             CourseRatingSeeder::class,
             SlopeRatingSeeder::class,
 

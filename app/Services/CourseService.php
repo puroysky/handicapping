@@ -2,6 +2,13 @@
 
 namespace App\Services;
 
+use App\Models\Course;
+use App\Models\Scorecard;
+use App\Models\ScorecardHole;
+use App\Models\ScorecardHoleHandicap;
+use App\Models\Tee;
+use App\Models\Tournament;
+use App\Models\TournamentCourse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -41,22 +48,44 @@ class CourseService
         ], 201);
     }
 
-    public function getTees(Request $request, $courseId)
+    public function getTees(Request $request, $tournamentCourseId)
     {
 
 
         try {
-            $tees = \App\Models\Tee::where('course_id', $courseId)->where('active', true)->orderBy('tee_name')->get();
+
+            $gender = 'M';
+
+            $tournamentCourse = TournamentCourse::where('tournament_course_id', $tournamentCourseId)->firstOrFail();
+
+            $pars = ScorecardHole::with([
+                'handicapHole' => function ($query) use ($gender) {
+                    $query->where('gender', $gender);
+                }
+            ])->whereHas('scorecard', function ($query) use ($tournamentCourse) {
+                $query->where('scorecard_id', $tournamentCourse->scorecard_id);
+            })->where('scorecard_id', $tournamentCourse->scorecard_id)
+                ->orderBy('hole')
+                ->get();
+
+
+
+
+            $tees = Tee::where('course_id', $tournamentCourse->course_id)->where('active', true)->orderBy('tee_name')->get();
 
             return response()->json([
                 'success' => true,
                 'message' => 'Tees fetched successfully',
-                'tees' => $tees
+                'tees' => $tees,
+                'holes' => $pars,
+                // 'handicapHoles' => $handicapHoles
             ], 200);
         } catch (\Exception $e) {
             Log::error('Error fetching tournament tees: ' . $e->getMessage());
+            Log::error($e->getLine());
+            Log::error($e->getFile());
             return response()->json([
-                'message' => 'Error fetching tournament tees',
+                'message' => 'Error fetching tournament tees : ' . $e->getMessage(),
             ], 500);
         }
     }

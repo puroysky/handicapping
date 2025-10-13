@@ -7,8 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 class Scorecard extends Model
 {
 
+    public function course()
+    {
+        return $this->belongsTo(Course::class, 'course_id', 'course_id');
+    }
 
-    public function holes()
+    public function scorecardHoles()
     {
         return $this->hasMany(ScorecardHole::class, 'scorecard_id', 'scorecard_id');
     }
@@ -28,8 +32,13 @@ class Scorecard extends Model
         return $this->hasMany(ScorecardYard::class, 'scorecard_id', 'scorecard_id');
     }
 
-    public function handicaps()
+    public function handicapHoles()
     {
         return $this->hasMany(ScorecardHoleHandicap::class, 'scorecard_id', 'scorecard_id');
+    }
+
+    public function handicapHole()
+    {
+        return $this->hasOne(ScorecardHoleHandicap::class, 'scorecard_id', 'scorecard_id');
     }
 }

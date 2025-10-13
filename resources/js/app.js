@@ -8,10 +8,8 @@ import "./handicapping.js";
 import "./error-modal.js";
 import "./compact-modal.js";
 
-
-
-document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('input').forEach(el => {
-        el.setAttribute('autocomplete', 'off');
-    });
-});
+// document.addEventListener("DOMContentLoaded", () => {
+//     document.querySelectorAll("input").forEach((el) => {
+//         el.setAttribute("autocomplete", "off");
+//     });
+// });
