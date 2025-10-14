@@ -3,10 +3,20 @@
 namespace App\Services;
 
 use App\Models\User;
+use App\Models\UserProfile;
+use App\Models\PlayerProfile;
 use Exception;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
+use Maatwebsite\Excel\Facades\Excel;
+
+use PhpOffice\PhpSpreadsheet\Shared\Date as ExcelDate;
+use Carbon\Carbon;
 
 class PlayerService
 {
@@ -33,7 +43,8 @@ class PlayerService
     public function searchPlayers($searchTerm)
     {
         $players = User::with('player', 'profile')
-            ->where('role', 'user')
+            ->whereIn('role', ['player', 'member'])
+            ->where('active', true)
             ->where(function ($query) use ($searchTerm) {
                 $query->where('email', 'LIKE', "%{$searchTerm}%")
                     ->orWhereHas('profile', function ($q) use ($searchTerm) {
@@ -68,10 +79,14 @@ class PlayerService
                 'email' => $player->email,
                 'account_no' => $player->player->account_no ?? '',
                 'whs_no' => $player->player->whs_no ?? '',
-                'gender' => $gender,
+                'gender' => $player->profile->sex,
             ];
         });
 
-        return $players;
+        return response()->json([
+            'success' => true,
+            'message' => 'Players retrieved successfully',
+            'players' => $players
+        ]);
     }
 }

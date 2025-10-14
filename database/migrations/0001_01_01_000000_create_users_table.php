@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('email')->unique();
-            $table->enum('role', ['admin', 'user'])->default('user');
+            $table->enum('role', ['admin', 'user', 'player', 'member', 'stockholder'])->default('user');
             $table->boolean('active')->default(true);
             $table->boolean('default_account')->default(false);
             $table->timestamp('email_verified_at')->nullable();
@@ -38,7 +38,7 @@ return new class extends Migration
             $table->string('middle_name', 50)->nullable();
             $table->string('last_name', 50);
             $table->date('birthdate')->nullable()->default(null);
-            $table->enum('sex', ["MALE", "FEMALE"])->nullable()->default(null);
+            $table->enum('sex', ["M", "F"])->nullable()->default(null);
             $table->string('user_desc', 100)->nullable()->default(null);
             $table->text('remarks')->nullable()->default(null);
             $table->string('phone', 15)->nullable()->default(null);
@@ -51,15 +51,29 @@ return new class extends Migration
             $table->foreign('created_by')->references('id')->on('users');
             $table->foreign('updated_by')->references('id')->on('users');
 
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('restrict');
         });
 
 
+        Schema::create('members', function (Blueprint $table) {
+            $table->id('member_id');
+            $table->unsignedBigInteger('user_id')->unique();
+            $table->string('member_no', 15)->unique();
+
+            $table->unsignedBigInteger('created_by');
+            $table->unsignedBigInteger('updated_by')->nullable()->default(null);
+            $table->timestamp('created_at')->useCurrent();
+            $table->timestamp('updated_at')->nullable()->default(null);
+            $table->foreign('created_by')->references('id')->on('users');
+            $table->foreign('updated_by')->references('id')->on('users');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('restrict');
+        });
 
         Schema::create('player_profiles', function (Blueprint $table) {
             $table->id('player_profile_id');
             $table->unsignedBigInteger('user_id')->unique();
             $table->unsignedBigInteger('user_profile_id');
+            $table->unsignedBigInteger('member_id');
             $table->string('account_no', 15)->unique();
             $table->integer('whs_no')->unique();
             $table->unsignedBigInteger('created_by');
@@ -68,8 +82,9 @@ return new class extends Migration
             $table->timestamp('updated_at')->nullable()->default(null);
             $table->foreign('created_by')->references('id')->on('users');
             $table->foreign('updated_by')->references('id')->on('users');
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-            $table->foreign('user_profile_id')->references('user_profile_id')->on('user_profiles')->onDelete('cascade');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('restrict');
+            $table->foreign('user_profile_id')->references('user_profile_id')->on('user_profiles')->onDelete('restrict');
+            $table->foreign('member_id')->references('member_id')->on('members')->onDelete('restrict');
         });
 
 

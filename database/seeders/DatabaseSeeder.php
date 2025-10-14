@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Member;
 use App\Models\PlayerProfile;
 use App\Models\ScorecardHandicapHole;
 use App\Models\Tournament;
@@ -19,39 +20,117 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        User::create([
-            'id' => 1,
-            'email' => 'test@example.com',
-            'role' => 'admin',
-            'default_account' => true,
-            'password' => bcrypt('123123123'),
-            'created_by' => 1,
+        User::insert([
+            [
+                'id' => 1,
+                'email' => 'developer@gmail.com',
+                'role' => 'admin',
+                'default_account' => true,
+                'password' => bcrypt('123123123'),
+                'created_by' => 1,
+            ],
+
+            [
+                'id' => 2,
+                'email' => 'asuncion.froilan1010@gmail.com',
+                'role' => 'member',
+                'default_account' => false,
+                'password' => bcrypt('123123123'),
+                'created_by' => 1,
+            ],
+
+            [
+                'id' => 3,
+                'email' => 'vanessa@gmail.com',
+                'role' => 'player',
+                'default_account' => false,
+                'password' => bcrypt('123123123'),
+                'created_by' => 1,
+            ]
         ]);
 
-        UserProfile::create([
-            'user_profile_id' => 1,
-            'user_id' => 1,
-            'first_name' => 'Admin',
-            'middle_name' => 'Istrator',
-            'last_name' => 'User',
-            'birthdate' => '1990-01-01',
-            'sex' => 'M',
-            'user_desc' => 'Test User Admin',
-            'remarks' => 'No remarks',
-            'phone' => '1234567890',
-            'address' => '123 Test St, Test City',
-            'avatar' => null,
-            'created_by' => 1,
+        UserProfile::insert([
+            [
+                'user_profile_id' => 1,
+                'user_id' => 1,
+                'first_name' => 'Developer',
+                'middle_name' => 'Istrator',
+                'last_name' => 'Valley Golf',
+                'birthdate' => '1990-01-01',
+                'sex' => 'M',
+                'user_desc' => 'Developer Account',
+                'remarks' => 'This is a developer account',
+                'phone' => '1234567890',
+                'address' => '123 Test St, Test City',
+                'avatar' => null,
+                'created_by' => 1,
+            ],
+
+            [
+                'user_profile_id' => 2,
+                'user_id' => 2,
+                'first_name' => 'Froilan',
+                'middle_name' => 'Almazan',
+                'last_name' => 'Asuncion',
+                'birthdate' => '1994-10-10',
+                'sex' => 'M',
+                'user_desc' => 'Professional Golfer',
+                'remarks' => 'Make sure to call the Golf Association for WHS registration.',
+                'phone' => '099557033836',
+                'address' => '407A Narra St., Agapito Subd., Pasig City',
+                'avatar' => null,
+                'created_by' => 1,
+            ],
+
+            [
+                'user_profile_id' => 3,
+                'user_id' => 3,
+                'first_name' => 'Nhesa',
+                'middle_name' => 'Asuncion',
+                'last_name' => 'Sumabat',
+                'birthdate' => '1991-04-01',
+                'sex' => 'F',
+                'user_desc' => 'Junior Golfer',
+                'remarks' => 'Give special discount on tournament fees.',
+                'phone' => '09540469925',
+                'address' => 'Caabatacan East, Lasam, Cagayan',
+                'avatar' => null,
+                'created_by' => 1,
+            ]
+        ]);
+
+        Member::insert([
+            [
+                'member_id' => 1,
+                'user_id' => 2,
+                'member_no' => '0001',
+                'created_by' => 1,
+            ]
         ]);
 
 
-        PlayerProfile::create([
-            'player_profile_id' => 1,
-            'user_id' => 1,
-            'user_profile_id' => 1,
-            'account_no' => 'ACC1001',
-            'whs_no' => 1001,
-            'created_by' => 1,
+
+        PlayerProfile::insert([
+            [
+                'player_profile_id' => 1,
+                'user_id' => 2,
+                'user_profile_id' => 2,
+                'member_id' => 1,
+                'account_no' => '0001-00',
+                'whs_no' => 1111,
+                'created_by' => 1,
+            ],
+
+
+            [
+                'player_profile_id' => 2,
+                'user_id' => 3,
+                'user_profile_id' => 3,
+                'member_id' => 1,
+                'account_no' => '0001-02',
+                'whs_no' => 2222,
+                'created_by' => 1,
+            ]
         ]);
 
 

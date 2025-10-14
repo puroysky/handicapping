@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\admin;
 
 use App\Http\Controllers\Controller;
+use App\Services\PlayerImportService;
 use Illuminate\Http\Request;
 use App\Services\PlayerService;
 
@@ -73,38 +74,7 @@ class PlayerController extends Controller
         //
     }
 
-    /**
-     * Search for players by name or email
-     */
-    public function search(Request $request)
-    {
-        try {
-            $searchTerm = $request->get('q', '');
 
-            if (strlen($searchTerm) < 2) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Search term must be at least 2 characters long',
-                    'players' => []
-                ]);
-            }
-
-            $players = $this->playerService->searchPlayers($searchTerm);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Players found successfully',
-                'players' => $players,
-                'count' => count($players)
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error searching players: ' . $e->getMessage(),
-                'players' => []
-            ], 500);
-        }
-    }
 
     /**
      * Get recent scores for a specific player
@@ -154,5 +124,27 @@ class PlayerController extends Controller
                 'scores' => []
             ], 500);
         }
+    }
+
+    public function import(Request $request)
+    {
+
+
+
+
+        $import = new PlayerImportService();
+
+        $result = $import->import($request);
+
+        if ($result['success']) {
+            return response()->json($result, 200);
+        } else {
+            return response()->json($result, 400);
+        }
+    }
+
+    public function search()
+    {
+        return $this->playerService->searchPlayers(request('q'));
     }
 }

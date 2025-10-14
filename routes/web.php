@@ -4,6 +4,7 @@ use App\Models\Scorecard;
 use App\Models\ScorecardHoleHandicap;
 use App\Models\Tournament;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Admin\PlayerController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -30,9 +31,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::resource('users', App\Http\Controllers\Admin\UserController::class);
 
     // Player search route must come before resource routes to avoid conflicts
-    Route::get('players/search', [App\Http\Controllers\Admin\PlayerController::class, 'search'])->name('players.search');
-    Route::get('players/{player_id}/recent-scores', [App\Http\Controllers\Admin\PlayerController::class, 'getRecentScores'])->name('players.recent-scores');
-    Route::resource('players', App\Http\Controllers\Admin\PlayerController::class);
+    Route::get('players/search', [PlayerController::class, 'search'])->name('players.search');
+    Route::get('players/{player_id}/recent-scores', [PlayerController::class, 'getRecentScores'])->name('players.recent-scores');
+    Route::post('players/import', [PlayerController::class, 'import'])->name('players.import');
+    Route::resource('players', PlayerController::class);
 
     Route::resource('scores', App\Http\Controllers\Admin\ScoreController::class);
 
