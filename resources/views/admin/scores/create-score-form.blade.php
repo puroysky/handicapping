@@ -10,7 +10,8 @@
 
                 <!-- Compact Card Body -->
                 <div class="card-body p-3" style="background: linear-gradient(180deg, #f8f9fa 0%, #ffffff 100%);">
-                    <form class="needs-validation" novalidate>
+                    <form class="needs-validation" method="POST" action="/admin/scores" novalidate>
+                        @csrf
                         <!-- Player Selection Section -->
                         <div class="row mb-3">
                             <div class="col-md-12">
@@ -91,7 +92,6 @@
                                         <option value="">Select Score Mode</option>
                                         <option value="hole_by_hole">Hole by Hole</option>
                                         <option value="adjusted_score">Adjusted Score</option>
-                                        <option value="gross_total">Gross Total</option>
                                     </select>
                                     <label for="score_mode" class="fw-semibold text-dark small">
                                         <i class="fas fa-calculator text-primary me-1"></i>Score Mode
@@ -835,6 +835,15 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // Form submit event handler
+        const form = document.querySelector('form.needs-validation');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault(); // Prevent default browser form submission
+                submitForm(); // Use our custom submission function
+            });
+        }
+
         // Player search functionality
         const playerSearch = document.getElementById('player_search');
         const playerDropdown = document.getElementById('player_dropdown');
@@ -1235,33 +1244,329 @@
         // Form submission function
         function submitForm() {
             const form = document.querySelector('form.needs-validation');
-            if (form) {
-                // Trigger form validation
-                if (form.checkValidity()) {
-                    // Show submission feedback
-                    const submitBtn = document.querySelector('button[type="submit"]');
-                    if (submitBtn) {
-                        const originalText = submitBtn.innerHTML;
-                        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Saving...';
-                        submitBtn.disabled = true;
+            if (!form) {
+                console.error('Form not found');
+                return;
+            }
 
-                        // Simulate form submission (replace with actual submission logic)
-                        setTimeout(() => {
-                            submitBtn.innerHTML = '<i class="fas fa-check me-1"></i>Saved!';
-                            setTimeout(() => {
-                                submitBtn.innerHTML = originalText;
-                                submitBtn.disabled = false;
-                            }, 1500);
-                        }, 1000);
+            // Collect form data first
+            const formData = {
+                player_id: document.getElementById('player_id')?.value,
+                tournament_id: document.getElementById('tournament_id')?.value,
+                course_id: document.getElementById('course_id')?.value,
+                tee_id: document.getElementById('tee_id')?.value,
+                score_mode: document.getElementById('score_mode')?.value,
+                _token: document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ||
+                    document.querySelector('input[name="_token"]')?.value
+            };
+
+            // Validate required fields with user-friendly names
+            const requiredFields = [{
+                    field: 'player_id',
+                    name: 'Player',
+                    element: document.getElementById('player_search')
+                },
+                {
+                    field: 'tournament_id',
+                    name: 'Tournament',
+                    element: document.getElementById('tournament_id')
+                },
+                {
+                    field: 'course_id',
+                    name: 'Course',
+                    element: document.getElementById('course_id')
+                },
+                {
+                    field: 'tee_id',
+                    name: 'Tee',
+                    element: document.getElementById('tee_id')
+                },
+                {
+                    field: 'score_mode',
+                    name: 'Score Mode',
+                    element: document.getElementById('score_mode')
+                }
+            ];
+
+            const missingFields = [];
+            requiredFields.forEach(({
+                field,
+                name,
+                element
+            }) => {
+                if (!formData[field] || formData[field].trim() === '') {
+                    missingFields.push(name);
+                    // Add visual indication for missing field
+                    if (element) {
+                        element.classList.add('is-invalid');
+                        element.focus();
+                    }
+                } else {
+                    // Remove invalid class if field is filled
+                    if (element) {
+                        element.classList.remove('is-invalid');
+                    }
+                }
+            });
+
+            if (missingFields.length > 0) {
+                showNotification(`Please fill in the following required fields: ${missingFields.join(', ')}`, 'error');
+                return;
+            }
+
+            // Validate that scorecard data is available
+            const scorecardHoles = document.querySelectorAll('.score-input');
+            if (scorecardHoles.length === 0) {
+                showNotification('Scorecard not loaded. Please select a valid course and tee combination.', 'error');
+                return;
+            }
+
+            // Collect all score inputs with their hole data
+            const scores = {};
+            const frontNineScores = {};
+            const backNineScores = {};
+            let hasFrontScores = false;
+            let hasBackScores = false;
+
+            scorecardHoles.forEach(input => {
+                const holeNumber = parseInt(input.getAttribute('data-hole'));
+                const scoreValue = input.value.trim();
+
+                if (scoreValue && scoreValue !== '' && !isNaN(scoreValue)) {
+                    const score = parseInt(scoreValue);
+                    if (score > 0 && score <= 20) { // Reasonable score range
+                        scores[holeNumber] = score;
+
+                        // Categorize holes into front nine (1-9) and back nine (10-18)
+                        if (holeNumber >= 1 && holeNumber <= 9) {
+                            frontNineScores[holeNumber] = score;
+                            hasFrontScores = true;
+                        } else if (holeNumber >= 10 && holeNumber <= 18) {
+                            backNineScores[holeNumber] = score;
+                            hasBackScores = true;
+                        }
+                    }
+                }
+            });
+
+            // Validate hole completion based on requirements
+            let validationErrors = [];
+            const scoreMode = document.getElementById('score_mode')?.value;
+
+            // Check if at least one score is entered OR if adjusted/gross total is available
+            const hasAdjustedTotal = window.adjustedTotal && scoreMode === 'adjusted_score';
+            const hasGrossTotal = window.grossTotal;
+
+            if (!hasFrontScores && !hasBackScores && !hasAdjustedTotal && !hasGrossTotal) {
+                if (scoreMode === 'adjusted_score') {
+                    showNotification('Please enter an adjusted total score or hole-by-hole scores before submitting.', 'error');
+                } else {
+                    showNotification('Please enter at least one valid score (1-20) before submitting.', 'error');
+                }
+                const firstScoreInput = document.querySelector('.score-input');
+                if (firstScoreInput) {
+                    firstScoreInput.focus();
+                }
+                return;
+            }
+
+            // Skip hole validation if using adjusted score mode with total
+            if (!(hasAdjustedTotal || hasGrossTotal)) {
+
+                // Validate front nine: if any front nine score is entered, all front nine holes must be completed
+                if (hasFrontScores) {
+                    const missingFrontHoles = [];
+                    for (let hole = 1; hole <= 9; hole++) {
+                        if (!frontNineScores[hole]) {
+                            missingFrontHoles.push(hole);
+                        }
+                    }
+                    if (missingFrontHoles.length > 0) {
+                        validationErrors.push(`Front nine incomplete. Please enter scores for holes: ${missingFrontHoles.join(', ')}`);
+                    }
+                }
+
+                // Validate back nine: if any back nine score is entered, all back nine holes must be completed
+                if (hasBackScores) {
+                    const missingBackHoles = [];
+                    for (let hole = 10; hole <= 18; hole++) {
+                        if (!backNineScores[hole]) {
+                            missingBackHoles.push(hole);
+                        }
+                    }
+                    if (missingBackHoles.length > 0) {
+                        validationErrors.push(`Back nine incomplete. Please enter scores for holes: ${missingBackHoles.join(', ')}`);
+                    }
+                }
+
+                // Show validation errors if any
+                if (validationErrors.length > 0) {
+                    showNotification(validationErrors.join('<br>'), 'error');
+
+                    // Focus on first missing hole input
+                    const allMissingHoles = [];
+                    if (hasFrontScores) {
+                        for (let hole = 1; hole <= 9; hole++) {
+                            if (!frontNineScores[hole]) allMissingHoles.push(hole);
+                        }
+                    }
+                    if (hasBackScores) {
+                        for (let hole = 10; hole <= 18; hole++) {
+                            if (!backNineScores[hole]) allMissingHoles.push(hole);
+                        }
                     }
 
-                    console.log('Form submitted via Ctrl+S');
-                    // Add actual form submission logic here
-                } else {
-                    // Show validation errors
-                    form.classList.add('was-validated');
-                    console.log('Form validation failed');
+                    if (allMissingHoles.length > 0) {
+                        const firstMissingInput = document.querySelector(`[data-hole="${allMissingHoles[0]}"]`);
+                        if (firstMissingInput) {
+                            firstMissingInput.focus();
+                            firstMissingInput.classList.add('is-invalid');
+                        }
+                    }
+                    return;
                 }
+            } // Close the hole validation skip section
+
+            // Add scores to form data
+            formData.scores = scores;
+
+            // Add adjusted or gross totals if available
+            if (window.adjustedTotal) {
+                formData.adjusted_total = window.adjustedTotal;
+            }
+            if (window.grossTotal) {
+                formData.gross_total = window.grossTotal;
+            }
+
+            // Trigger form validation
+            if (!form.checkValidity()) {
+                form.classList.add('was-validated');
+                showNotification('Please check all form fields for errors.', 'error');
+                return;
+            }
+
+            // Show submission feedback
+            const submitBtn = document.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                const originalText = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Saving...';
+                submitBtn.disabled = true;
+
+                // Submit to backend
+                console.log('Submitting form data to /admin/scores:', formData);
+
+                fetch('/admin/scores', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': formData._token,
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify(formData)
+                    })
+                    .then(response => {
+                        console.log('Response status:', response.status);
+                        if (!response.ok) {
+                            return response.text().then(text => {
+                                throw new Error(`HTTP ${response.status}: ${text}`);
+                            });
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            // Success feedback
+                            submitBtn.innerHTML = '<i class="fas fa-check me-1"></i>Saved!';
+                            submitBtn.classList.remove('btn-primary');
+                            submitBtn.classList.add('btn-success');
+
+                            // Show success message
+                            showNotification('Score saved successfully!', 'success');
+
+                            // Reset form after delay
+                            setTimeout(() => {
+                                if (confirm('Score saved successfully! Would you like to enter another score?')) {
+                                    resetForm();
+                                } else {
+                                    window.location.href = '/admin/scores';
+                                }
+                            }, 1500);
+                        } else {
+                            throw new Error(data.message || 'Failed to save score');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        submitBtn.innerHTML = originalText;
+                        submitBtn.disabled = false;
+                        submitBtn.classList.remove('btn-success');
+                        submitBtn.classList.add('btn-primary');
+
+                        // Show error message
+                        showNotification(`Error saving score: ${error.message}`, 'error');
+                    });
+            }
+
+            console.log('Submitting form data:', formData);
+        }
+
+        // Helper function to show notifications
+        function showNotification(message, type = 'info') {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `alert alert-${type === 'error' ? 'danger' : type === 'success' ? 'success' : 'info'} alert-dismissible fade show position-fixed`;
+            notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            notification.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+
+            document.body.appendChild(notification);
+
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.remove();
+                }
+            }, 5000);
+        }
+
+        // Helper function to reset form
+        function resetForm() {
+            // Reset all score inputs
+            document.querySelectorAll('.score-input').forEach(input => {
+                input.value = '';
+            });
+
+            // Reset computed totals
+            document.querySelectorAll('.front-score-total, .back-score-total, .total-score-total').forEach(input => {
+                input.value = '';
+            });
+
+            // Reset display inputs
+            document.querySelectorAll('.score-input-display').forEach(input => {
+                input.value = '';
+            });
+
+            // Reset selects (except tournament as it might be reused)
+            document.getElementById('course_id').selectedIndex = 0;
+            document.getElementById('tee_id').selectedIndex = 0;
+            document.getElementById('score_mode').selectedIndex = 0;
+
+            // Reset button
+            const submitBtn = document.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.innerHTML = '<i class="fas fa-save me-2"></i>Save Score';
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('btn-success');
+                submitBtn.classList.add('btn-primary');
+            }
+
+            // Focus first input
+            const firstInput = document.querySelector('.score-input');
+            if (firstInput) {
+                firstInput.focus();
             }
         }
 
@@ -2333,6 +2638,11 @@
                             showAdjustedTotalConfirmation(adjustedTotal);
 
                             console.log('Adjusted total set to:', adjustedTotal);
+
+                            // Trigger form submission after setting adjusted total
+                            setTimeout(() => {
+                                submitForm();
+                            }, 500);
                         } else {
                             // Show validation error
                             input.classList.add('is-invalid');
@@ -2359,6 +2669,11 @@
                             showGrossTotalConfirmation(grossTotal);
 
                             console.log('Gross total set to:', grossTotal);
+
+                            // Trigger form submission after setting gross total
+                            setTimeout(() => {
+                                submitForm();
+                            }, 500);
                         } else {
                             // Show validation error
                             input.classList.add('is-invalid');
