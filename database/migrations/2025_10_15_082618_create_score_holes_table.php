@@ -13,24 +13,37 @@ return new class extends Migration
     {
         Schema::create('score_holes', function (Blueprint $table) {
             $table->id('score_hole_id');
-            $table->unsignedBigInteger('score_id');
-            $table->enum('score_type', ['hole by hole', 'gross score'])->default('hole by hole')->comment('Type of score: hole by hole or gross score');
+
+            // Relationships
+            $table->unsignedBigInteger('score_id')->comment('Linked to main score record');
+
+            //  Hole details
+            $table->unsignedTinyInteger('hole')->comment('Hole number (1–18)');
+            $table->enum('side', ['front', 'back'])->comment('Front 9 or Back 9'); // auto-set based on hole
+
+            // Score data
+            $table->string('raw_input', 2)
+                ->nullable()
+                ->comment('Actual input: numeric strokes or "X" for no score');
+
+            $table->unsignedTinyInteger('strokes')
+                ->nullable()
+                ->comment('Number of strokes recorded (numeric only, parsed from raw_input)');
 
 
-            $table->decimal('gross_score', 5, 2)->nullable()->default(null);
-            $table->decimal('adjusted_score', 5, 2);
-
-
-
+            // Audit
             $table->unsignedBigInteger('created_by');
-            $table->unsignedBigInteger('updated_by')->nullable()->default(null);
+            $table->unsignedBigInteger('updated_by')->nullable();
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->nullable()->default(null);
 
+            // Foreign keys
+            $table->foreign('score_id')->references('score_id')->on('scores')->onDelete('restrict');
             $table->foreign('created_by')->references('id')->on('users')->onDelete('restrict');
             $table->foreign('updated_by')->references('id')->on('users')->onDelete('restrict');
 
-            $table->foreign('score_id')->references('score_id')->on('scores')->onDelete('restrict');
+            // Ensure one record per hole per score
+            $table->unique(['score_id', 'hole']);
         });
     }
 

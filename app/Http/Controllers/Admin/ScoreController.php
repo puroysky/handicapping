@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Score;
 use App\Models\Scorecard;
 use App\Models\Tournament;
 use App\Models\TournamentCourse;
@@ -73,16 +74,45 @@ class ScoreController extends Controller
      */
     public function store(Request $request)
     {
-        // Example usage (wire this when your form posts real data):
-        // $validated = $request->validate([
-        //     'scores' => 'array',
-        //     'scores.*' => 'nullable|string', // digits or x
-        //     'pars' => 'array',
-        //     'pars.*' => 'required|integer|min:3|max:5',
-        // ]);
-        // $service = app(\App\Services\ScoreService::class);
-        // $result = $service->computeRound($validated['scores'] ?? [], $validated['pars'] ?? []);
-        // return back()->with('computed', $result);
+
+
+        // Example incoming request data (for debugging)
+        // {
+        //   "player_profile_id":"1",
+        //   "tournament_id":"2",
+        //   "course_id":"2",
+        //   "tee_id":"1",
+        //   "scoring_method":"adjusted_score",
+        //   "score_date":"2025-10-15",
+        //   "_token":"DVt3lSvYkADxTnn35SVdChkqliEYbVDKT0yrwrm5",
+        //   "scores":{
+        //     "1":{"stroke":2,"raw_input":"x","par":"4","handicap_index":"3","yardage":"360"},
+        //     "2":{"stroke":2,"raw_input":"2","par":"4","handicap_index":"5","yardage":"346"},
+        //     "3":{"stroke":2,"raw_input":"2","par":"3","handicap_index":"11","yardage":"192"},
+        //     "4":{"stroke":2,"raw_input":"2","par":"3","handicap_index":"13","yardage":"130"},
+        //     "5":{"stroke":5,"raw_input":"5","par":"5","handicap_index":"1","yardage":"521"},
+        //     "6":{"stroke":6,"raw_input":"6","par":"3","handicap_index":"7","yardage":"164"},
+        //     "7":{"stroke":4,"raw_input":"4","par":"5","handicap_index":"17","yardage":"476"},
+        //     "8":{"stroke":5,"raw_input":"5","par":"3","handicap_index":"15","yardage":"156"},
+        //     "9":{"stroke":4,"raw_input":"4","par":"5","handicap_index":"9","yardage":"469"}
+        //   }
+        // }
+
+
+        $validated = $request->validate([
+            'player_profile_id' => 'required|exists:player_profiles,player_profile_id',
+            'tournament_id' => 'required|exists:tournaments,tournament_id',
+            'course_id' => 'required|exists:courses,course_id',
+            'tee_id' => 'required|exists:tees,tee_id',
+            'scoring_method' => 'required|in:hole_by_hole,adjusted_score',
+            'score_date' => 'required|date_format:Y-m-d|before_or_equal:today',
+            'scores' => 'required|array',
+            'scores.*.stroke' => 'required|integer',
+            'scores.*.raw_input' => ['required', 'regex:/^(x|\d+)$/'],
+            'scores.*.par' => 'required|integer',
+            'scores.*.handicap_index' => 'required|integer',
+            'scores.*.yardage' => 'required|integer',
+        ]);
     }
 
     /**

@@ -14,7 +14,7 @@
                         @csrf
                         <!-- Player Selection Section -->
                         <div class="row mb-3">
-                            <div class="col-md-12">
+                            <div class="col-md-8">
                                 <div class="form-floating bg-white rounded-2 border border-light shadow-sm">
                                     <input type="text" name="player_search" id="player_search" class="form-control border-0 bg-light" placeholder="Search players..." autocomplete="off">
                                     <label for="player_search" class="fw-semibold text-dark small">
@@ -24,7 +24,7 @@
                                     <div id="player_dropdown" class="position-absolute w-100 bg-white border border-light rounded-2 shadow-sm mt-1 d-none" style="z-index: 1000; max-height: 200px; overflow-y: auto;">
                                     </div>
                                     <!-- Hidden input for selected player ID -->
-                                    <input type="hidden" name="player_id" id="player_id" required>
+                                    <input type="hidden" name="player_profile_id" id="player_profile_id" required>
                                 </div>
 
                                 <!-- Selected Player Info Display -->
@@ -44,6 +44,14 @@
                                             <i class="fas fa-venus-mars me-1"></i>-
                                         </small>
                                     </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-floating bg-white rounded-2 border border-light shadow-sm">
+                                    <input type="date" name="score_date" id="score_date" class="form-control border-0 bg-light" required value="{{ \Carbon\Carbon::now()->format('Y-m-d') }}">
+                                    <label for="score_date" class="fw-semibold text-dark small">
+                                        <i class="fas fa-calendar-day text-primary me-1"></i>Score Date
+                                    </label>
                                 </div>
                             </div>
                         </div>
@@ -88,12 +96,12 @@
 
                             <div class="col-md-3 col-lg-3">
                                 <div class="form-floating bg-white rounded-2 border border-light shadow-sm">
-                                    <select name="score_mode" id="score_mode" class="form-select form-select-sm border-0 bg-light" required disabled>
+                                    <select name="scoring_method" id="scoring_method" class="form-select form-select-sm border-0 bg-light" required disabled>
                                         <option value="">Select Score Mode</option>
                                         <option value="hole_by_hole">Hole by Hole</option>
                                         <option value="adjusted_score">Adjusted Score</option>
                                     </select>
-                                    <label for="score_mode" class="fw-semibold text-dark small">
+                                    <label for="scoring_method" class="fw-semibold text-dark small">
                                         <i class="fas fa-calculator text-primary me-1"></i>Score Mode
                                     </label>
                                 </div>
@@ -847,7 +855,7 @@
         // Player search functionality
         const playerSearch = document.getElementById('player_search');
         const playerDropdown = document.getElementById('player_dropdown');
-        const playerIdInput = document.getElementById('player_id');
+        const playerIdInput = document.getElementById('player_profile_id');
         let searchTimeout;
 
         if (playerSearch) {
@@ -938,7 +946,7 @@
 
                     html += `
                         <div class="dropdown-item p-2 border-bottom cursor-pointer player-option" 
-                             data-player-id="${player.id}" 
+                             data-player-id="${player.player_profile_id}" 
                              data-player-name="${player.first_name} ${player.last_name}"
                              data-player-gender="${player.gender || 'M'}"
                              data-player-whs="${player.whs_no || ''}"
@@ -1251,18 +1259,19 @@
 
             // Collect form data first
             const formData = {
-                player_id: document.getElementById('player_id')?.value,
+                player_profile_id: document.getElementById('player_profile_id')?.value,
                 tournament_id: document.getElementById('tournament_id')?.value,
                 course_id: document.getElementById('course_id')?.value,
                 tee_id: document.getElementById('tee_id')?.value,
-                score_mode: document.getElementById('score_mode')?.value,
+                scoring_method: document.getElementById('scoring_method')?.value,
+                score_date: document.getElementById('score_date')?.value,
                 _token: document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ||
                     document.querySelector('input[name="_token"]')?.value
             };
 
             // Validate required fields with user-friendly names
             const requiredFields = [{
-                    field: 'player_id',
+                    field: 'player_profile_id',
                     name: 'Player',
                     element: document.getElementById('player_search')
                 },
@@ -1282,9 +1291,9 @@
                     element: document.getElementById('tee_id')
                 },
                 {
-                    field: 'score_mode',
+                    field: 'scoring_method',
                     name: 'Score Mode',
-                    element: document.getElementById('score_mode')
+                    element: document.getElementById('scoring_method')
                 }
             ];
 
@@ -1315,28 +1324,41 @@
             }
 
             // Validate that scorecard data is available
-            const scorecardHoles = document.querySelectorAll('.score-input');
-            if (scorecardHoles.length === 0) {
+            const scoreInputs = document.querySelectorAll('.score-input');
+            const scoreDisplayInputs = document.querySelectorAll('.score-input-display');
+            if (scoreInputs.length === 0 || scoreDisplayInputs.length === 0) {
                 showNotification('Scorecard not loaded. Please select a valid course and tee combination.', 'error');
                 return;
             }
 
-            // Collect all score inputs with their hole data
+            // Collect all score and raw inputs with their hole data
             const scores = {};
             const frontNineScores = {};
             const backNineScores = {};
             let hasFrontScores = false;
             let hasBackScores = false;
 
-            scorecardHoles.forEach(input => {
-                const holeNumber = parseInt(input.getAttribute('data-hole'));
+            scoreDisplayInputs.forEach(input => {
+                const holeNumber = parseInt(input.getAttribute('data-score-input-display'));
                 const scoreValue = input.value.trim();
+                // Find corresponding raw input for this hole
+                const rawInput = document.querySelector(`.score-input[data-hole='${holeNumber}']`);
+                let rawValue = rawInput ? rawInput.value.trim() : '';
 
-                if (scoreValue && scoreValue !== '' && !isNaN(scoreValue)) {
+                // Get par, handicap, and yardage for this hole
+                const parSpan = document.querySelector(`.par-span[data-hole='${holeNumber}']`);
+                const handicapSpan = document.querySelector(`.handicap-span[data-hole='${holeNumber}']`);
+                const yardageSpan = document.querySelector(`.yardage-span[data-hole='${holeNumber}']`);
+                let par = parSpan ? parSpan.textContent.trim() : '';
+                let handicap = handicapSpan ? handicapSpan.textContent.trim() : '';
+                let yardage = yardageSpan ? yardageSpan.textContent.trim() : '';
+
+                // Use rawValue as string, allow non-numeric (e.g. 'x')
+                let scoreObj = {};
+                if (scoreValue && !isNaN(scoreValue)) {
                     const score = parseInt(scoreValue);
-                    if (score > 0 && score <= 20) { // Reasonable score range
-                        scores[holeNumber] = score;
-
+                    if (score > 0 && score <= 20) {
+                        scoreObj.stroke = score;
                         // Categorize holes into front nine (1-9) and back nine (10-18)
                         if (holeNumber >= 1 && holeNumber <= 9) {
                             frontNineScores[holeNumber] = score;
@@ -1347,11 +1369,20 @@
                         }
                     }
                 }
+                // Always include raw value, par, handicap, yardage
+                scoreObj.raw_input = rawValue;
+                scoreObj.par = par;
+                scoreObj.handicap_index = handicap;
+                scoreObj.yardage = yardage;
+                // Only add if stroke or raw is present
+                if (scoreObj.stroke !== undefined || scoreObj.raw) {
+                    scores[holeNumber] = scoreObj;
+                }
             });
 
             // Validate hole completion based on requirements
             let validationErrors = [];
-            const scoreMode = document.getElementById('score_mode')?.value;
+            const scoreMode = document.getElementById('scoring_method')?.value;
 
             // Check if at least one score is entered OR if adjusted/gross total is available
             const hasAdjustedTotal = window.adjustedTotal && scoreMode === 'adjusted_score';
@@ -1455,7 +1486,7 @@
                 // Submit to backend
                 console.log('Submitting form data to /admin/scores:', formData);
 
-                fetch('/admin/scores', {
+                fetch(BASE_URL + '/admin/scores', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -1503,8 +1534,24 @@
                         submitBtn.classList.remove('btn-success');
                         submitBtn.classList.add('btn-primary');
 
-                        // Show error message
-                        showNotification(`Error saving score: ${error.message}`, 'error');
+                        // Try to parse error for validation details
+                        let errorMsg = `Error saving score: ${error.message}`;
+                        if (error.message && error.message.includes('422')) {
+                            try {
+                                const jsonStart = error.message.indexOf('{');
+                                if (jsonStart !== -1) {
+                                    const errorJson = JSON.parse(error.message.substring(jsonStart));
+                                    if (errorJson.errors && errorJson.errors.score_date) {
+                                        errorMsg = errorJson.errors.score_date.join(' ');
+                                    } else if (errorJson.message) {
+                                        errorMsg = errorJson.message;
+                                    }
+                                }
+                            } catch (e) {
+                                // fallback to default errorMsg
+                            }
+                        }
+                        showNotification(errorMsg, 'error');
                     });
             }
 
@@ -1552,7 +1599,7 @@
             // Reset selects (except tournament as it might be reused)
             document.getElementById('course_id').selectedIndex = 0;
             document.getElementById('tee_id').selectedIndex = 0;
-            document.getElementById('score_mode').selectedIndex = 0;
+            document.getElementById('scoring_method').selectedIndex = 0;
 
             // Reset button
             const submitBtn = document.querySelector('button[type="submit"]');
@@ -1686,7 +1733,7 @@
                     teeSelect.disabled = true;
 
                     // Disable score mode when tee is cleared (tournament change)
-                    const scoreModeSelect = document.getElementById('score_mode');
+                    const scoreModeSelect = document.getElementById('scoring_method');
                     if (scoreModeSelect) {
                         scoreModeSelect.disabled = true;
                         scoreModeSelect.value = '';
@@ -1777,7 +1824,7 @@
                     teeSelect.disabled = true;
 
                     // Disable score mode when tee is cleared (course change)
-                    const scoreModeSelect = document.getElementById('score_mode');
+                    const scoreModeSelect = document.getElementById('scoring_method');
                     if (scoreModeSelect) {
                         scoreModeSelect.disabled = true;
                         scoreModeSelect.value = '';
@@ -1992,7 +2039,7 @@
                 teeSelect.addEventListener('change', function() {
                     console.log('Tee changed:', this.value);
                     const teeId = this.value;
-                    const scoreModeSelect = document.getElementById('score_mode');
+                    const scoreModeSelect = document.getElementById('scoring_method');
 
                     if (teeId) {
                         // Enable score mode selection when tee is selected
@@ -2149,7 +2196,7 @@
                         hideSkeletonLoader();
 
                         // Disable score mode when no tee is selected
-                        const scoreModeSelect = document.getElementById('score_mode');
+                        const scoreModeSelect = document.getElementById('scoring_method');
                         if (scoreModeSelect) {
                             scoreModeSelect.disabled = true;
                             scoreModeSelect.value = '';
@@ -2487,7 +2534,7 @@
                 calculateTotals();
 
                 // Score Mode Handler
-                const scoreModeSelect = document.getElementById('score_mode');
+                const scoreModeSelect = document.getElementById('scoring_method');
                 if (scoreModeSelect) {
                     scoreModeSelect.addEventListener('change', function() {
                         console.log('Score mode changed:', this.value);
@@ -2505,7 +2552,7 @@
                 // Adjusted Total Dialog Functions
                 function showAdjustedTotalDialog() {
                     const input = document.getElementById('adjustedTotalInput');
-                    const scoreModeSelect = document.getElementById('score_mode');
+                    const scoreModeSelect = document.getElementById('scoring_method');
                     const selectedMode = scoreModeSelect ? scoreModeSelect.value : '';
 
                     // Clear previous input and validation
@@ -2719,7 +2766,7 @@
                 }
 
                 function showAdjustedTotalConfirmation(total) {
-                    const scoreModeSelect = document.getElementById('score_mode');
+                    const scoreModeSelect = document.getElementById('scoring_method');
                     const selectedMode = scoreModeSelect ? scoreModeSelect.value : '';
 
                     let title, message;

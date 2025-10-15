@@ -66,14 +66,10 @@ class PlayerService
 
 
         $players = $players->map(function ($player) {
-            // Convert database gender format to single character
-            $gender = 'M'; // Default to Male
-            if ($player->profile && $player->profile->sex) {
-                $gender = $player->profile->sex === 'FEMALE' ? 'F' : 'M';
-            }
+
 
             return [
-                'id' => $player->id,
+                'player_profile_id' => $player->player->player_profile_id,
                 'first_name' => $player->profile->first_name ?? '',
                 'last_name' => $player->profile->last_name ?? '',
                 'email' => $player->email,
