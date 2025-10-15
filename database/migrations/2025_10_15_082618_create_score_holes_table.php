@@ -19,7 +19,7 @@ return new class extends Migration
 
             //  Hole details
             $table->unsignedTinyInteger('hole')->comment('Hole number (1–18)');
-            $table->enum('side', ['front', 'back'])->comment('Front 9 or Back 9'); // auto-set based on hole
+            $table->enum('side', ['front', 'back', 'both'])->comment('Front 9, Back 9, or Both'); // auto-set based on hole
 
             // Score data
             $table->string('raw_input', 2)

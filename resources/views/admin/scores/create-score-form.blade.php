@@ -10,7 +10,7 @@
 
                 <!-- Compact Card Body -->
                 <div class="card-body p-3" style="background: linear-gradient(180deg, #f8f9fa 0%, #ffffff 100%);">
-                    <form class="needs-validation" method="POST" action="/admin/scores" novalidate>
+                    <form class="needs-validation" novalidate>
                         @csrf
                         <!-- Player Selection Section -->
                         <div class="row mb-3">
@@ -74,10 +74,10 @@
 
                             <div class="col-md-3 col-lg-3">
                                 <div class="form-floating bg-white rounded-2 border border-light shadow-sm">
-                                    <select name="course_id" id="course_id" class="form-select form-select-sm border-0 bg-light" required disabled>
+                                    <select name="tournament_course_id" id="tournament_course_id" class="form-select form-select-sm border-0 bg-light" required disabled>
                                         <option value="">Select Course</option>
                                     </select>
-                                    <label for="course_id" class="fw-semibold text-dark small">
+                                    <label for="tournament_course_id" class="fw-semibold text-dark small">
                                         <i class="fas fa-golf-ball text-primary me-1"></i>Course
                                     </label>
                                 </div>
@@ -271,7 +271,7 @@
                                 <button type="button" class="btn btn-outline-danger rounded-pill px-3" id="clearAllBtn">
                                     <i class="fas fa-trash me-1"></i>Clear All
                                 </button>
-                                <button type="submit" class="btn rounded-pill px-4 text-white fw-bold" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); border: none; box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);" title="Save scorecard (Ctrl+S)" data-bs-toggle="tooltip">
+                                <button type="button" class="btn rounded-pill px-4 text-white fw-bold" id="submitScoreBtn" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); border: none; box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);" title="Save scorecard (Ctrl+S)" data-bs-toggle="tooltip">
                                     <i class="fas fa-save me-1"></i>Save
                                 </button>
                             </div>
@@ -852,6 +852,15 @@
             });
         }
 
+        // Submit button click handler
+        const submitBtn = document.getElementById('submitScoreBtn');
+        if (submitBtn) {
+            submitBtn.addEventListener('click', function(e) {
+                e.preventDefault(); // Prevent any default behavior
+                submitForm(); // Use our custom submission function
+            });
+        }
+
         // Player search functionality
         const playerSearch = document.getElementById('player_search');
         const playerDropdown = document.getElementById('player_dropdown');
@@ -1261,7 +1270,7 @@
             const formData = {
                 player_profile_id: document.getElementById('player_profile_id')?.value,
                 tournament_id: document.getElementById('tournament_id')?.value,
-                course_id: document.getElementById('course_id')?.value,
+                tournament_course_id: document.getElementById('tournament_course_id')?.value,
                 tee_id: document.getElementById('tee_id')?.value,
                 scoring_method: document.getElementById('scoring_method')?.value,
                 score_date: document.getElementById('score_date')?.value,
@@ -1281,9 +1290,9 @@
                     element: document.getElementById('tournament_id')
                 },
                 {
-                    field: 'course_id',
+                    field: 'tournament_course_id',
                     name: 'Course',
-                    element: document.getElementById('course_id')
+                    element: document.getElementById('tournament_course_id')
                 },
                 {
                     field: 'tee_id',
@@ -1358,7 +1367,7 @@
                 if (scoreValue && !isNaN(scoreValue)) {
                     const score = parseInt(scoreValue);
                     if (score > 0 && score <= 20) {
-                        scoreObj.stroke = score;
+                        scoreObj.strokes = score;
                         // Categorize holes into front nine (1-9) and back nine (10-18)
                         if (holeNumber >= 1 && holeNumber <= 9) {
                             frontNineScores[holeNumber] = score;
@@ -1375,7 +1384,7 @@
                 scoreObj.handicap_index = handicap;
                 scoreObj.yardage = yardage;
                 // Only add if stroke or raw is present
-                if (scoreObj.stroke !== undefined || scoreObj.raw) {
+                if (scoreObj.strokes !== undefined || scoreObj.raw) {
                     scores[holeNumber] = scoreObj;
                 }
             });
@@ -1463,7 +1472,7 @@
 
             // Add adjusted or gross totals if available
             if (window.adjustedTotal) {
-                formData.adjusted_total = window.adjustedTotal;
+                formData.adjusted_score = window.adjustedTotal;
             }
             if (window.grossTotal) {
                 formData.gross_total = window.grossTotal;
@@ -1477,7 +1486,7 @@
             }
 
             // Show submission feedback
-            const submitBtn = document.querySelector('button[type="submit"]');
+            const submitBtn = document.getElementById('submitScoreBtn');
             if (submitBtn) {
                 const originalText = submitBtn.innerHTML;
                 submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Saving...';
@@ -1506,26 +1515,24 @@
                         return response.json();
                     })
                     .then(data => {
-                        if (data.success) {
-                            // Success feedback
-                            submitBtn.innerHTML = '<i class="fas fa-check me-1"></i>Saved!';
-                            submitBtn.classList.remove('btn-primary');
-                            submitBtn.classList.add('btn-success');
+                        // Success feedback
+                        submitBtn.innerHTML = '<i class="fas fa-check me-1"></i>Saved!';
+                        submitBtn.classList.remove('btn-primary');
+                        submitBtn.classList.add('btn-success');
 
-                            // Show success message
-                            showNotification('Score saved successfully!', 'success');
+                        // Show success message with success color
+                        showNotification('Score saved successfully!', 'success');
 
-                            // Reset form after delay
-                            setTimeout(() => {
-                                if (confirm('Score saved successfully! Would you like to enter another score?')) {
-                                    resetForm();
-                                } else {
-                                    window.location.href = '/admin/scores';
-                                }
-                            }, 1500);
-                        } else {
-                            throw new Error(data.message || 'Failed to save score');
-                        }
+                        // Clear the form immediately
+                        clearFormAfterSuccess();
+
+                        // Reset button after delay
+                        setTimeout(() => {
+                            submitBtn.innerHTML = '<i class="fas fa-save me-1"></i>Save Score';
+                            submitBtn.disabled = false;
+                            submitBtn.classList.remove('btn-success');
+                            submitBtn.classList.add('btn-primary');
+                        }, 2000);
                     })
                     .catch(error => {
                         console.error('Error:', error);
@@ -1597,14 +1604,14 @@
             });
 
             // Reset selects (except tournament as it might be reused)
-            document.getElementById('course_id').selectedIndex = 0;
+            document.getElementById('tournament_course_id').selectedIndex = 0;
             document.getElementById('tee_id').selectedIndex = 0;
             document.getElementById('scoring_method').selectedIndex = 0;
 
             // Reset button
-            const submitBtn = document.querySelector('button[type="submit"]');
+            const submitBtn = document.getElementById('submitScoreBtn');
             if (submitBtn) {
-                submitBtn.innerHTML = '<i class="fas fa-save me-2"></i>Save Score';
+                submitBtn.innerHTML = '<i class="fas fa-save me-1"></i>Save';
                 submitBtn.disabled = false;
                 submitBtn.classList.remove('btn-success');
                 submitBtn.classList.add('btn-primary');
@@ -1617,10 +1624,90 @@
             }
         }
 
+        // Clear form after successful submission
+        function clearFormAfterSuccess() {
+            // Clear all score inputs
+            document.querySelectorAll('.score-input').forEach(input => {
+                input.value = '';
+                input.classList.remove('is-valid', 'is-invalid');
+            });
+
+            // Clear score display inputs
+            document.querySelectorAll('.score-input-display').forEach(input => {
+                input.value = '';
+                input.classList.remove('is-valid', 'is-invalid');
+            });
+
+            // Clear computed totals
+            document.querySelectorAll('.front-score-total, .back-score-total, .total-score-total').forEach(input => {
+                input.value = '';
+            });
+
+            // Reset yardage displays to 0 (default)
+            document.querySelectorAll('.yardage-span').forEach(span => {
+                span.textContent = '0';
+            });
+
+            // Reset handicap displays to 0 (default)
+            document.querySelectorAll('.handicap-span').forEach(span => {
+                span.textContent = '0';
+            });
+
+            // Reset par displays to 0 (default)
+            document.querySelectorAll('.par-span').forEach(span => {
+                span.textContent = '0';
+            });
+
+            // Clear ALL player details completely
+            const playerSearch = document.getElementById('player_search');
+            const playerProfileId = document.getElementById('player_profile_id');
+            const playerNameDisplay = document.getElementById('player_name_display');
+            const playerGenderDisplay = document.getElementById('player_gender_display');
+            const playerHandicapDisplay = document.getElementById('player_handicap_display');
+
+            if (playerSearch) playerSearch.value = '';
+            if (playerProfileId) playerProfileId.value = '';
+            if (playerNameDisplay) playerNameDisplay.textContent = '';
+            if (playerGenderDisplay) {
+                playerGenderDisplay.textContent = '';
+                playerGenderDisplay.className = 'badge bg-success'; // Reset to default class
+            }
+            if (playerHandicapDisplay) {
+                playerHandicapDisplay.textContent = '';
+                playerHandicapDisplay.className = 'badge bg-primary'; // Reset to default class
+            }
+
+            // Clear any validation states
+            document.querySelectorAll('.is-valid, .is-invalid').forEach(el => {
+                el.classList.remove('is-valid', 'is-invalid');
+            });
+
+            // Hide player search dropdown if visible
+            const playerResults = document.getElementById('player_results');
+            if (playerResults) {
+                playerResults.style.display = 'none';
+                playerResults.innerHTML = ''; // Clear the content too
+            }
+
+            // Hide recent scores if visible
+            const recentScores = document.getElementById('recent_scores');
+            if (recentScores) {
+                recentScores.style.display = 'none';
+                recentScores.innerHTML = ''; // Clear the content too
+            }
+
+            // Focus back to player search for next entry
+            if (playerSearch) {
+                playerSearch.focus();
+            }
+
+            console.log('Form cleared after successful submission - all fields reset to defaults');
+        }
+
         // Enhanced keyboard navigation for dropdown selects
         const selectElements = [
             document.getElementById('tournament_id'),
-            document.getElementById('course_id'),
+            document.getElementById('tournament_course_id'),
             document.getElementById('tee_id')
         ].filter(el => el !== null);
 
@@ -1713,7 +1800,7 @@
             console.log('Setting up tournament/course/tee handlers');
 
             const tournamentSelect = document.getElementById('tournament_id');
-            const courseSelect = document.getElementById('course_id');
+            const courseSelect = document.getElementById('tournament_course_id');
             const teeSelect = document.getElementById('tee_id');
 
             if (tournamentSelect && courseSelect && teeSelect) {
@@ -1785,26 +1872,26 @@
                                 courseSelect.disabled = false; // Enable for fallback options
 
                                 const fallbackCourses = [{
-                                        course_id: 1,
+                                        tournament_course_id: 1,
                                         course_name: 'North Course'
                                     },
                                     {
-                                        course_id: 2,
+                                        tournament_course_id: 2,
                                         course_name: 'South Course'
                                     },
                                     {
-                                        course_id: 3,
+                                        tournament_course_id: 3,
                                         course_name: 'East Course'
                                     },
                                     {
-                                        course_id: 4,
+                                        tournament_course_id: 4,
                                         course_name: 'West Course'
                                     }
                                 ];
 
                                 fallbackCourses.forEach(course => {
                                     const option = document.createElement('option');
-                                    option.value = course.course_id;
+                                    option.value = course.tournament_course_id;
                                     option.textContent = course.course_name;
                                     courseSelect.appendChild(option);
                                 });
@@ -2476,6 +2563,9 @@
 
                 // Gender-based handicap functions
                 function updateHandicapDisplay(gender) {
+
+                    console.log('Updating handicap display for gender:', gender);
+
                     if (!window.courseHandicapData) return;
 
                     console.log('Updating handicap display for gender:', gender);

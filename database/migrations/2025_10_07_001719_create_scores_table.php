@@ -16,9 +16,13 @@ return new class extends Migration
             $table->id('score_id');
 
             // Foreign keys
-            $table->unsignedBigInteger('player_profile_id')->comment('Player ID who played the round');
+            $table->unsignedBigInteger('player_profile_id')->comment('Player profile ID who played the round');
+            $table->unsignedBigInteger('user_profile_id')->comment('User profile ID who played the round');
+            $table->unsignedBigInteger('user_id')->comment('User ID who played the round');
 
+            $table->unsignedBigInteger('tournament_id')->comment('Tournament played');
             $table->unsignedBigInteger('tournament_course_id')->comment('Course played');
+            $table->unsignedBigInteger('tee_id')->comment('Tee played');
 
             // Round info
             $table->date('score_date')->nullable()->comment('Date when the round was played or recorded');
@@ -27,7 +31,7 @@ return new class extends Migration
             $table->enum('side', ['front', 'back', 'both'])->comment('Front 9, Back 9, or Both (full 18 holes)');
 
             // Score totals
-            $table->unsignedSmallInteger('gross_score')->comment('Total strokes taken');
+            $table->unsignedSmallInteger('gross_score')->nullable()->comment('Total strokes taken');
             $table->unsignedSmallInteger('adjusted_score')->comment('Score after adjustments');
             $table->unsignedSmallInteger('net_score')->comment('Score after applying handicap');
 
@@ -42,10 +46,9 @@ return new class extends Migration
             // $table->decimal('score_differential', 5, 2)->nullable()->comment('Used for handicap index calculation');
 
             // Status and audit
-            $table->boolean('is_completed')->default(false)->comment('All holes completed');
-            $table->boolean('is_verified')->default(false)->comment('Verified by tournament official');
-            $table->unsignedBigInteger('verified_by')->nullable();
-            $table->timestamp('verified_at')->nullable();
+            $table->boolean('is_verified')->default(true)->comment('Verified by tournament official');
+            $table->unsignedBigInteger('verified_by')->nullable()->default(null);
+            $table->timestamp('verified_at')->nullable()->default(null);
             $table->text('remarks')->nullable()->comment('Optional notes');
 
             // Audit trail
@@ -56,8 +59,12 @@ return new class extends Migration
 
             // Foreign keys
             $table->foreign('player_profile_id')->references('player_profile_id')->on('player_profiles')->onDelete('restrict');
+            $table->foreign('user_profile_id')->references('user_profile_id')->on('user_profiles')->onDelete('restrict');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('restrict');
 
+            $table->foreign('tournament_id')->references('tournament_id')->on('tournaments')->onDelete('restrict');
             $table->foreign('tournament_course_id')->references('tournament_course_id')->on('tournament_courses')->onDelete('restrict');
+            $table->foreign('tee_id')->references('tee_id')->on('tees')->onDelete('restrict');
             $table->foreign('verified_by')->references('id')->on('users')->onDelete('set null');
             $table->foreign('created_by')->references('id')->on('users')->onDelete('restrict');
             $table->foreign('updated_by')->references('id')->on('users')->onDelete('restrict');

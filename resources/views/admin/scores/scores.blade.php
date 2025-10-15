@@ -17,6 +17,9 @@
                     <button class="btn btn-outline-secondary btn-modern" onclick="exportUsers()">
                         <i class="fas fa-download me-1"></i>Export
                     </button>
+                    <button class="btn btn-outline-secondary btn-modern" onclick="importUsers()">
+                        <i class="fas fa-upload me-1"></i>Import
+                    </button>
                     <a href="{{ route('admin.scores.create') }}" class="btn btn-primary btn-modern">
                         <i class="fas fa-plus me-2"></i>Add New Score
                     </a>
@@ -61,35 +64,35 @@
                                 </th>
                                 <th class="sortable" data-column="1">
                                     <div class="d-flex align-items-center justify-content-between">
-                                        <span>Description</span>
-                                        <i class="fas fa-sort sort-icon"></i>
-                                    </div>
-                                </th>
-                                <th class="sortable" data-column="1">
-                                    <div class="d-flex align-items-center justify-content-between">
-                                        <span>Course</span>
+                                        <span>Account No</span>
                                         <i class="fas fa-sort sort-icon"></i>
                                     </div>
                                 </th>
                                 <th class="sortable" data-column="2">
                                     <div class="d-flex align-items-center justify-content-between">
-                                        <span>Start Date</span>
+                                        <span>Email</span>
                                         <i class="fas fa-sort sort-icon"></i>
                                     </div>
                                 </th>
                                 <th class="sortable" data-column="3">
                                     <div class="d-flex align-items-center justify-content-between">
-                                        <span>End Date</span>
+                                        <span>Tournament / Course</span>
                                         <i class="fas fa-sort sort-icon"></i>
                                     </div>
                                 </th>
                                 <th class="sortable" data-column="4">
                                     <div class="d-flex align-items-center justify-content-between">
-                                        <span>Status</span>
+                                        <span>Adjusted Score</span>
                                         <i class="fas fa-sort sort-icon"></i>
                                     </div>
                                 </th>
                                 <th class="sortable" data-column="5">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <span>Status</span>
+                                        <i class="fas fa-sort sort-icon"></i>
+                                    </div>
+                                </th>
+                                <th class="sortable" data-column="6">
                                     <div class="d-flex align-items-center justify-content-between">
                                         <span>Created At</span>
                                         <i class="fas fa-sort sort-icon"></i>
@@ -104,26 +107,88 @@
                             @foreach ($scores as $score)
                             <tr class="table-row">
                                 <td class="name-cell">
-                                    <span class="user-name">{{ $score->score_name ?? 'N/A' }}</span>
+                                    <div class="d-flex align-items-center">
+                                        <div class="user-avatar me-3">
+                                            @if($score->playerProfile->avatar !== null)
+                                            <img src="{{ $score->playerProfile->avatar }}" alt="Avatar" class="avatar-img">
+                                            @else
+                                            <div class="avatar-placeholder">
+                                                {{ strtoupper(
+                                                    (isset($score->userProfile->first_name) ? substr($score->userProfile->first_name, 0, 1) : '') . 
+                                                    (isset($score->userProfile->last_name) ? substr($score->userProfile->last_name, 0, 1) : '')
+                                                ) ?: 'U' }}
+                                            </div>
+                                            @endif
+                                            <!-- Status Indicator -->
+                                            <div class="status-indicator {{ $score->playerProfile->active ? 'status-online' : 'status-offline' }}"
+                                                title="{{ $score->playerProfile->active ? 'Active Score' : 'Inactive Score' }}">
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div class="user-name">{{ ($score->userProfile->first_name ?? '') . ' ' . ($score->userProfile->last_name ?? '') }}</div>
+                                            @if($score->userProfile->phone)
+                                            <small class="user-whs-no">{{ $score->playerProfile->whs_no }}</small>
+                                            @endif
+                                        </div>
+                                    </div>
                                 </td>
-                                <td class="">
-                                    <span class="">
-                                        {{ $score->score_desc ?? '-' }}
+                                <td class="account-cell">
+                                    <span class="account-number">
+                                        {{ $score->playerProfile->account_no ?? 'Not Set' }}
                                     </span>
                                 </td>
-                                <td>
-                                    @foreach ($score->courses as $course)
-                                    <span class="badge bg-secondary me-1 mb-1">{{ $course->course->course_name }}</span>
-                                    @endforeach
+                                <td class="email-cell">
+                                    <span class="user-email">{{ $score->userProfile->email }}</span>
                                 </td>
-                                <td class="">
-                                    <span class="">{{ $score->score_start }}</span>
+                                <td class="tournament-course-cell">
+                                    <div class="tournament-course-info">
+                                        <div class="tournament-name">
+                                            <i class="fas fa-trophy me-1" style="font-size: 0.75rem; color: #fbbf24;"></i>
+                                            {{ $score->tournament->tournament_name ?? 'N/A' }}
+                                        </div>
+                                        <small class="course-name">
+                                            <i class="fas fa-golf-ball-tee me-1" style="font-size: 0.65rem; color: #5E7C4C;"></i>
+                                            {{ $score->tournamentCourse->course->course_name ?? 'N/A' }}
+                                        </small>
+                                    </div>
                                 </td>
-                                <td class="">
-                                    <span class="">{{ $score->score_end }}</span>
+                                <td class="score-cell">
+                                    @if($score->scoreHoles && $score->scoreHoles->count() > 0)
+                                    @php
+                                    // Calculate total from score holes if not already calculated
+                                    $totalScore = $score->adjusted_score ?: $score->scoreHoles->sum('strokes');
+                                    // Separate front and back nine
+                                    $frontNine = $score->scoreHoles->filter(fn($h) => $h->hole >= 1 && $h->hole <= 9)->sortBy('hole');
+                                        $backNine = $score->scoreHoles->filter(fn($h) => $h->hole >= 10 && $h->hole <= 18)->sortBy('hole');
+                                            $frontTotal = $frontNine->sum('strokes');
+                                            $backTotal = $backNine->sum('strokes');
+                                            @endphp
+                                            <div class="score-badge-wrapper">
+                                                <span class="score-badge"
+                                                    data-bs-toggle="tooltip"
+                                                    data-bs-html="true"
+                                                    data-bs-placement="top"
+                                                    title="<div class='score-tooltip'><strong>Hole-by-Hole Scorecard:</strong>@if($frontNine->count() > 0)<div class='score-nine-section'><div class='nine-header'>Front 9</div><div class='score-holes-horizontal'>@foreach($frontNine as $hole)<div class='hole-item-h'><span class='hole-number-h'>{{ $hole->hole }}</span><span class='hole-score-h'>{{ $hole->strokes }}</span></div>@endforeach<div class='hole-item-h total-hole'><span class='hole-number-h'>OUT</span><span class='hole-score-h total-score'>{{ $frontTotal }}</span></div></div></div>@endif @if($backNine->count() > 0)<div class='score-nine-section'><div class='nine-header'>Back 9</div><div class='score-holes-horizontal'>@foreach($backNine as $hole)<div class='hole-item-h'><span class='hole-number-h'>{{ $hole->hole }}</span><span class='hole-score-h'>{{ $hole->strokes }}</span></div>@endforeach<div class='hole-item-h total-hole'><span class='hole-number-h'>IN</span><span class='hole-score-h total-score'>{{ $backTotal }}</span></div></div></div>@endif<div class='score-total mt-2'><strong>Total:</strong> {{ $totalScore }} strokes</div></div>">
+                                                    <i class="fas fa-golf-ball me-1"></i>{{ $totalScore }}
+                                                </span>
+                                                @if($score->scoring_method === 'hole_by_hole')
+                                                <small class="d-block text-muted mt-1" style="font-size: 0.75rem;">
+                                                    <i class="fas fa-info-circle me-1"></i>Hover for details
+                                                </small>
+                                                @endif
+                                            </div>
+                                            @elseif($score->adjusted_score !== null)
+                                            <div class="score-badge-wrapper">
+                                                <span class="score-badge">
+                                                    <i class="fas fa-golf-ball me-1"></i>{{ $score->adjusted_score }}
+                                                </span>
+                                            </div>
+                                            @else
+                                            <span class="text-muted">N/A</span>
+                                            @endif
                                 </td>
                                 <td class="status-cell">
-                                    @if ($score->active)
+                                    @if ($score->playerProfile->active)
                                     <span class="status-badge status-active">
                                         <i class="fas fa-check-circle me-1"></i>Active
                                     </span>
@@ -141,7 +206,7 @@
                                     <div class="action-wrapper">
                                         <button class="btn btn-outline-secondary btn-context-menu"
                                             type="button"
-                                            onclick="showUserContextMenu({{ $score->score_id }}, '{{ $score->score_name }}', event)"
+                                            onclick="showUserContextMenu()"
                                             title="Actions"
                                             data-label="Actions">
                                             <i class="fas fa-ellipsis-v me-1"></i>
@@ -155,6 +220,96 @@
                         </tbody>
                     </table>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Import Scores Modal -->
+<div class="modal fade" id="importPlayersModal" tabindex="-1" aria-labelledby="importPlayersModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="importPlayersModalLabel">
+                    <i class="fas fa-upload me-2"></i>Import Scores
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="importPlayersForm" enctype="multipart/form-data">
+                    @csrf
+                    <!-- File Upload Section -->
+                    <div class="mb-4">
+                        <label for="import_file" class="form-label fw-bold">
+                            <i class="fas fa-file-excel me-1"></i>Select Import File
+                        </label>
+                        <input type="file"
+                            class="form-control"
+                            id="import_file"
+                            name="import_file"
+                            accept=".xlsx,.xls,.csv"
+                            required>
+                        <div class="form-text">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Supported formats: Excel (.xlsx, .xls) or CSV files. Maximum size: 2MB
+                        </div>
+                    </div>
+
+                    <!-- File Requirements -->
+                    <div class="alert alert-info">
+                        <h6 class="alert-heading">
+                            <i class="fas fa-list me-1"></i>Required Column Headers
+                        </h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <ul class="mb-0 small">
+                                    <li><strong>whs_no</strong> - WHS Number (numeric)</li>
+                                    <li><strong>account_no</strong> - Account Number (string)</li>
+                                    <li><strong>first_name</strong> - First Name</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <ul class="mb-0 small">
+                                    <li><strong>last_name</strong> - Last Name</li>
+                                    <li><strong>birthdate</strong> - Birth Date (YYYY-MM-DD)</li>
+                                    <li><strong>sex</strong> - Gender (M/F or MALE/FEMALE)</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sample Format -->
+                    <div class="mb-3">
+                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="downloadSampleFile()">
+                            <i class="fas fa-download me-1"></i>Download Sample Format
+                        </button>
+                    </div>
+
+                    <!-- Progress Bar (hidden initially) -->
+                    <div id="importProgress" class="mb-3" style="display: none;">
+                        <div class="d-flex justify-content-between mb-1">
+                            <small class="text-muted">Importing scores...</small>
+                            <small class="text-muted" id="importProgressText">0%</small>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated"
+                                role="progressbar"
+                                style="width: 0%"
+                                id="importProgressBar"></div>
+                        </div>
+                    </div>
+
+                    <!-- Results Section (hidden initially) -->
+                    <div id="importResults" style="display: none;"></div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i>Cancel
+                </button>
+                <button type="button" class="btn btn-primary" onclick="startImport()" id="importBtn">
+                    <i class="fas fa-upload me-1"></i>Import Scores
+                </button>
             </div>
         </div>
     </div>
@@ -389,6 +544,17 @@
 
     // Enhanced context menu button functionality
     document.addEventListener('DOMContentLoaded', function() {
+        // Initialize Bootstrap tooltips
+        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+        const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => {
+            if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
+                return new bootstrap.Tooltip(tooltipTriggerEl, {
+                    html: true,
+                    sanitize: false
+                });
+            }
+        });
+
         // Add keyboard navigation for context menu buttons
         document.querySelectorAll('.btn-context-menu').forEach(button => {
             button.addEventListener('keydown', function(e) {
@@ -446,9 +612,498 @@
             rows.forEach(row => tbody.appendChild(row));
         });
     });
+
+    // Import Scores Functionality
+    function importUsers() {
+        // Try Bootstrap 5 first, then fallback to jQuery/Bootstrap 4
+        const modalElement = document.getElementById('importPlayersModal');
+
+        if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+            // Bootstrap 5
+            const modal = new bootstrap.Modal(modalElement);
+            modal.show();
+        } else if (typeof $ !== 'undefined' && $.fn.modal) {
+            // jQuery/Bootstrap 4
+            $('#importPlayersModal').modal('show');
+        } else {
+            // Fallback - manual modal display
+            modalElement.style.display = 'block';
+            modalElement.classList.add('show');
+            document.body.classList.add('modal-open');
+
+            // Add backdrop
+            const backdrop = document.createElement('div');
+            backdrop.className = 'modal-backdrop fade show';
+            backdrop.id = 'modal-backdrop';
+            document.body.appendChild(backdrop);
+        }
+
+        // Reset form when modal opens
+        resetImportModal();
+    }
+
+    function resetImportModal() {
+        document.getElementById('importPlayersForm').reset();
+        document.getElementById('importProgress').style.display = 'none';
+        document.getElementById('importResults').style.display = 'none';
+        document.getElementById('importBtn').disabled = false;
+        document.getElementById('importBtn').innerHTML = '<i class="fas fa-upload me-1"></i>Import Scores';
+    }
+
+    function startImport() {
+        const form = document.getElementById('importPlayersForm');
+        const fileInput = document.getElementById('import_file');
+        const importBtn = document.getElementById('importBtn');
+        const progressSection = document.getElementById('importProgress');
+        const resultsSection = document.getElementById('importResults');
+
+        // Validate file selection
+        if (!fileInput.files[0]) {
+            alert('Please select a file to import.');
+            return;
+        }
+
+        // Prepare form data
+        const formData = new FormData();
+        formData.append('import_file', fileInput.files[0]);
+        formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
+
+        // Update UI to show progress
+        importBtn.disabled = true;
+        importBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Importing...';
+        progressSection.style.display = 'block';
+        resultsSection.style.display = 'none';
+
+        // Simulate progress (since we don't have real-time progress from backend)
+        simulateProgress();
+
+        // Make the import request
+        fetch(BASE_URL + '/admin/scores/import', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                handleImportResponse(data);
+            })
+            .catch(error => {
+                console.error('Import error:', error);
+                handleImportError(error);
+            });
+    }
+
+    function simulateProgress() {
+        const progressBar = document.getElementById('importProgressBar');
+        const progressText = document.getElementById('importProgressText');
+        let progress = 0;
+
+        const interval = setInterval(() => {
+            progress += Math.random() * 15;
+            if (progress > 90) progress = 90; // Cap at 90% until real response
+
+            progressBar.style.width = progress + '%';
+            progressText.textContent = Math.round(progress) + '%';
+        }, 200);
+
+        // Store interval ID to clear it later
+        window.importProgressInterval = interval;
+    }
+
+    function handleImportResponse(data) {
+        // Clear progress simulation
+        if (window.importProgressInterval) {
+            clearInterval(window.importProgressInterval);
+        }
+
+        // Complete progress bar
+        const progressBar = document.getElementById('importProgressBar');
+        const progressText = document.getElementById('importProgressText');
+        progressBar.style.width = '100%';
+        progressText.textContent = '100%';
+
+        // Show results
+        const resultsSection = document.getElementById('importResults');
+        const importBtn = document.getElementById('importBtn');
+
+        if (data.success) {
+            resultsSection.innerHTML = `
+                <div class="alert alert-success">
+                    <h6 class="alert-heading">
+                        <i class="fas fa-check-circle me-1"></i>Import Successful!
+                    </h6>
+                    <p class="mb-1">${data.message}</p>
+                    <small>Successfully imported ${data.imported} scores.</small>
+                    ${data.errors && data.errors.length > 0 ? 
+                        `<div class="mt-2">
+                            <strong>Warnings/Skipped rows:</strong>
+                            <ul class="mb-0 small mt-1">
+                                ${data.errors.slice(0, 5).map(error => `<li>${error}</li>`).join('')}
+                                ${data.errors.length > 5 ? `<li><em>... and ${data.errors.length - 5} more</em></li>` : ''}
+                            </ul>
+                        </div>` : ''
+                    }
+                </div>
+            `;
+
+            // Update button
+            importBtn.innerHTML = '<i class="fas fa-check me-1"></i>Import Complete';
+            importBtn.classList.remove('btn-primary');
+            importBtn.classList.add('btn-success');
+
+            // Refresh page after delay to show new scores
+            setTimeout(() => {
+                window.location.reload();
+            }, 2000);
+
+        } else {
+            resultsSection.innerHTML = `
+                <div class="alert alert-danger">
+                    <h6 class="alert-heading">
+                        <i class="fas fa-exclamation-triangle me-1"></i>Import Failed
+                    </h6>
+                    <p class="mb-1">${data.message}</p>
+                    ${data.errors && data.errors.length > 0 ? 
+                        `<div class="mt-2">
+                            <strong>Errors found:</strong>
+                            <ul class="mb-0 small mt-1">
+                                ${data.errors.slice(0, 10).map(error => `<li>${error}</li>`).join('')}
+                                ${data.errors.length > 10 ? `<li><em>... and ${data.errors.length - 10} more</em></li>` : ''}
+                            </ul>
+                        </div>` : ''
+                    }
+                </div>
+            `;
+
+            // Reset button
+            importBtn.disabled = false;
+            importBtn.innerHTML = '<i class="fas fa-upload me-1"></i>Try Again';
+        }
+
+        resultsSection.style.display = 'block';
+    }
+
+    function handleImportError(error) {
+        // Clear progress simulation
+        if (window.importProgressInterval) {
+            clearInterval(window.importProgressInterval);
+        }
+
+        const resultsSection = document.getElementById('importResults');
+        const importBtn = document.getElementById('importBtn');
+
+        resultsSection.innerHTML = `
+            <div class="alert alert-danger">
+                <h6 class="alert-heading">
+                    <i class="fas fa-exclamation-triangle me-1"></i>Import Error
+                </h6>
+                <p class="mb-0">An unexpected error occurred during import. Please try again.</p>
+            </div>
+        `;
+
+        resultsSection.style.display = 'block';
+        importBtn.disabled = false;
+        importBtn.innerHTML = '<i class="fas fa-upload me-1"></i>Try Again';
+    }
+
+    function downloadSampleFile() {
+        // Create sample CSV data
+        const sampleData = [
+            ['whs_no', 'account_no', 'first_name', 'last_name', 'birthdate', 'sex'],
+            ['12345', 'ACC001', 'John', 'Doe', '1990-01-15', 'M'],
+            ['67890', 'ACC002', 'Jane', 'Smith', '1985-05-20', 'F'],
+            ['11111', 'ACC003', 'Bob', 'Johnson', '1992-12-10', 'MALE']
+        ];
+
+        // Convert to CSV
+        const csvContent = sampleData.map(row => row.join(',')).join('\n');
+
+        // Create and trigger download
+        const blob = new Blob([csvContent], {
+            type: 'text/csv'
+        });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'players_import_sample.csv';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+    }
+
+    // Export Users Function (placeholder)
+    function exportUsers() {
+        alert('Export functionality coming soon!');
+    }
+
+    // Modal close functionality for fallback
+    function closeModal(modalId) {
+        const modal = document.getElementById(modalId);
+        const backdrop = document.getElementById('modal-backdrop');
+
+        if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+            // Bootstrap 5
+            const modalInstance = bootstrap.Modal.getInstance(modal);
+            if (modalInstance) {
+                modalInstance.hide();
+            }
+        } else if (typeof $ !== 'undefined' && $.fn.modal) {
+            // jQuery/Bootstrap 4
+            $(`#${modalId}`).modal('hide');
+        } else {
+            // Fallback - manual modal hide
+            modal.style.display = 'none';
+            modal.classList.remove('show');
+            document.body.classList.remove('modal-open');
+            if (backdrop) {
+                backdrop.remove();
+            }
+        }
+    }
+
+    // Add event listeners for modal close buttons
+    document.addEventListener('DOMContentLoaded', function() {
+        // Close button event listeners
+        document.querySelectorAll('[data-bs-dismiss="modal"]').forEach(button => {
+            button.addEventListener('click', function() {
+                const modal = this.closest('.modal');
+                if (modal) {
+                    closeModal(modal.id);
+                }
+            });
+        });
+
+        // Close modal when clicking backdrop
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('modal-backdrop')) {
+                closeModal('importPlayersModal');
+            }
+        });
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const modal = document.querySelector('.modal.show');
+                if (modal) {
+                    closeModal(modal.id);
+                }
+            }
+        });
+    });
 </script>
 
 <style>
     /* Modern Header Card */
+    .score-badge-wrapper {
+        display: inline-block;
+        text-align: center;
+    }
+
+    .score-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.5rem 1rem;
+        background: linear-gradient(135deg, #2F4A3C 0%, #5E7C4C 100%);
+        color: white;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: help;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(47, 74, 60, 0.3);
+    }
+
+    .score-badge:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(94, 124, 76, 0.4);
+        background: linear-gradient(135deg, #5E7C4C 0%, #8DA66E 100%);
+    }
+
+    .score-badge i {
+        font-size: 0.875rem;
+    }
+
+    /* Tooltip Styles */
+    .tooltip-inner {
+        max-width: 550px;
+        padding: 0.75rem;
+        background-color: #ffffff;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        text-align: left;
+    }
+
+    .score-tooltip {
+        font-size: 0.8rem;
+    }
+
+    .score-tooltip strong {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #2F4A3C;
+        font-size: 0.9rem;
+        border-bottom: 2px solid #5E7C4C;
+        padding-bottom: 0.4rem;
+    }
+
+    .score-nine-section {
+        margin-bottom: 0.75rem;
+    }
+
+    .nine-header {
+        font-weight: 600;
+        color: #5E7C4C;
+        font-size: 0.75rem;
+        margin-bottom: 0.4rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .score-holes-horizontal {
+        display: flex;
+        gap: 0.2rem;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+    }
+
+    .hole-item-h {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-width: 38px;
+        padding: 0.2rem 0.25rem;
+        background-color: #f7fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 3px;
+        transition: all 0.2s ease;
+    }
+
+    .hole-item-h:hover {
+        background-color: #edf2f7;
+        border-color: #cbd5e0;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .hole-item-h.total-hole {
+        background-color: #f0fdf4;
+        border: 2px solid #5E7C4C;
+        min-width: 42px;
+    }
+
+    .hole-number-h {
+        font-weight: 600;
+        color: #64748b;
+        font-size: 0.65rem;
+        margin-bottom: 0.15rem;
+    }
+
+    .hole-score-h {
+        font-weight: 700;
+        color: #ffffff;
+        font-size: 0.85rem;
+        background-color: #5E7C4C;
+        padding: 0.1rem 0.4rem;
+        border-radius: 8px;
+        min-width: 26px;
+        text-align: center;
+    }
+
+    .hole-score-h.total-score {
+        background-color: #2F4A3C;
+        color: #ffffff;
+        font-weight: 800;
+        font-size: 0.9rem;
+    }
+
+    .score-holes-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+    }
+
+    .hole-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.375rem 0.5rem;
+        background-color: rgba(94, 124, 76, 0.3);
+        border-radius: 4px;
+        transition: background-color 0.2s ease;
+    }
+
+    .hole-item:hover {
+        background-color: rgba(94, 124, 76, 0.5);
+    }
+
+    .hole-number {
+        font-weight: 600;
+        color: #8DA66E;
+        font-size: 0.8rem;
+    }
+
+    .hole-score {
+        font-weight: 700;
+        color: #ffffff;
+        font-size: 0.9rem;
+        background-color: #5E7C4C;
+        padding: 0.125rem 0.5rem;
+        border-radius: 12px;
+    }
+
+    .score-total {
+        padding-top: 0.6rem;
+        margin-top: 0.6rem;
+        border-top: 2px solid #e2e8f0;
+        color: #2F4A3C;
+        font-size: 0.95rem;
+        text-align: center;
+        background-color: #f8fafc;
+        padding: 0.5rem;
+        border-radius: 4px;
+    }
+
+    .score-total strong {
+        border: none;
+        padding: 0;
+        margin-right: 0.5rem;
+        color: #2F4A3C;
+    }
+
+    .score-cell {
+        vertical-align: middle;
+    }
+
+    /* Tournament/Course Cell Styles */
+    .tournament-course-cell {
+        vertical-align: middle;
+    }
+
+    .tournament-course-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .tournament-name {
+        font-weight: 600;
+        color: #2c3e50;
+        font-size: 0.875rem;
+        display: flex;
+        align-items: center;
+    }
+
+    .course-name {
+        color: #6c757d;
+        font-size: 0.75rem;
+        display: flex;
+        align-items: center;
+        padding-left: 0.125rem;
+    }
 </style>
 @endsection
