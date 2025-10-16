@@ -17,6 +17,12 @@ return new class extends Migration
             $table->string('scorecard_version', 20)->unique()->comment('Unique code for the scorecard ex: N, S, NRT, SRH');
             $table->string('scorecard_name', 100);
             $table->string('scorecard_desc', 255)->nullable()->default(null);
+            $table->enum('scorecard_type', ['tournament', 'regular'])->default('regular');
+
+
+            $table->unsignedBigInteger('ags_formula_id')->nullable()->default(null);
+            $table->unsignedBigInteger('hi_formula_id')->nullable()->default(null);
+            $table->unsignedBigInteger('sd_formula_id')->nullable()->default(null);
 
 
 
@@ -35,6 +41,9 @@ return new class extends Migration
             $table->foreign('updated_by')->references('id')->on('users')->onDelete('restrict');
 
             $table->foreign('course_id')->references('course_id')->on('courses')->onDelete('restrict');
+            $table->foreign('ags_formula_id')->references('formula_id')->on('formulas')->onDelete('restrict');
+            $table->foreign('hi_formula_id')->references('formula_id')->on('formulas')->onDelete('restrict');
+            $table->foreign('sd_formula_id')->references('formula_id')->on('formulas')->onDelete('restrict');
         });
     }
 

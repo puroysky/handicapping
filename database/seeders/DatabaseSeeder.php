@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Formula;
 use App\Models\Member;
 use App\Models\PlayerProfile;
 use App\Models\ScorecardHandicapHole;
@@ -144,12 +145,14 @@ class DatabaseSeeder extends Seeder
             ScorecardSeeder::class,
             ScorecardHoleSeeder::class,
             ScorecardYardSeeder::class,
-            ScorecardHandicapHoleSeeder::class,
+            ScorecardStokeIndexSeeder::class,
             CourseRatingSeeder::class,
             SlopeRatingSeeder::class,
 
             TournamentSeeder::class,
             TournamentCourseSeeder::class,
+            FormulaTypeSeeder::class,
+            FormulaSeeder::class,
         ]);
     }
 }

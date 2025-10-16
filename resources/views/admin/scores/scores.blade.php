@@ -163,26 +163,19 @@
                                             $frontTotal = $frontNine->sum('strokes');
                                             $backTotal = $backNine->sum('strokes');
                                             @endphp
-                                            <div class="score-badge-wrapper">
-                                                <span class="score-badge"
+                                            <div class="modern-score-hover-preview-badge-wrapper">
+                                                <span class="modern-score-hover-preview-badge"
                                                     data-bs-toggle="tooltip"
                                                     data-bs-html="true"
                                                     data-bs-placement="top"
-                                                    title="<div class='score-tooltip'><strong>Hole-by-Hole Scorecard:</strong>@if($frontNine->count() > 0)<div class='score-nine-section'><div class='nine-header'>Front 9</div><div class='score-holes-horizontal'>@foreach($frontNine as $hole)<div class='hole-item-h'><span class='hole-number-h'>{{ $hole->hole }}</span><span class='hole-score-h'>{{ $hole->strokes }}</span></div>@endforeach<div class='hole-item-h total-hole'><span class='hole-number-h'>OUT</span><span class='hole-score-h total-score'>{{ $frontTotal }}</span></div></div></div>@endif @if($backNine->count() > 0)<div class='score-nine-section'><div class='nine-header'>Back 9</div><div class='score-holes-horizontal'>@foreach($backNine as $hole)<div class='hole-item-h'><span class='hole-number-h'>{{ $hole->hole }}</span><span class='hole-score-h'>{{ $hole->strokes }}</span></div>@endforeach<div class='hole-item-h total-hole'><span class='hole-number-h'>IN</span><span class='hole-score-h total-score'>{{ $backTotal }}</span></div></div></div>@endif<div class='score-total mt-2'><strong>Total:</strong> {{ $totalScore }} strokes</div></div>">
+                                                    title="<div class='modern-score-hover-preview-tooltip'><strong>Hole-by-Hole Scorecard:</strong>@if($frontNine->count() > 0)<div class='modern-score-hover-preview-nine-section'><div class='modern-score-hover-preview-nine-header'>Front 9</div><div class='modern-score-hover-preview-holes-horizontal'>@foreach($frontNine as $hole)<div class='modern-score-hover-preview-hole-item-h'><span class='modern-score-hover-preview-hole-number-h'>{{ $hole->hole }}</span><span class='modern-score-hover-preview-hole-score-h'>{{ $hole->strokes }}</span></div>@endforeach<div class='modern-score-hover-preview-hole-item-h modern-score-hover-preview-total-hole'><span class='modern-score-hover-preview-hole-number-h'>OUT</span><span class='modern-score-hover-preview-hole-score-h modern-score-hover-preview-total-score'>{{ $frontTotal }}</span></div></div></div>@endif @if($backNine->count() > 0)<div class='modern-score-hover-preview-nine-section'><div class='modern-score-hover-preview-nine-header'>Back 9</div><div class='modern-score-hover-preview-holes-horizontal'>@foreach($backNine as $hole)<div class='modern-score-hover-preview-hole-item-h'><span class='modern-score-hover-preview-hole-number-h'>{{ $hole->hole }}</span><span class='modern-score-hover-preview-hole-score-h'>{{ $hole->strokes }}</span></div>@endforeach<div class='modern-score-hover-preview-hole-item-h modern-score-hover-preview-total-hole'><span class='modern-score-hover-preview-hole-number-h'>IN</span><span class='modern-score-hover-preview-hole-score-h modern-score-hover-preview-total-score'>{{ $backTotal }}</span></div></div></div>@endif<div class='modern-score-hover-preview-score-total'><strong>Total:</strong> {{ $totalScore }} strokes</div></div>">
                                                     <i class="fas fa-golf-ball me-1"></i>{{ $totalScore }}
                                                 </span>
                                                 @if($score->scoring_method === 'hole_by_hole')
-                                                <small class="d-block text-muted mt-1" style="font-size: 0.75rem;">
-                                                    <i class="fas fa-info-circle me-1"></i>Hover for details
-                                                </small>
                                                 @endif
                                             </div>
                                             @elseif($score->adjusted_score !== null)
-                                            <div class="score-badge-wrapper">
-                                                <span class="score-badge">
-                                                    <i class="fas fa-golf-ball me-1"></i>{{ $score->adjusted_score }}
-                                                </span>
-                                            </div>
+                                            <span>{{ $score->adjusted_score }}</span>
                                             @else
                                             <span class="text-muted">N/A</span>
                                             @endif
@@ -897,12 +890,12 @@
 
 <style>
     /* Modern Header Card */
-    .score-badge-wrapper {
+    .modern-score-hover-preview-badge-wrapper {
         display: inline-block;
         text-align: center;
     }
 
-    .score-badge {
+    .modern-score-hover-preview-badge {
         display: inline-flex;
         align-items: center;
         padding: 0.5rem 1rem;
@@ -916,13 +909,13 @@
         box-shadow: 0 2px 8px rgba(47, 74, 60, 0.3);
     }
 
-    .score-badge:hover {
+    .modern-score-hover-preview-badge:hover {
         transform: translateY(-2px);
         box-shadow: 0 4px 12px rgba(94, 124, 76, 0.4);
         background: linear-gradient(135deg, #5E7C4C 0%, #8DA66E 100%);
     }
 
-    .score-badge i {
+    .modern-score-hover-preview-badge i {
         font-size: 0.875rem;
     }
 
@@ -937,11 +930,11 @@
         text-align: left;
     }
 
-    .score-tooltip {
+    .modern-score-hover-preview-tooltip {
         font-size: 0.8rem;
     }
 
-    .score-tooltip strong {
+    .modern-score-hover-preview-tooltip strong {
         display: block;
         margin-bottom: 0.5rem;
         color: #2F4A3C;
@@ -950,11 +943,11 @@
         padding-bottom: 0.4rem;
     }
 
-    .score-nine-section {
+    .modern-score-hover-preview-nine-section {
         margin-bottom: 0.75rem;
     }
 
-    .nine-header {
+    .modern-score-hover-preview-nine-header {
         font-weight: 600;
         color: #5E7C4C;
         font-size: 0.75rem;
@@ -963,14 +956,14 @@
         letter-spacing: 0.5px;
     }
 
-    .score-holes-horizontal {
+    .modern-score-hover-preview-holes-horizontal {
         display: flex;
         gap: 0.2rem;
         flex-wrap: nowrap;
         overflow-x: auto;
     }
 
-    .hole-item-h {
+    .modern-score-hover-preview-hole-item-h {
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -982,27 +975,27 @@
         transition: all 0.2s ease;
     }
 
-    .hole-item-h:hover {
+    .modern-score-hover-preview-hole-item-h:hover {
         background-color: #edf2f7;
         border-color: #cbd5e0;
         transform: translateY(-1px);
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
 
-    .hole-item-h.total-hole {
+    .modern-score-hover-preview-hole-item-h.modern-score-hover-preview-total-hole {
         background-color: #f0fdf4;
         border: 2px solid #5E7C4C;
         min-width: 42px;
     }
 
-    .hole-number-h {
+    .modern-score-hover-preview-hole-number-h {
         font-weight: 600;
         color: #64748b;
         font-size: 0.65rem;
         margin-bottom: 0.15rem;
     }
 
-    .hole-score-h {
+    .modern-score-hover-preview-hole-score-h {
         font-weight: 700;
         color: #ffffff;
         font-size: 0.85rem;
@@ -1013,7 +1006,7 @@
         text-align: center;
     }
 
-    .hole-score-h.total-score {
+    .modern-score-hover-preview-hole-score-h.modern-score-hover-preview-total-score {
         background-color: #2F4A3C;
         color: #ffffff;
         font-weight: 800;
@@ -1056,7 +1049,7 @@
         border-radius: 12px;
     }
 
-    .score-total {
+    .modern-score-hover-preview-score-total {
         padding-top: 0.6rem;
         margin-top: 0.6rem;
         border-top: 2px solid #e2e8f0;
@@ -1068,7 +1061,7 @@
         border-radius: 4px;
     }
 
-    .score-total strong {
+    .modern-score-hover-preview-score-total strong {
         border: none;
         padding: 0;
         margin-right: 0.5rem;

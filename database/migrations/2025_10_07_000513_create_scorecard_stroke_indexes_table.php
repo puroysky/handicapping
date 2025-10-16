@@ -11,10 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('scorecard_handicap_holes', function (Blueprint $table) {
-            $table->id('scorecard_handicap_hole_id');
+        Schema::create('scorecard_stroke_indexes', function (Blueprint $table) {
+            $table->id('scorecard_stroke_index_id');
             $table->unsignedBigInteger('scorecard_id');
             $table->unsignedBigInteger('scorecard_hole_id');
+            $table->unsignedTinyInteger('hole');
             $table->enum('gender', ['M', 'F'])->comment('M = Male, F = Female');
             $table->unsignedTinyInteger('handicap_hole')->nullable()->default(null)->comment('Handicap for the hole, typically 1-18, null if not assigned');
             $table->unsignedTinyInteger('scorecard_hole')->comment('Hole number, typically 1-18. Redundant but useful for quick access');

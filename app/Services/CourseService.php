@@ -59,7 +59,7 @@ class CourseService
             $tournamentCourse = TournamentCourse::where('tournament_course_id', $tournamentCourseId)->firstOrFail();
 
             $pars = ScorecardHole::with([
-                'handicapHole' => function ($query) use ($gender) {
+                'strokeIndex' => function ($query) use ($gender) {
                     $query->where('gender', $gender);
                 }
             ])->whereHas('scorecard', function ($query) use ($tournamentCourse) {
@@ -78,7 +78,7 @@ class CourseService
                 'message' => 'Tees fetched successfully',
                 'tees' => $tees,
                 'holes' => $pars,
-                // 'handicapHoles' => $handicapHoles
+                // 'strokeIndexs' => $strokeIndexs
             ], 200);
         } catch (\Exception $e) {
             Log::error('Error fetching tournament tees: ' . $e->getMessage());

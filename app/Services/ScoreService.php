@@ -197,6 +197,9 @@ class ScoreService
         Log::debug('Score holes inserted', ['inserted' => $inserted]);
     }
 
+
+    private function calculateNetScore(int $grossScore, int $handicapStroke): int {}
+
     /**
      * Store request data to a file for debugging
      */

@@ -6,12 +6,16 @@ use App\Models\Tournament;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\PlayerController;
 use App\Http\Controllers\Admin\ScoreController;
+use App\Http\Controllers\FormulaController;
 
 Route::get('/', function () {
     return view('welcome');
 })->name('home');
 
-Route::get('test', function () {})->name('test');
+Route::get('test', function () {
+
+    return view('admin.formula.create');
+})->name('test');
 
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::resource('users', App\Http\Controllers\Admin\UserController::class);
@@ -23,6 +27,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::resource('players', PlayerController::class);
 
     Route::resource('scores', ScoreController::class);
+
+    Route::resource('formulas', FormulaController::class);
 
     Route::resource('courses', App\Http\Controllers\Admin\CourseController::class);
     Route::get('courses/{course_id}/tees', [App\Http\Controllers\Admin\CourseController::class, 'getTees'])->name('tees.courses');
