@@ -14,6 +14,15 @@ Route::get('/', function () {
 
 Route::get('test', function () {
 
+
+    $scoreService = new \App\Services\ScoreService();
+    $test = $scoreService->getNetScore();
+
+    echo '<pre>';
+    print_r($test);
+    echo '</pre>';
+
+    return;
     return view('admin.formula.create');
 })->name('test');
 

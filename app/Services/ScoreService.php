@@ -198,7 +198,13 @@ class ScoreService
     }
 
 
-    private function calculateNetScore(int $grossScore, int $handicapStroke): int {}
+    /**
+     * Calculate net score for a single hole (simple version)
+     */
+    private function calculateNetScore(int $grossScore, int $handicapStroke): int
+    {
+        return max(0, $grossScore - $handicapStroke);
+    }
 
     /**
      * Store request data to a file for debugging
@@ -225,5 +231,220 @@ class ScoreService
             // Don't let file storage errors break the main process
             Log::warning("Failed to store request to file: " . $e->getMessage());
         }
+    }
+
+    /**
+     * Calculate net score for a player based on their scores and course handicap
+     * 
+     * @param array $scores Array of hole scores [hole => strokes]
+     * @param int $courseHandicap Player's course handicap
+     * @param array $strokeIndex Stroke index for each hole [hole => index]
+     * @param array $parValues Par values for each hole [hole => par]
+     * @param bool $detailed Return detailed hole-by-hole breakdown
+     * @return array|int Net score total or detailed breakdown
+     */
+    public function calculatePlayerNetScore(array $scores, int $courseHandicap, array $strokeIndex, array $parValues = [], bool $detailed = false)
+    {
+        $totalNetScore = 0;
+        $totalAdjustedGrossScore = 0;
+        $holeDetails = [];
+
+        foreach ($scores as $hole => $strokes) {
+            // Ensure hole number is integer
+            $holeNumber = (int) $hole;
+
+            // Skip if hole number is invalid
+            if ($holeNumber < 1 || $holeNumber > 18) {
+                continue;
+            }
+
+            // Skip if stroke index not available for this hole
+            if (!isset($strokeIndex[$holeNumber])) {
+                Log::warning("Stroke index not found for hole {$holeNumber}");
+                continue;
+            }
+
+            // Get par value for this hole (default to 4 if not provided)
+            $par = $parValues[$holeNumber] ?? 4;
+
+            // Calculate handicap strokes for this hole
+            $handicapStrokes = $this->calculateHandicapStrokesForHole($courseHandicap, $strokeIndex[$holeNumber]);
+
+            // Calculate adjusted gross strokes (ESC - Equitable Stroke Control)
+            $adjustedGrossStrokes = $this->calculateAdjustedGrossStroke($strokes, $par, $handicapStrokes, $courseHandicap);
+
+            // Calculate net strokes (adjusted gross strokes minus handicap strokes)
+            $netStrokes = max(0, $adjustedGrossStrokes - $handicapStrokes); // Ensure non-negative
+
+            $totalNetScore += $netStrokes;
+            $totalAdjustedGrossScore += $adjustedGrossStrokes;
+
+            if ($detailed) {
+                $holeDetails[$holeNumber] = [
+                    'gross_strokes' => $strokes,
+                    'adjusted_gross_strokes' => $adjustedGrossStrokes,
+                    'handicap_strokes' => $handicapStrokes,
+                    'net_strokes' => $netStrokes,
+                    'par' => $par,
+                    'stroke_index' => $strokeIndex[$holeNumber],
+                    'max_allowed_strokes' => $this->getMaxAllowedStrokes($par, $handicapStrokes, $courseHandicap)
+                ];
+            }
+        }
+
+        Log::debug('Net score calculated', [
+            'total_net_score' => $totalNetScore,
+            'total_adjusted_gross_score' => $totalAdjustedGrossScore,
+            'course_handicap' => $courseHandicap,
+            'holes_played' => count($scores)
+        ]);
+
+        return $detailed ? [
+            'total_net_score' => $totalNetScore,
+            'total_adjusted_gross_score' => $totalAdjustedGrossScore,
+            'hole_details' => $holeDetails
+        ] : $totalNetScore;
+    }
+
+    /**
+     * Calculate handicap strokes for a specific hole
+     * 
+     * @param int $courseHandicap Player's course handicap
+     * @param int $strokeIndex Stroke index of the hole
+     * @return int Number of handicap strokes for this hole
+     */
+    private function calculateHandicapStrokesForHole(int $courseHandicap, int $strokeIndex): int
+    {
+        // Basic handicap allocation: if course handicap >= stroke index, player gets 1 stroke
+        // For handicaps > 18, players get additional strokes on easier holes
+
+        if ($courseHandicap <= 0) {
+            return 0;
+        }
+
+        $strokes = 0;
+
+        // First stroke allocation (handicap 1-18)
+        if ($courseHandicap >= $strokeIndex) {
+            $strokes++;
+        }
+
+        // Second stroke allocation (handicap 19-36)
+        if ($courseHandicap >= ($strokeIndex + 18)) {
+            $strokes++;
+        }
+
+        // Third stroke allocation (handicap 37-54) - rare but possible
+        if ($courseHandicap >= ($strokeIndex + 36)) {
+            $strokes++;
+        }
+
+        return $strokes;
+    }
+
+    /**
+     * Calculate adjusted gross stroke for a hole using Equitable Stroke Control (ESC)
+     * 
+     * @param int $actualStrokes Actual strokes taken on the hole
+     * @param int $par Par value for the hole
+     * @param int $handicapStrokes Number of handicap strokes for this hole
+     * @param int $courseHandicap Player's total course handicap
+     * @return int Adjusted gross strokes (capped at maximum allowed)
+     */
+    private function calculateAdjustedGrossStroke(int $actualStrokes, int $par, int $handicapStrokes, int $courseHandicap): int
+    {
+        $maxAllowedStrokes = $this->getMaxAllowedStrokes($par, $handicapStrokes, $courseHandicap);
+        return min($actualStrokes, $maxAllowedStrokes);
+    }
+
+    /**
+     * Get maximum allowed strokes for a hole based on mathematical expression
+     * Formula: Par + Handicap Strokes + Double Bogey Constant (2)
+     * 
+     * @param int $par Par value for the hole
+     * @param int $handicapStrokes Number of handicap strokes for this hole
+     * @param int $courseHandicap Player's total course handicap (unused in pure mathematical approach)
+     * @return int Maximum allowed strokes
+     */
+    private function getMaxAllowedStrokes(int $par, int $handicapStrokes, int $courseHandicap): int
+    {
+        // Pure mathematical expression: Par + Handicap Strokes + Double Bogey Constant
+        $doubleBogeyConstant = 2;
+        return $par + $handicapStrokes + $doubleBogeyConstant;
+    }
+
+    /**
+     * Legacy method for backward compatibility - uses hardcoded test data
+     * @deprecated Use calculatePlayerNetScore() instead
+     */
+    public function getNetScore()
+    {
+        // Hardcoded test data for demonstration
+        $courseHandicap = 12;
+        $strokeIndex = [
+            1 => 10,
+            2 => 3,
+            3 => 14,
+            4 => 7,
+            5 => 17,
+            6 => 4,
+            7 => 1,
+            8 => 13,
+            9 => 16,
+            10 => 5,
+            11 => 15,
+            12 => 8,
+            13 => 11,
+            14 => 2,
+            15 => 18,
+            16 => 6,
+            17 => 12,
+            18 => 9
+        ];
+
+        $scores = [
+            1 => 8,
+            2 => 5,
+            3 => 3,
+            4 => 4,
+            5 => 6,
+            6 => 5,
+            7 => 4,
+            8 => 3,
+            9 => 5,
+            10 => 4,
+            11 => 5,
+            12 => 3,
+            13 => 4,
+            14 => 6,
+            15 => 5,
+            16 => 4,
+            17 => 3,
+            18 => 5
+        ];
+
+        // Typical par values for 18 holes
+        $parValues = [
+            1 => 4,
+            2 => 4,
+            3 => 3,
+            4 => 4,
+            5 => 5,
+            6 => 4,
+            7 => 3,
+            8 => 4,
+            9 => 5,
+            10 => 4,
+            11 => 5,
+            12 => 3,
+            13 => 4,
+            14 => 4,
+            15 => 5,
+            16 => 4,
+            17 => 3,
+            18 => 4
+        ];
+
+        return $this->calculatePlayerNetScore($scores, $courseHandicap, $strokeIndex, $parValues, true);
     }
 }
