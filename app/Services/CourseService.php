@@ -54,14 +54,12 @@ class CourseService
 
         try {
 
-            $gender = 'M';
+
 
             $tournamentCourse = TournamentCourse::where('tournament_course_id', $tournamentCourseId)->firstOrFail();
 
             $pars = ScorecardHole::with([
-                'strokeIndex' => function ($query) use ($gender) {
-                    $query->where('gender', $gender);
-                }
+                'strokeIndex'
             ])->whereHas('scorecard', function ($query) use ($tournamentCourse) {
                 $query->where('scorecard_id', $tournamentCourse->scorecard_id);
             })->where('scorecard_id', $tournamentCourse->scorecard_id)

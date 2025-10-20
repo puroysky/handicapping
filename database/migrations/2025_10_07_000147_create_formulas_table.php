@@ -23,7 +23,7 @@ return new class extends Migration
             $table->string('formula_desc', 255)->nullable()->default(null);
 
             $table->string('formula_expression', 255)->comment('The mathematical expression of the formula');
-            $table->json('formula_components')->comment('List of components and its values used in the formula');
+            $table->json('formula_variables')->comment('List of components and its values used in the formula');
 
             $table->text('remarks')->nullable()->default(null);
             $table->boolean('active')->default(true);

@@ -17,8 +17,8 @@ return new class extends Migration
             $table->unsignedBigInteger('scorecard_hole_id');
             $table->unsignedTinyInteger('hole');
             $table->enum('gender', ['M', 'F'])->comment('M = Male, F = Female');
-            $table->unsignedTinyInteger('handicap_hole')->nullable()->default(null)->comment('Handicap for the hole, typically 1-18, null if not assigned');
-            $table->unsignedTinyInteger('scorecard_hole')->comment('Hole number, typically 1-18. Redundant but useful for quick access');
+            $table->unsignedTinyInteger('stroke_index')->nullable()->default(null)->comment('Handicap for the hole, typically 1-18, null if not assigned');
+
 
             $table->unique(['scorecard_hole_id', 'gender'], 'scorecard_hole_handicap_key')->comment('Ensure unique combination of scorecard hole and gender');
 

@@ -126,10 +126,10 @@ class ScoreController extends Controller
                     }
                 },
             ],
-            'scores.*.strokes' => $request->scoring_method === 'hole_by_hole' ? 'required|integer' : 'nullable|integer',
+            'scores.*.gross_strokes' => $request->scoring_method === 'hole_by_hole' ? 'required|integer' : 'nullable|integer',
             'scores.*.raw_input' => ['required', 'regex:/^(x|\d+)$/'],
             'scores.*.par' => 'required|integer',
-            'scores.*.handicap_index' => 'required|integer',
+            'scores.*.stroke_index' => 'required|integer',
             'scores.*.yardage' => 'required|integer',
         ]);
 

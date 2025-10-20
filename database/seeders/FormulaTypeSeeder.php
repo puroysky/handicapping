@@ -22,8 +22,9 @@ class FormulaTypeSeeder extends Seeder
                 'formula_type_desc' => 'Adjusted Gross Score Formula',
                 'remarks' => 'Used for calculating Adjusted Gross Score',
                 'formula_type_fields' => json_encode([
-                    'HOLE_PAR',
+                    'PAR',
                     'HANDICAP_STROKES',
+                    'DOUBLE_BOGEY_LIMIT',
                 ]),
                 'active' => true,
                 'created_by' => 1, // Assuming admin user ID is 1

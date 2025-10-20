@@ -24,17 +24,8 @@ class FormulaSeeder extends Seeder
                 'formula_name' => 'Adjusted Gross Score v1.0',
                 'formula_code' => 'ASG-v1.0',
                 'formula_desc' => 'Initial version of Adjusted Gross Score formula',
-                'formula_expression' => 'HOLE_PAR + DOUBLE_BOGEY_LIMIT + HANDICAP_STROKES',
-                'formula_components' => json_encode([
-
-                    [
-                        'type' => 'field',
-                        'name' => 'HOLE_PAR',
-                    ],
-                    [
-                        'type' => 'field',
-                        'name' => 'HANDICAP_STROKES',
-                    ],
+                'formula_expression' => 'PAR + DOUBLE_BOGEY_LIMIT + HANDICAP_STROKES',
+                'formula_variables' => json_encode([
                     [
                         'type' => 'variable',
                         'name' => 'DOUBLE_BOGEY_LIMIT',
@@ -51,7 +42,7 @@ class FormulaSeeder extends Seeder
                 'formula_code' => 'SD-v1.0',
                 'formula_desc' => 'Initial version of Score Differential formula',
                 'formula_expression' => 'SD = (AGS - Course Rating) x 113 / Slope Rating',
-                'formula_components' => json_encode([
+                'formula_variables' => json_encode([
                     'adjusted_gross_score',
                     'course_rating',
                     'slope_rating',
@@ -66,7 +57,7 @@ class FormulaSeeder extends Seeder
                 'formula_code' => 'HI-V1.0',
                 'formula_desc' => 'Initial version of Handicap Index formula',
                 'formula_expression' => 'HI = Average of Lowest Score Differentials x 0.96',
-                'formula_components' => json_encode([
+                'formula_variables' => json_encode([
                     'score_differentials',
                 ]),
                 'remarks' => 'Used for calculating Handicap Index',

@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\PlayerController;
 use App\Http\Controllers\Admin\ScoreController;
 use App\Http\Controllers\FormulaController;
+use NXP\MathExecutor;
 
 Route::get('/', function () {
     return view('welcome');
@@ -15,8 +16,24 @@ Route::get('/', function () {
 Route::get('test', function () {
 
 
+
+
+
+
+
+
+
     $scoreService = new \App\Services\ScoreService();
-    $test = $scoreService->getNetScore();
+
+    $scoreArr = [
+        [
+            'gross_strokes' => 5,
+            'par' => 4,
+            'stroke_index' => 12,
+            'yardage' => 450
+        ]
+    ];
+    $test = $scoreService->getScoreBreakdown($scoreArr, 10);
 
     echo '<pre>';
     print_r($test);

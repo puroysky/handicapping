@@ -20,6 +20,9 @@ return new class extends Migration
             $table->unsignedBigInteger('user_profile_id')->comment('User profile ID who played the round');
             $table->unsignedBigInteger('user_id')->comment('User ID who played the round');
 
+
+
+
             $table->unsignedBigInteger('tournament_id')->comment('Tournament played');
             $table->unsignedBigInteger('tournament_course_id')->comment('Course played');
             $table->unsignedBigInteger('tee_id')->comment('Tee played');

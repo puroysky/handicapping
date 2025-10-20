@@ -32,13 +32,13 @@ class Scorecard extends Model
         return $this->hasMany(ScorecardYard::class, 'scorecard_id', 'scorecard_id');
     }
 
-    public function handicapHoles()
+    public function strokeIndex()
     {
-        return $this->hasMany(ScorecardHoleHandicap::class, 'scorecard_id', 'scorecard_id');
+        return $this->hasMany(ScorecardStrokeIndex::class, 'scorecard_id', 'scorecard_id');
     }
 
     public function handicapHole()
     {
-        return $this->hasOne(ScorecardHoleHandicap::class, 'scorecard_id', 'scorecard_id');
+        return $this->hasOne(ScorecardStrokeIndex::class, 'scorecard_id', 'scorecard_id');
     }
 }

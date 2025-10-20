@@ -43,14 +43,23 @@
                                         <small class="badge bg-success" id="player_gender_display">
                                             <i class="fas fa-venus-mars me-1"></i>-
                                         </small>
+                                        <small class="badge bg-warning text-dark d-none" id="tee_difference_display">
+                                            <i class="fas fa-flag me-1"></i>-
+                                        </small>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-4">
-                                <div class="form-floating bg-white rounded-2 border border-light shadow-sm">
+                            <div class="col-md-4 d-flex align-items-center gap-2">
+                                <div class="form-floating bg-white rounded-2 border border-light shadow-sm flex-grow-1">
                                     <input type="date" name="score_date" id="score_date" class="form-control border-0 bg-light" required value="{{ \Carbon\Carbon::now()->format('Y-m-d') }}">
                                     <label for="score_date" class="fw-semibold text-dark small">
                                         <i class="fas fa-calendar-day text-primary me-1"></i>Score Date
+                                    </label>
+                                </div>
+                                <div class="form-floating bg-white rounded-2 border border-light shadow-sm" style="min-width: 140px;">
+                                    <input type="text" name="handicap_index" id="handicap_index" class="form-control border-0 bg-light" placeholder="-">
+                                    <label for="handicap_index" class="fw-semibold text-dark small">
+                                        <i class="fas fa-chart-line text-warning me-1"></i>Handicap Index
                                     </label>
                                 </div>
                             </div>
@@ -1007,6 +1016,9 @@
                         // Display selected player information
                         displaySelectedPlayerInfo(playerName, playerWhs, playerAccount, playerGender, playerId);
 
+                        // Refresh tees if a course is already selected
+                        refreshTeesForSelectedCourse();
+
                         // Automatically update handicap display based on player's gender
                         if (window.courseHandicapData) {
                             updateHandicapDisplay(playerGender);
@@ -1034,6 +1046,98 @@
                 });
             } else {
                 playerDropdown.innerHTML = '<div class="p-2 text-muted"><i class="fas fa-user-slash me-2"></i>No players found</div>';
+            }
+        }
+
+        function refreshTeesForSelectedCourse() {
+            const courseSelect = document.getElementById('course_id');
+            const teeSelect = document.getElementById('tee_id');
+
+            if (courseSelect && courseSelect.value && teeSelect) {
+                const courseId = courseSelect.value;
+                const playerGender = window.selectedPlayerGender || 'M';
+
+                console.log('Refreshing tees for course:', courseId, 'with updated gender:', playerGender);
+
+                // Enable tee select and show loading state
+                teeSelect.disabled = false;
+                teeSelect.innerHTML = '<option value="">Loading tees...</option>';
+
+                // Fetch tees from API with gender parameter
+                fetch(`${BASE_URL}/admin/courses/${courseId}/tees`)
+                    .then(response => {
+                        console.log('Tees refresh API Response status:', response.status);
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log('Tees refresh API Response data:', data);
+                        teeSelect.innerHTML = '<option value="">Select Tee</option>';
+
+                        if (data.success) {
+                            if (data.tees && data.tees.length > 0) {
+                                data.tees.forEach(tee => {
+                                    const option = document.createElement('option');
+                                    option.value = tee.tee_id;
+                                    option.textContent = `${tee.tee_code} (${tee.tee_name})`;
+                                    teeSelect.appendChild(option);
+                                });
+                                console.log(`Refreshed ${data.tees.length} tees for gender: ${playerGender}`);
+
+                                // Show tee gender information and compute difference if available
+                                displayTeeGenderInfo(data.tees, playerGender, data.comparison);
+                            } else {
+                                teeSelect.innerHTML = '<option value="">No tees available</option>';
+                                teeSelect.disabled = true;
+                                console.log('No tees found for selected gender');
+                                hideTeeGenderInfo();
+                            }
+                        } else {
+                            console.error('Failed to fetch tees:', data.message || 'Unknown error');
+                            teeSelect.innerHTML = '<option value="">Error loading tees</option>';
+                            teeSelect.disabled = true;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error refreshing tees:', error);
+                        teeSelect.innerHTML = '<option value="">Error loading tees</option>';
+                        teeSelect.disabled = true;
+                    });
+            }
+        }
+
+        function displayTeeGenderInfo(tees, currentGender, comparison = null) {
+            const teeDifferenceDisplay = document.getElementById('tee_difference_display');
+
+            if (!teeDifferenceDisplay) return;
+
+            // If comparison data is available from backend
+            if (comparison && comparison.yardage_difference !== undefined) {
+                const difference = Math.abs(comparison.yardage_difference);
+                const otherGender = currentGender === 'M' ? 'Female' : 'Male';
+                const direction = comparison.yardage_difference > 0 ? 'longer' : 'shorter';
+
+                teeDifferenceDisplay.innerHTML = `<i class="fas fa-flag me-1"></i>${difference}y ${direction} than ${otherGender}`;
+                teeDifferenceDisplay.classList.remove('d-none');
+
+                console.log(`Tee difference: ${difference}y ${direction} than ${otherGender} tees`);
+            } else {
+                // Fallback: show that we're showing gender-specific tees
+                const genderText = currentGender === 'M' ? 'Male' : 'Female';
+                teeDifferenceDisplay.innerHTML = `<i class="fas fa-flag me-1"></i>${genderText} Tees`;
+                teeDifferenceDisplay.classList.remove('d-none');
+
+                console.log(`Showing ${genderText} specific tees`);
+            }
+        }
+
+        function hideTeeGenderInfo() {
+            const teeDifferenceDisplay = document.getElementById('tee_difference_display');
+
+            if (teeDifferenceDisplay) {
+                teeDifferenceDisplay.classList.add('d-none');
             }
         }
 
@@ -1367,7 +1471,7 @@
                 if (scoreValue && !isNaN(scoreValue)) {
                     const score = parseInt(scoreValue);
                     if (score > 0 && score <= 20) {
-                        scoreObj.strokes = score;
+                        scoreObj.gross_strokes = score;
                         // Categorize holes into front nine (1-9) and back nine (10-18)
                         if (holeNumber >= 1 && holeNumber <= 9) {
                             frontNineScores[holeNumber] = score;
@@ -1381,10 +1485,10 @@
                 // Always include raw value, par, handicap, yardage
                 scoreObj.raw_input = rawValue;
                 scoreObj.par = par;
-                scoreObj.handicap_index = handicap;
+                scoreObj.stroke_index = handicap;
                 scoreObj.yardage = yardage;
                 // Only add if stroke or raw is present
-                if (scoreObj.strokes !== undefined || scoreObj.raw) {
+                if (scoreObj.gross_strokes !== undefined || scoreObj.raw) {
                     scores[holeNumber] = scoreObj;
                 }
             });
@@ -1921,14 +2025,18 @@
                     // Clear scorecard values when course changes
                     clearScorecardValues();
 
+                    // Reset handicap data when course changes
+                    window.courseHandicapData = null;
+
                     if (courseId) {
                         // Enable tee select and show loading state
                         teeSelect.disabled = false;
                         teeSelect.innerHTML = '<option value="">Loading tees...</option>';
 
-                        // Fetch tees from API
-                        console.log('Fetching tees for course:', courseId);
-                        fetch(`${BASE_URL}/admin/courses/${courseId}/tees`)
+                        // Fetch tees from API with gender parameter
+                        const playerGender = window.selectedPlayerGender || 'M';
+                        console.log('Fetching tees for course:', courseId, 'with gender:', playerGender);
+                        fetch(`${BASE_URL}/admin/courses/${courseId}/tees?gender=${playerGender}`)
                             .then(response => {
                                 console.log('Tees API Response status:', response.status);
                                 if (!response.ok) {
@@ -1949,10 +2057,14 @@
                                             teeSelect.appendChild(option);
                                         });
                                         console.log(`Loaded ${data.tees.length} tees from API`);
+
+                                        // Show tee gender information and compute difference if available
+                                        displayTeeGenderInfo(data.tees, playerGender, data.comparison);
                                     } else {
                                         teeSelect.innerHTML = '<option value="">No tees available</option>';
                                         teeSelect.disabled = true;
                                         console.log('No tees found in API response');
+                                        hideTeeGenderInfo();
                                     }
 
 
@@ -1971,14 +2083,29 @@
                                             const par = holeData.par;
 
                                             // Store handicap data by gender
-                                            if (holeData.handicap_hole) {
-                                                const gender = holeData.handicap_hole.gender || 'M'; // Default to Male
-                                                const handicapValue = holeData.handicap_hole.handicap_hole || '-';
+                                            // API may return single stroke_index object or array of stroke indices
+                                            if (holeData.stroke_index) {
+                                                if (Array.isArray(holeData.stroke_index)) {
+                                                    // Handle array of stroke indices (one per gender)
+                                                    holeData.stroke_index.forEach(strokeIndexData => {
+                                                        const gender = strokeIndexData.gender || 'M';
+                                                        const handicapValue = strokeIndexData.stroke_index || '-';
 
-                                                if (!handicapData[hole]) {
-                                                    handicapData[hole] = {};
+                                                        if (!handicapData[hole]) {
+                                                            handicapData[hole] = {};
+                                                        }
+                                                        handicapData[hole][gender] = handicapValue;
+                                                    });
+                                                } else {
+                                                    // Handle single stroke_index object
+                                                    const gender = holeData.stroke_index.gender || 'M';
+                                                    const handicapValue = holeData.stroke_index.stroke_index || '-';
+
+                                                    if (!handicapData[hole]) {
+                                                        handicapData[hole] = {};
+                                                    }
+                                                    handicapData[hole][gender] = handicapValue;
                                                 }
-                                                handicapData[hole][gender] = handicapValue;
                                             }
 
                                             // Find the par span for this hole
@@ -1993,6 +2120,8 @@
                                         // Store handicap data globally for gender switching
                                         window.courseHandicapData = handicapData;
 
+                                        console.log('Handicap data stored for course:', handicapData);
+
                                         // Update handicap display based on selected player's gender or default to Male
                                         const currentGender = window.selectedPlayerGender || 'M';
                                         updateHandicapDisplay(currentGender);
@@ -2000,6 +2129,8 @@
                                         // Show feedback if player is selected
                                         if (window.selectedPlayerGender) {
                                             console.log(`Handicap display updated for ${currentGender === 'M' ? 'Male' : 'Female'} player after course change`);
+                                        } else {
+                                            console.log(`Handicap display set to default Male, waiting for player selection`);
                                         }
 
                                         // Calculate and update PAR totals
@@ -2079,45 +2210,7 @@
                                 }
                             })
                             .catch(error => {
-                                console.error('Error fetching tees from API:', error);
 
-                                // Fallback to static data if API fails
-                                console.log('Using fallback tees due to API error');
-                                teeSelect.innerHTML = '<option value="">Select Tee</option>';
-                                const fallbackTees = [{
-                                        tee_id: 1,
-                                        tee_name: 'Championship Tees',
-                                        tee_color: 'Black'
-                                    },
-                                    {
-                                        tee_id: 2,
-                                        tee_name: 'Tournament Tees',
-                                        tee_color: 'Blue'
-                                    },
-                                    {
-                                        tee_id: 3,
-                                        tee_name: 'Regular Tees',
-                                        tee_color: 'White'
-                                    },
-                                    {
-                                        tee_id: 4,
-                                        tee_name: 'Forward Tees',
-                                        tee_color: 'Red'
-                                    },
-                                    {
-                                        tee_id: 5,
-                                        tee_name: 'Senior Tees',
-                                        tee_color: 'Gold'
-                                    }
-                                ];
-
-                                fallbackTees.forEach(tee => {
-                                    const option = document.createElement('option');
-                                    option.value = tee.tee_id;
-                                    option.textContent = `${tee.tee_name} (${tee.tee_color})`;
-                                    teeSelect.appendChild(option);
-                                });
-                                console.log('Fallback tees loaded after API error');
                             });
                     }
                 });
@@ -2563,12 +2656,17 @@
 
                 // Gender-based handicap functions
                 function updateHandicapDisplay(gender) {
+                    console.log('updateHandicapDisplay called with gender:', gender);
 
-                    console.log('Updating handicap display for gender:', gender);
+                    if (!window.courseHandicapData) {
+                        console.warn('No course handicap data available yet');
+                        // Clear handicap index field if no data
+                        const handicapIndexInput = document.getElementById('handicap_index');
+                        if (handicapIndexInput) handicapIndexInput.value = '';
+                        return;
+                    }
 
-                    if (!window.courseHandicapData) return;
-
-                    console.log('Updating handicap display for gender:', gender);
+                    console.log('Course handicap data available:', window.courseHandicapData);
 
                     let frontHandicap = 0,
                         backHandicap = 0,
@@ -2578,6 +2676,12 @@
                         const handicapSpan = document.querySelector(`.handicap-span[data-hole="${hole}"]`);
                         if (handicapSpan && window.courseHandicapData[hole]) {
                             const handicapValue = window.courseHandicapData[hole][gender] || '-';
+
+                            // If gender-specific handicap not found, log warning
+                            if (handicapValue === '-' && window.courseHandicapData[hole]) {
+                                console.warn(`No handicap data for hole ${hole} and gender ${gender}. Available genders:`, Object.keys(window.courseHandicapData[hole]));
+                            }
+
                             handicapSpan.textContent = handicapValue;
                             handicapSpan.setAttribute('data-handicap', handicapValue);
                             handicapSpan.setAttribute('data-gender', gender);
@@ -2590,10 +2694,10 @@
                                 backHandicap += numericValue;
                             }
                             totalHandicap += numericValue;
-
-                            console.log(`Updated hole ${hole} handicap to ${handicapValue} for ${gender}`);
                         }
                     }
+
+                    console.log(`Handicap totals for ${gender === 'M' ? 'Male' : 'Female'} - Front: ${frontHandicap}, Back: ${backHandicap}, Total: ${totalHandicap}`);
 
                     // Update handicap totals
                     const frontHandicapTotal = document.querySelector('.front-handicap-total');
@@ -2603,6 +2707,17 @@
                     if (frontHandicapTotal) frontHandicapTotal.textContent = frontHandicap > 0 ? frontHandicap : '-';
                     if (backHandicapTotal) backHandicapTotal.textContent = backHandicap > 0 ? backHandicap : '-';
                     if (totalHandicapTotal) totalHandicapTotal.textContent = totalHandicap > 0 ? totalHandicap : '-';
+
+                    // Update handicap index field beside score date
+                    const handicapIndexInput = document.getElementById('handicap_index');
+                    if (handicapIndexInput) {
+                        // Use selected player's handicap index if available
+                        if (window.selectedPlayerHandicapIndex) {
+                            handicapIndexInput.value = window.selectedPlayerHandicapIndex;
+                        } else {
+                            handicapIndexInput.value = '';
+                        }
+                    }
 
                     // Store current gender selection
                     window.currentGender = gender;
