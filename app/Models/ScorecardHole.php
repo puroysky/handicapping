@@ -8,12 +8,12 @@ class ScorecardHole extends Model
 {
     public function yardages()
     {
-        return $this->hasMany(ScorecardYard::class, 'scorecard_hole_id', 'scorecard_hole_id');
+        return $this->hasMany(ScorecardYardage::class, 'scorecard_hole_id', 'scorecard_hole_id');
     }
 
     public function yardage()
     {
-        return $this->hasOne(ScorecardYard::class, 'scorecard_hole_id', 'scorecard_hole_id');
+        return $this->hasOne(ScorecardYardage::class, 'scorecard_hole_id', 'scorecard_hole_id');
     }
 
     public function strokeIndexes()

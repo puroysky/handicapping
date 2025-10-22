@@ -11,14 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('course_ratings', function (Blueprint $table) {
-            $table->id('course_rating_id');
+        Schema::create('ratings', function (Blueprint $table) {
+            $table->id('rating_id');
+
 
             $table->unsignedBigInteger('scorecard_id');
             $table->unsignedBigInteger('tee_id');
 
-            $table->unique(['scorecard_id', 'tee_id'], 'scorecard_course_rating_key');
+            $table->decimal('slope_rating', 5, 2)->unsigned();
             $table->decimal('course_rating', 5, 2)->unsigned();
+            $table->unique(['scorecard_id', 'tee_id'], 'scorecard_slope_rating_key');
 
             $table->unsignedBigInteger('created_by');
             $table->unsignedBigInteger('updated_by')->nullable()->default(null);
@@ -27,6 +29,7 @@ return new class extends Migration
 
             $table->foreign('created_by')->references('id')->on('users')->onDelete('restrict');
             $table->foreign('updated_by')->references('id')->on('users')->onDelete('restrict');
+
             $table->foreign('scorecard_id')->references('scorecard_id')->on('scorecards')->onDelete('restrict');
             $table->foreign('tee_id')->references('tee_id')->on('tees')->onDelete('restrict');
         });
@@ -37,6 +40,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('scorecard_course_ratings');
+        Schema::dropIfExists('scorecard_slope_ratings');
     }
 };

@@ -6,10 +6,12 @@ use App\Models\PlayerProfile;
 use App\Models\Score;
 use App\Models\Scorecard;
 use App\Models\ScoreHole;
+use App\Models\TournamentCourse;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use InvalidArgumentException;
 use NXP\MathExecutor;
 
 class ScoreService
@@ -49,33 +51,58 @@ class ScoreService
         $this->storeRequestToFile($request);
 
         try {
+
+
+
             DB::beginTransaction();
 
             $scores = $request['scores'] ?? [];
             $side = $this->determineSide($scores);
-            $totalStrokes = $this->calculateTotalStrokes($scores);
+            $player = PlayerProfile::where('player_profile_id', $request['player_profile_id'])->firstOrFail();
+            $sex = $player->userProfile->sex;
 
-            $score = $this->createScore($request, $side, $totalStrokes);
+            $tournamentCourse = TournamentCourse::where('tournament_course_id', $request['tournament_course_id'])->firstOrFail();
+            $scorecardId = $tournamentCourse->scorecard_id;
+            $teeId = $request['tee_id'];
+
+            $formattedScore = $this->formatScoreInput($scorecardId, $sex, $teeId, $scores);
+
+
+
+
+            $scorecard = $this->getScorecard($scorecardId, $teeId);
+            $courseHandicap = $this->getCourseHandicap($request, $scorecard);
+            $scoreBreakdown = $this->getScoreBreakdown($formattedScore, $courseHandicap);
+
+
+            $score = $this->createScore($request, $side, $scoreBreakdown);
 
 
             Log::debug('Score created', ['score_id' => $score->score_id]);
             $this->createScoreHoles($score->score_id, $scores);
 
 
-            $formattedScore = $this->formatScoreInput(1, 'M', 1, $scores);
+            // // return '<pre>' . print_r($formattedScore) . '</pre>';
+            // return '<pre>' . print_r($scoreBreakdown) . '</pre>';
 
-            $scoreBreakdown = $this->getScoreBreakdown($formattedScore, 10);
-
-
-            return '<pre>' . print_r($scoreBreakdown, true) . '</pre>';
-
-            // return '<pre>' . print_r($this->formatScoreInput(1, 'M', 1, $scores), true) . '</pre>';
+            // return '<pre>' . print_r(array_sum(array_column($scoreBreakdown["hole_details"], 'gross_strokes'))) . '</pre>';
 
 
 
 
 
-            // DB::commit();
+
+
+
+            // return '<pre>' . print_r($scoreBreakdown, true) . '</pre>';
+
+            // // return '<pre>' . print_r($this->formatScoreInput(1, 'M', 1, $scores), true) . '</pre>';
+
+
+
+
+
+            DB::commit();
 
 
 
@@ -100,39 +127,96 @@ class ScoreService
     }
 
 
-    /* Calculate the course handicap using handicap index, slope rating, and course rating.
-     *
-     * Formula: Course Handicap = Handicap Index × (Slope Rating ÷ 113)
-     * (Course rating is typically used in handicap index calculation, not directly here)
-     *
-     * @param float $handicapIndex Player's handicap index
-     * @param int $slopeRating Course slope rating
-     * @param float $courseRating Course rating (for reference, not used in calculation)
-     * @return float Calculated course handicap, rounded to nearest whole number
-     */
-    public function calculateCourseHandicap(float $handicapIndex, int $slopeRating, float $courseRating, int $par, array $variables): float
+
+    private function getScorecard($scorecardId, $teeId): ?Scorecard
+    {
+        return Scorecard::with([
+            'slopeRating' => function ($query) use ($teeId) {
+                $query->where('tee_id', $teeId);
+            },
+            'courseRating' => function ($query) use ($teeId) {
+                $query->where('tee_id', $teeId);
+            },
+            'courseRatingFormula'
+        ])->where('scorecard_id', $scorecardId)->firstOrFail();
+    }
+
+
+    private function getCourseHandicap($request, Scorecard $scorecard)
     {
 
 
-        $params = [
-            'HANDICAP_INDEX' => $handicapIndex,
-            'SLOPE_RATING' => $slopeRating,
-            'COURSE_RATING' => $courseRating,
-            'PAR' => $par,
-        ];
-
-        $executor = new MathExecutor();
-
-        foreach ($params as $key => $value) {
-            $executor->setVar($key, $value);
+        if (empty(trim($request['handicap_index'] ?? ''))) {
+            return 0;
         }
 
-        // Standard USGA formula for course handicap
-        $courseHandicap = $executor->execute('HANDICAP_INDEX * (SLOPE_RATING / 113) + (COURSE_RATING - PAR)');
+        $handicapIndex = (float) $request['handicap_index'];
+
+        // Start with user-defined variables from the formula (if any)
+        $variables = json_decode($scorecard->courseRatingFormula?->formula_variables, true) ?? [];
 
 
-        return round($courseHandicap);
+        $formula = $scorecard->courseRatingFormula?->formula_expression ?? '';
+
+        // Convert formula variable objects/arrays into key-value pairs
+        $param = [];
+        foreach ($variables as $parameter) {
+            $param[$parameter['name']] = $parameter['value'];
+        }
+
+        // Merge predefined system values
+        $systemParams = [
+            'HANDICAP_INDEX' => $handicapIndex,
+            'SLOPE_RATING'   => $scorecard->slopeRating->slope_rating,
+            'COURSE_RATING'  => $scorecard->courseRating->course_rating,
+            'PAR'            => $scorecard->scorecardHoles->sum('par'),
+        ];
+
+        // Merge formula variables + system parameters
+        $parameters = array_merge($systemParams, $param);
+
+
+        return $this->calculateCourseHandicap($parameters, $formula);
     }
+
+
+    /**
+     * Calculate the Course Handicap based on user-defined or standard formulas.
+     *
+     * Formula Example (default USGA): 
+     *     Course Handicap = Handicap Index × (Slope Rating ÷ 113)
+     *
+     * Notes:
+     * - The Course Rating is generally used to calculate the Handicap Index, 
+     *   not directly in this formula, but is included here for flexibility.
+     * - Supports dynamic formulas via MathExecutor with registered custom functions.
+     *
+     * @param  array  $params  Key-value pairs of variables (e.g., HANDICAP_INDEX, SLOPE_RATING)
+     * @return float  Calculated course handicap, rounded to the nearest whole number
+     */
+    public function calculateCourseHandicap(array $params, $formula): float
+    {
+        $executor = new MathExecutor();
+
+        // Register custom math helpers
+        $executor->addFunction('round', fn($value, $precision = 0) => round($value, $precision));
+
+        // Bind parameters as variables
+        foreach ($params as $key => $value) {
+            if (is_numeric($value)) {
+                $executor->setVar($key, (float) $value);
+                continue;
+            }
+
+            throw new InvalidArgumentException("Non-numeric parameter value for {$key} provided. Key: {$key}, Value: " . print_r($value, true));
+        }
+
+
+        $courseHandicap = $executor->execute($formula);
+
+        return $courseHandicap;
+    }
+
 
     /**
      * Format scorecard input data for a given scorecard, gender, and tee.
@@ -179,6 +263,7 @@ class ScoreService
             ->mapWithKeys(function ($hole) use ($score) {
                 return [
                     $hole->hole => [
+                        'hole' => $hole->hole,
                         'par' => $hole->par,
                         'stroke_index' => $hole->strokeIndex?->stroke_index,
                         'yardage' => $hole->yardage?->yardage,
@@ -217,7 +302,7 @@ class ScoreService
     /**
      * Calculate total strokes from scores array
      */
-    private function calculateTotalStrokes(array $scores): int
+    private function calculateGrossScore(array $scores): int
     {
         return array_sum(array_column($scores, 'gross_strokes'));
     }
@@ -225,7 +310,7 @@ class ScoreService
     /**
      * Create the main Score record
      */
-    private function createScore($request, string $side, int $totalStrokes): Score
+    private function createScore($request, string $side, array $scoreBreakdown): Score
     {
         $userId = Auth::id();
         $now = now();
@@ -245,9 +330,9 @@ class ScoreService
             'score_date' => $request['score_date'],
             'entry_type' => 'manual',
             'side' => $side,
-            'gross_score' =>  $request['scoring_method'] === 'hole_by_hole' ? $totalStrokes : null,
-            'adjusted_score' => $request['scoring_method'] === 'adjusted_score' ? $request['adjusted_score'] : $totalStrokes,
-            'net_score' => $totalStrokes,
+            'gross_score' =>  $request['scoring_method'] === 'hole_by_hole' ? $scoreBreakdown['gross_score'] : null,
+            'adjusted_score' => $request['scoring_method'] === 'adjusted_score' ? $request['adjusted_score'] : $scoreBreakdown['adjusted_gross_score'],
+            'net_score' => $request['scoring_method'] === 'adjusted_score' ? null : $scoreBreakdown['net_score'],
             'is_verified' => true,
             'verified_by' => $userId,
             'verified_at' => $now,
@@ -349,9 +434,9 @@ class ScoreService
      */
     public function calculatePlayerNetScore(array $scores, int $courseHandicap, array $strokeIndex, array $parValues = [], bool $detailed = false)
     {
-        $totalNetScore = 0;
+        $netScore = 0;
         $totalGrossScore = array_sum($scores);
-        $totalAdjustedGrossScore = 0;
+        $adjustedGrossScore = 0;
         $holeDetails = [];
 
         foreach ($scores as $hole => $strokes) {
@@ -381,8 +466,8 @@ class ScoreService
             // Calculate net strokes (adjusted gross strokes minus handicap strokes)
             $netStrokes = max(0, $adjustedGrossStrokes - $handicapStrokes); // Ensure non-negative
 
-            $totalNetScore += $netStrokes;
-            $totalAdjustedGrossScore += $adjustedGrossStrokes;
+            $netScore += $netStrokes;
+            $adjustedGrossScore += $adjustedGrossStrokes;
 
             if ($detailed) {
                 $holeDetails[$holeNumber] = [
@@ -398,19 +483,19 @@ class ScoreService
         }
 
         Log::debug('Net score calculated', [
-            'total_net_score' => $totalNetScore,
-            'total_gross_score' => $totalGrossScore,
-            'total_adjusted_gross_score' => $totalAdjustedGrossScore,
+            'net_score' => $netScore,
+            'gross_score' => $totalGrossScore,
+            'adjusted_gross_score' => $adjustedGrossScore,
             'course_handicap' => $courseHandicap,
             'holes_played' => count($scores)
         ]);
 
         return $detailed ? [
-            'total_net_score' => $totalNetScore,
-            'total_gross_score' => $totalGrossScore,
-            'total_adjusted_gross_score' => $totalAdjustedGrossScore,
+            'net_score' => $netScore,
+            'gross_score' => $totalGrossScore,
+            'adjusted_gross_score' => $adjustedGrossScore,
             'hole_details' => $holeDetails,
-        ] : $totalNetScore;
+        ] : $netScore;
     }
 
     /**
@@ -422,10 +507,21 @@ class ScoreService
      */
     private function calculateHandicapStrokesForHole(int $courseHandicap, int $strokeIndex): int
     {
+
+
+        $courseHandicap = 19;
+
+
+        Log::debug("Handicap", [
+            "course_handicap" => $courseHandicap,
+            "stroke_index" => $strokeIndex
+        ]);
         // Basic handicap allocation: if course handicap >= stroke index, player gets 1 stroke
         // For handicaps > 18, players get additional strokes on easier holes
 
         if ($courseHandicap <= 0) {
+
+            Log::debug('No handicap strokes allocated', ['course_handicap' => $courseHandicap, 'stroke_index' => $strokeIndex]);
             return 0;
         }
 
@@ -433,16 +529,20 @@ class ScoreService
 
         // First stroke allocation (handicap 1-18)
         if ($courseHandicap >= $strokeIndex) {
+
+            Log::debug("Allocating first handicap stroke (first)", ['course_handicap' => $courseHandicap, 'stroke_index' => $strokeIndex]);
             $strokes++;
         }
 
         // Second stroke allocation (handicap 19-36)
         if ($courseHandicap >= ($strokeIndex + 18)) {
+            Log::debug("Allocating first handicap stroke (second)", ['course_handicap' => $courseHandicap, 'stroke_index' => $strokeIndex]);
             $strokes++;
         }
 
         // Third stroke allocation (handicap 37-54) - rare but possible
         if ($courseHandicap >= ($strokeIndex + 36)) {
+            Log::debug("Allocating first handicap stroke (third)", ['course_handicap' => $courseHandicap, 'stroke_index' => $strokeIndex]);
             $strokes++;
         }
 
@@ -505,9 +605,13 @@ class ScoreService
     private function getScoreBreakdown(array $scoreArr, int $courseHandicap): array
     {
         // Extract data from scoreArr
-        $scores = array_column($scoreArr, 'gross_strokes');
-        $strokeIndex = array_column($scoreArr, 'stroke_index');
-        $parValues = array_column($scoreArr, 'par');
+        $scores = array_column($scoreArr, 'gross_strokes', 'hole');
+        $strokeIndex = array_column($scoreArr, 'stroke_index', 'hole');
+        $parValues = array_column($scoreArr, 'par', 'hole');
+
+        Log::debug($scores);
+        Log::debug($strokeIndex);
+        Log::debug($parValues);
 
         return $this->calculatePlayerNetScore($scores, $courseHandicap, $strokeIndex, $parValues, true);
     }

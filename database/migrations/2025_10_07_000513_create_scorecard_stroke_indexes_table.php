@@ -16,11 +16,11 @@ return new class extends Migration
             $table->unsignedBigInteger('scorecard_id');
             $table->unsignedBigInteger('scorecard_hole_id');
             $table->unsignedTinyInteger('hole');
-            $table->enum('gender', ['M', 'F'])->comment('M = Male, F = Female');
+            $table->enum('sex', ['M', 'F'])->comment('M = Male, F = Female');
             $table->unsignedTinyInteger('stroke_index')->nullable()->default(null)->comment('Handicap for the hole, typically 1-18, null if not assigned');
 
 
-            $table->unique(['scorecard_hole_id', 'gender'], 'scorecard_hole_handicap_key')->comment('Ensure unique combination of scorecard hole and gender');
+            $table->unique(['scorecard_hole_id', 'sex'], 'scorecard_hole_handicap_key')->comment('Ensure unique combination of scorecard hole and gender');
 
             $table->unsignedBigInteger('created_by');
             $table->unsignedBigInteger('updated_by')->nullable()->default(null);

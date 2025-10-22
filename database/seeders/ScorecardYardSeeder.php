@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\ScorecardYard;
+use App\Models\ScorecardYardage;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -13,7 +14,7 @@ class ScorecardYardSeeder extends Seeder
      */
     public function run(): void
     {
-        ScorecardYard::insert([
+        ScorecardYardage::insert([
             [
                 'scorecard_id' => 1,
                 'scorecard_hole_id' => 1,

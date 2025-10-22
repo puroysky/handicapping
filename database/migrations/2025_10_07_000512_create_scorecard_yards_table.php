@@ -11,12 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('scorecard_yards', function (Blueprint $table) {
-            $table->id('scorecard_yard_id');
+        Schema::create('scorecard_yardages', function (Blueprint $table) {
+            $table->id('scorecard_yardages_id');
             $table->unsignedBigInteger('scorecard_id');
             $table->unsignedBigInteger('scorecard_hole_id');
             $table->unsignedBigInteger('tee_id');
             $table->unsignedSmallInteger('yardage');
+            //hole
+            // $table->unsignedSmallInteger('hole');
 
 
 

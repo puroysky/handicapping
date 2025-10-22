@@ -6,42 +6,16 @@ use App\Models\Tournament;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\PlayerController;
 use App\Http\Controllers\Admin\ScoreController;
+use App\Http\Controllers\ScorecardController;
 use App\Http\Controllers\FormulaController;
+
 use NXP\MathExecutor;
 
 Route::get('/', function () {
     return view('welcome');
 })->name('home');
 
-Route::get('test', function () {
-
-
-
-
-
-
-
-
-
-    $scoreService = new \App\Services\ScoreService();
-
-    $scoreArr = [
-        [
-            'gross_strokes' => 5,
-            'par' => 4,
-            'stroke_index' => 12,
-            'yardage' => 450
-        ]
-    ];
-    $test = $scoreService->getScoreBreakdown($scoreArr, 10);
-
-    echo '<pre>';
-    print_r($test);
-    echo '</pre>';
-
-    return;
-    return view('admin.formula.create');
-})->name('test');
+Route::get('test', function () {})->name('test');
 
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::resource('users', App\Http\Controllers\Admin\UserController::class);
@@ -53,8 +27,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::resource('players', PlayerController::class);
 
     Route::resource('scores', ScoreController::class);
+    Route::resource('scorecards', ScorecardController::class);
 
     Route::resource('formulas', FormulaController::class);
+    // Settings page routes
+    Route::get('settings', [\App\Http\Controllers\Admin\SettingsController::class, 'index'])->name('settings');
+    Route::post('settings/save', [\App\Http\Controllers\Admin\SettingsController::class, 'save'])->name('settings.save');
 
     Route::resource('courses', App\Http\Controllers\Admin\CourseController::class);
     Route::get('courses/{course_id}/tees', [App\Http\Controllers\Admin\CourseController::class, 'getTees'])->name('tees.courses');

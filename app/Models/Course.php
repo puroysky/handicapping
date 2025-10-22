@@ -12,4 +12,9 @@ class Course extends Model
     {
         return $this->hasMany(Scorecard::class, 'course_id', 'course_id');
     }
+
+    public function tees()
+    {
+        return $this->hasMany(Tee::class, 'course_id', 'course_id');
+    }
 }

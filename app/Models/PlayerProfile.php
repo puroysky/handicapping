@@ -23,4 +23,9 @@ class PlayerProfile extends Model
     {
         return $this->belongsTo(User::class, 'user_id', 'id');
     }
+
+    public function userProfile()
+    {
+        return $this->belongsTo(UserProfile::class, 'user_profile_id', 'user_profile_id');
+    }
 }

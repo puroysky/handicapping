@@ -1378,6 +1378,8 @@
                 tee_id: document.getElementById('tee_id')?.value,
                 scoring_method: document.getElementById('scoring_method')?.value,
                 score_date: document.getElementById('score_date')?.value,
+                // Include handicap index input so backend receives it
+                handicap_index: document.getElementById('handicap_index')?.value,
                 _token: document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ||
                     document.querySelector('input[name="_token"]')?.value
             };

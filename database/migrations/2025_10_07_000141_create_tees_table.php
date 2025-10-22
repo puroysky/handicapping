@@ -12,6 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('tees', function (Blueprint $table) {
+
             $table->id('tee_id');
             $table->string('tee_code', 10)->comment('Unique code for the tee ex: BLUE, WHITE, RED');
             $table->string('tee_name', 100)->comment('Name of the tee, e.g., Back, Middle, Front');
@@ -20,8 +21,6 @@ return new class extends Migration
 
             $table->text('remarks')->nullable()->default(null);
             $table->boolean('active')->default(true);
-
-
 
             $table->unique(['tee_code', 'course_id'], 'unique_tee_code_course')->comment('Ensure unique combination of tee code and course');
 

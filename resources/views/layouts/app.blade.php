@@ -43,6 +43,10 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{{ route('admin.scores.index') }}">Scores</a>
                     </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('admin.scorecards.index') }}">Scorecards</a>
+                    </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{{ route('admin.players.index') }}">Players</a>
                     </li>
@@ -53,7 +57,7 @@
                         <a class="nav-link" href="{{ route('admin.tournaments.index') }}">Tournaments</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Settings</a>
+                        <a class="nav-link" href="{{ route('admin.settings') }}">Settings</a>
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">

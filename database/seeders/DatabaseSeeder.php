@@ -142,17 +142,18 @@ class DatabaseSeeder extends Seeder
         $this->call([
             CourseSeeder::class,
             TeeSeeder::class,
+            FormulaTypeSeeder::class,
+            FormulaSeeder::class,
             ScorecardSeeder::class,
             ScorecardHoleSeeder::class,
             ScorecardYardSeeder::class,
             ScorecardStokeIndexSeeder::class,
-            CourseRatingSeeder::class,
-            SlopeRatingSeeder::class,
+            RatingSeeder::class,
+
 
             TournamentSeeder::class,
             TournamentCourseSeeder::class,
-            FormulaTypeSeeder::class,
-            FormulaSeeder::class,
+
         ]);
     }
 }
