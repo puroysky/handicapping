@@ -20,7 +20,7 @@
                     <button class="btn btn-outline-secondary btn-modern" onclick="importUsers()">
                         <i class="fas fa-upload me-1"></i>Import
                     </button>
-                    <a href="{{ route('admin.scores.create') }}" class="btn btn-primary btn-modern">
+                    <a href="{{ route('admin.scorecards.create') }}" class="btn btn-primary btn-modern">
                         <i class="fas fa-plus me-2"></i>Add New Scorecard
                     </a>
                 </div>

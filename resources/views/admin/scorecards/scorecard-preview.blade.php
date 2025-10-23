@@ -7,7 +7,8 @@
         background-color: #8DA66E !important;
         color: #fff !important;
         font-weight: bold !important;
-        border: 2px solid #2F4A3C !important;
+        border-left: 1px solid #2F4A3C !important;
+      
     }
 
     .scorecard-table th:nth-child(11) {
@@ -18,20 +19,20 @@
         font-size: 1.05rem;
     }
 
-    .scorecard-table th:nth-child(21),
-    .scorecard-table td:nth-child(21) {
+    .scorecard-table th:nth-child(22),
+    .scorecard-table td:nth-child(22) {
         background-color: #2F4A3C !important;
         color: #8DA66E !important;
         font-weight: bold !important;
         border: 2px solid #8DA66E !important;
     }
 
-    .scorecard-table tbody td:nth-child(21) {
+    .scorecard-table tbody td:nth-child(22) {
         font-size: 1.05rem;
     }
 
-    .scorecard-table th:nth-child(20),
-    .scorecard-table td:nth-child(20) {
+    .scorecard-table th:nth-child(21),
+    .scorecard-table td:nth-child(21) {
         background-color: #5E7C4C !important;
         color: #fff !important;
         font-weight: bold !important;
@@ -108,64 +109,81 @@
                     @foreach($scorecard->course->tees as $tee)
                     
                     <tr>
-                        <td class="fw-bold" style="color: #2F4A3C; background-color: #e8e8e8;">{{ $tee->tee_name }}</td>
+                        <td class="fw-bold">{{ $tee->tee_name }}</td>
 
-                        @php
-                            $yardage = $hole->yardages->firstWhere('tee_id', $tee->tee_id)->yardage
-                        @endphp
+                        @foreach ($yardages[$tee->tee_id] as $hole => $yardage) 
+                            <td style="color: #333;">{{ $yardage }}</td>
+                           @if ($hole == 9)
+                               <td style="">
+                                   {{ array_sum(array_slice($yardages[$tee->tee_id], 0, 9)) }}
+                               </td>
+                           @endif
 
+                              @if ($hole == 18)
+                               
+                           @endif
+                        @endforeach
+
+                        <td>
+                            {{ array_sum(array_slice($yardages[$tee->tee_id], 9, 9)) }}
+                        </td>
+                        <td>
+                            {{ array_sum($yardages[$tee->tee_id]) }}
+                        </td>
                     </tr>
                     @endforeach
 
                     {{-- Par Row --}}
                     <tr style="background-color: #e8e8e8; font-weight: bold;">
                         <td style="color: #2F4A3C; background-color: #d0d0d0;">PAR</td>
-                        @php $parOut = 0; $parIn = 0; @endphp
-                        @foreach($scorecard->scorecardHoles as $hole)
-                        @php
-                        $par = $hole->par;
-                        if ($hole->hole <= 9) $parOut +=$par;
-                            else $parIn +=$par;
-                            @endphp
-                            <td style="color: #2F4A3C;">{{ $par }}</td>
-                            @endforeach
-                            <td>{{ $parOut }}</td>
-                            <td>{{ $parIn }}</td>
-                            <td>{{ $parOut + $parIn }}</td>
+                        @foreach ($scorecard->scorecardHoles as $hole)
+                            <td style="color: #333;">{{ $hole->par }}</td>
+                            @if ($hole->hole == 9)
+                                <td>
+                                    {{ $scorecard->scorecardHoles->pluck('par')->take(9)->sum() }}
+                                </td>
+                            @endif
+                        @endforeach
+                       <td>
+                            {{ $scorecard->scorecardHoles->pluck('par')->skip(9)->sum() }}
+                        </td>
+                      <td>
+                            {{ $scorecard->scorecardHoles->pluck('par')->sum() }}
+                        </td>
+                     
                     </tr>
 
                     {{-- Men's Handicap --}}
                     <tr style="background-color: #f8fafc;">
-                        <td class="fw-bold" style="color: #2F4A3C; background-color: #e8e8e8;">Handicap</td>
-                        @php $hcpOut = 0; $hcpIn = 0; $menStrokes = $scorecard->strokeIndexes->where('sex', 'M'); @endphp
-                        @foreach($scorecard->scorecardHoles as $hole)
-                        @php
-                        $strokeIndex = $menStrokes->firstWhere('hole', $hole->hole)->stroke_index ?? 0;
-                        if ($hole->hole <= 9) $hcpOut +=$strokeIndex;
-                            else $hcpIn +=$strokeIndex;
-                            @endphp
-                            <td style="color: #333;">{{ $strokeIndex }}</td>
-                            @endforeach
-                            <td>{{ $hcpOut }}</td>
-                            <td>{{ $hcpIn }}</td>
-                            <td>{{ $hcpOut + $hcpIn }}</td>
+                        <td class="fw-bold">Handicap</td>
+                        @foreach ($scorecard->strokeIndexes as $index)
+                            @if ($index->sex == 'M')
+                                <td style="color: #333;">{{ $index->stroke_index }}</td>
+                                  @if ($index->hole == 9)
+                                        <td></td>
+                                    @endif
+                            @endif
+                          
+                        @endforeach
+                       <td></td>
+                        <td></td>
+                      
                     </tr>
 
                     {{-- Ladies' Handicap --}}
                     <tr style="background-color: #f8fafc;">
-                        <td class="fw-bold" style="color: #2F4A3C; background-color: #e8e8e8;">Ladies HCP</td>
-                        @php $ladiesOut = 0; $ladiesIn = 0; $womenStrokes = $scorecard->strokeIndexes->where('sex', 'F'); @endphp
-                        @foreach($scorecard->scorecardHoles as $hole)
-                        @php
-                        $womenIndex = $womenStrokes->firstWhere('hole', $hole->hole)->stroke_index ?? 0;
-                        if ($hole->hole <= 9) $ladiesOut +=$womenIndex;
-                            else $ladiesIn +=$womenIndex;
-                            @endphp
-                            <td style="color: #333;">{{ $womenIndex }}</td>
-                            @endforeach
-                            <td>{{ $ladiesOut }}</td>
-                            <td>{{ $ladiesIn }}</td>
-                            <td>{{ $ladiesOut + $ladiesIn }}</td>
+                        <td class="fw-bold">Ladies HDC</td>
+                        @foreach ($scorecard->strokeIndexes as $index)
+                            @if ($index->sex == 'F')
+                                <td style="color: #333;">{{ $index->stroke_index }}</td>
+                                  @if ($index->hole == 9)
+                                        <td></td>
+                                    @endif
+                            @endif
+                          
+                        @endforeach
+                        <td></td>
+                        <td></td>
                     </tr>
                 </tbody>
             </table>
