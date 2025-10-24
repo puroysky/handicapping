@@ -7,21 +7,21 @@
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
-                    <h6 class="header-title">Scorecards Management</h6>
+                    <h6 class="header-title">Formulas Management</h6>
                     <p class="header-subtitle">
-                        <i class="fas fa-list me-2"></i>
-                        Manage golf scorecards
+                        <i class="fas fa-calculator me-2"></i>
+                        Manage handicap calculation formulas
                     </p>
                 </div>
                 <div class="d-flex gap-2">
-                    <button class="btn btn-outline-secondary btn-modern" onclick="exportScorecards()">
+                    <button class="btn btn-outline-secondary btn-modern" onclick="exportFormulas()">
                         <i class="fas fa-download me-1"></i>Export
                     </button>
-                    <button class="btn btn-outline-secondary btn-modern" onclick="importScorecards()">
+                    <button class="btn btn-outline-secondary btn-modern" onclick="importFormulas()">
                         <i class="fas fa-upload me-1"></i>Import
                     </button>
-                    <a href="{{ route('admin.scorecards.create') }}" class="btn btn-primary btn-modern">
-                        <i class="fas fa-plus me-2"></i>Add New Scorecard
+                    <a href="{{ route('admin.formulas.create') }}" class="btn btn-primary btn-modern">
+                        <i class="fas fa-plus me-2"></i>Add New Formula
                     </a>
                 </div>
             </div>
@@ -38,13 +38,13 @@
                         <div class="col-md-6">
                             <div class="search-wrapper">
                                 <i class="fas fa-search search-icon"></i>
-                                <input type="text" class="search-input" id="tableSearch" placeholder="Search scorecards..." autocomplete="off">
+                                <input type="text" class="search-input" id="tableSearch" placeholder="Search formulas..." autocomplete="off">
                             </div>
                         </div>
                         <div class="col-md-6 text-end">
                             <div class="table-info">
                                 <small class="text-muted">
-                                    Showing <span id="showing-count">{{ count($scorecards ?? []) }}</span> of <span id="total-count">{{ count($scorecards ?? []) }}</span> scorecards
+                                    Showing <span id="showing-count">{{ count($formulas) }}</span> of <span id="total-count">{{ count($formulas) }}</span> formulas
                                 </small>
                             </div>
                         </div>
@@ -58,13 +58,13 @@
                             <tr>
                                 <th class="sortable" data-column="0">
                                     <div class="d-flex align-items-center justify-content-between">
-                                        <span>Scorecard Code</span>
+                                        <span>Formula Code</span>
                                         <i class="fas fa-sort sort-icon"></i>
                                     </div>
                                 </th>
                                 <th class="sortable" data-column="1">
                                     <div class="d-flex align-items-center justify-content-between">
-                                        <span>Name</span>
+                                        <span>Formula Name</span>
                                         <i class="fas fa-sort sort-icon"></i>
                                     </div>
                                 </th>
@@ -76,13 +76,13 @@
                                 </th>
                                 <th class="sortable" data-column="3">
                                     <div class="d-flex align-items-center justify-content-between">
-                                        <span>Scorecard Type</span>
+                                        <span>Course</span>
                                         <i class="fas fa-sort sort-icon"></i>
                                     </div>
                                 </th>
                                 <th class="sortable" data-column="4">
                                     <div class="d-flex align-items-center justify-content-between">
-                                        <span>Course</span>
+                                        <span>Formula Type</span>
                                         <i class="fas fa-sort sort-icon"></i>
                                     </div>
                                 </th>
@@ -104,25 +104,25 @@
                             </tr>
                         </thead>
                         <tbody id="mainTableBody">
-                            @foreach ($scorecards ?? [] as $scorecard)
+                            @foreach ($formulas as $formula)
                             <tr class="table-row">
-                                <td class="scorecard-code-cell">
-                                    <span class="fw-bold" style="color: #2F4A3C;">{{ $scorecard->scorecard_code ?? 'N/A' }}</span>
+                                <td class="formula-code-cell">
+                                    <span class="fw-bold" style="color: #2F4A3C;">{{ $formula->formula_code }}</span>
                                 </td>
-                                <td class="scorecard-name-cell">
-                                    <span class="fw-semibold">{{ $scorecard->scorecard_name ?? 'N/A' }}</span>
+                                <td class="formula-name-cell">
+                                    <span class="fw-semibold">{{ $formula->formula_name }}</span>
                                 </td>
-                                <td class="scorecard-desc-cell">
-                                    <span class="text-muted" style="font-size: 0.9rem;">{{ Str::limit($scorecard->scorecard_desc ?? 'No description', 50) }}</span>
-                                </td>
-                                <td class="scorecard-type-cell">
-                                    <span class="text-muted">{{ ucfirst($scorecard->scorecard_type ?? 'N/A') }}</span>
+                                <td class="formula-desc-cell">
+                                    <span class="text-muted" style="font-size: 0.9rem;">{{ Str::limit($formula->formula_desc ?? 'No description', 50) }}</span>
                                 </td>
                                 <td class="course-cell">
-                                    <span class="text-muted">{{ $scorecard->course->course_name ?? 'N/A' }}</span>
+                                    <span class="text-muted">{{ $formula->course->course_name ?? 'N/A' }}</span>
+                                </td>
+                                <td class="formula-type-cell">
+                                    <span class="text-muted">{{ $formula->formulaType->formula_type_name ?? 'N/A' }}</span>
                                 </td>
                                 <td class="status-cell">
-                                    @if ($scorecard->active ?? false)
+                                    @if ($formula->active)
                                     <span class="status-badge status-active">
                                         <i class="fas fa-check-circle me-1"></i>Active
                                     </span>
@@ -133,14 +133,14 @@
                                     @endif
                                 </td>
                                 <td class="date-cell">
-                                    <span class="cell-text-date">{{ \Carbon\Carbon::parse($scorecard->created_at)->format('M d, Y') }}</span>
-                                    <small class="cell-text-time d-block">{{ \Carbon\Carbon::parse($scorecard->created_at)->format('g:i A') }}</small>
+                                    <span class="cell-text-date">{{ \Carbon\Carbon::parse($formula->created_at)->format('M d, Y') }}</span>
+                                    <small class="cell-text-time d-block">{{ \Carbon\Carbon::parse($formula->created_at)->format('g:i A') }}</small>
                                 </td>
                                 <td class="action-cell text-center">
                                     <div class="action-wrapper">
                                         <button class="btn btn-outline-secondary btn-context-menu"
                                             type="button"
-                                            onclick="showScorecardContextMenu({{ $scorecard->scorecard_id ?? $scorecard->id }}, '{{ addslashes($scorecard->scorecard_name ?? 'Scorecard') }}', event)"
+                                            onclick="showFormulaContextMenu({{ $formula->formula_id }}, '{{ $formula->formula_name }}', event)"
                                             title="Actions"
                                             data-label="Actions">
                                             <i class="fas fa-ellipsis-v me-1"></i>
@@ -160,17 +160,17 @@
 </div>
 
 <!-- Import Players Modal -->
-<div class="modal fade" id="importTeesModal" tabindex="-1" aria-labelledby="importTeesModalLabel" aria-hidden="true">
+<div class="modal fade" id="importFormulasModal" tabindex="-1" aria-labelledby="importFormulasModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="importTeesModalLabel">
-                    <i class="fas fa-upload me-2"></i>Import Tees
+                <h5 class="modal-title" id="importFormulasModalLabel">
+                    <i class="fas fa-upload me-2"></i>Import Formulas
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="importTeesForm" enctype="multipart/form-data">
+                <form id="importFormulasForm" enctype="multipart/form-data">
                     @csrf
                     <!-- File Upload Section -->
                     <div class="mb-4">
@@ -242,7 +242,7 @@
                     <i class="fas fa-times me-1"></i>Cancel
                 </button>
                 <button type="button" class="btn btn-primary" onclick="startImport()" id="importBtn">
-                    <i class="fas fa-upload me-1"></i>Import Tees
+                    <i class="fas fa-upload me-1"></i>Import Formulas
                 </button>
             </div>
         </div>
@@ -360,28 +360,28 @@
         }, 10);
     }
 
-    // Scorecard-specific context menu
-    function showScorecardContextMenu(scorecardId, scorecardName, event) {
+    // Formula-specific context menu
+    function showFormulaContextMenu(formulaId, formulaName, event) {
         event.preventDefault();
         event.stopPropagation();
 
         modernContext({
             "data": {
-                "title": "Scorecard Actions",
-                "subtitle": scorecardName
+                "title": "Formula Actions",
+                "subtitle": formulaName
             },
-            "recordId": scorecardId,
+            "recordId": formulaId,
             "items": [{
                     "label": "View Details",
-                    "description": "View complete scorecard information",
+                    "description": "View complete formula information",
                     "icon": "eye",
                     "action": function(id) {
                         viewRecord(id);
                     }
                 },
                 {
-                    "label": "Edit Scorecard",
-                    "description": "Modify scorecard information",
+                    "label": "Edit Formula",
+                    "description": "Modify formula information",
                     "icon": "edit",
                     "action": function(id) {
                         editRecord(id);
@@ -391,8 +391,8 @@
                     "label": "---"
                 },
                 {
-                    "label": "Delete Scorecard",
-                    "description": "Permanently remove scorecard",
+                    "label": "Delete Formula",
+                    "description": "Permanently remove formula",
                     "icon": "trash",
                     "action": function(id) {
                         deleteRecord(id);
@@ -403,19 +403,19 @@
     }
 
     function viewRecord(id) {
-        window.location.href = `${BASE_URL}/admin/scorecards/${id}`;
+        window.location.href = `/admin/formulas/${id}`;
     }
 
     function editRecord(id) {
-        window.location.href = `${BASE_URL}/admin/scorecards/${id}/edit`;
+        window.location.href = `/admin/formulas/${id}/edit`;
     }
 
     function deleteRecord(id) {
-        if (confirm('Are you sure you want to delete this scorecard?')) {
+        if (confirm('Are you sure you want to delete this formula?')) {
             // Create a form and submit it for DELETE request
             const form = document.createElement('form');
             form.method = 'POST';
-            form.action = `/admin/scorecards/${id}`;
+            form.action = `/admin/formulas/${id}`;
 
             // Add CSRF token
             const csrfToken = document.createElement('input');
@@ -436,13 +436,13 @@
         }
     }
 
-    function exportScorecards() {
-        console.log('Export scorecards functionality');
+    function exportCourses() {
+        console.log('Export formulas functionality');
         // Implement export logic here
     }
 
-    function importScorecards() {
-        console.log('Import scorecards functionality');
+    function importCourses() {
+        console.log('Import formulas functionality');
         // Implement import logic here
     }
 
@@ -528,7 +528,7 @@
     // Import Players Functionality
     function importUsers() {
         // Try Bootstrap 5 first, then fallback to jQuery/Bootstrap 4
-        const modalElement = document.getElementById('importTeesModal');
+        const modalElement = document.getElementById('importFormulasModal');
 
         if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
             // Bootstrap 5
@@ -536,7 +536,7 @@
             modal.show();
         } else if (typeof $ !== 'undefined' && $.fn.modal) {
             // jQuery/Bootstrap 4
-            $('#importTeesModal').modal('show');
+            $('#importFormulasModal').modal('show');
         } else {
             // Fallback - manual modal display
             modalElement.style.display = 'block';
@@ -555,15 +555,15 @@
     }
 
     function resetImportModal() {
-        document.getElementById('importTeesForm').reset();
+        document.getElementById('importFormulasForm').reset();
         document.getElementById('importProgress').style.display = 'none';
         document.getElementById('importResults').style.display = 'none';
         document.getElementById('importBtn').disabled = false;
-        document.getElementById('importBtn').innerHTML = '<i class="fas fa-upload me-1"></i>Import Tees';
+        document.getElementById('importBtn').innerHTML = '<i class="fas fa-upload me-1"></i>Import Formulas';
     }
 
     function startImport() {
-        const form = document.getElementById('importTeesForm');
+        const form = document.getElementById('importFormulasForm');
         const fileInput = document.getElementById('import_file');
         const importBtn = document.getElementById('importBtn');
         const progressSection = document.getElementById('importProgress');
@@ -590,7 +590,7 @@
         simulateProgress();
 
         // Make the import request
-        fetch(BASE_URL + '/admin/tees/import', {
+        fetch(BASE_URL + '/admin/formulas/import', {
                 method: 'POST',
                 body: formData,
                 headers: {
@@ -647,7 +647,7 @@
                         <i class="fas fa-check-circle me-1"></i>Import Successful!
                     </h6>
                     <p class="mb-1">${data.message}</p>
-                    <small>Successfully imported ${data.imported} tees.</small>
+                    <small>Successfully imported ${data.imported} formulas.</small>
                     ${data.errors && data.errors.length > 0 ? 
                         `<div class="mt-2">
                             <strong>Warnings/Skipped rows:</strong>
@@ -791,7 +791,7 @@
         // Close modal when clicking backdrop
         document.addEventListener('click', function(e) {
             if (e.target.classList.contains('modal-backdrop')) {
-                closeModal('importTeesModal');
+                closeModal('importFormulasModal');
             }
         });
 

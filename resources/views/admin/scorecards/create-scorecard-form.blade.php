@@ -64,8 +64,8 @@
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-floating">
-                                        <input type="text" class="form-control" id="scorecard_name" name="scorecard_name" placeholder="Scorecard Name" required>
-                                        <label for="course_desc">Scorecard Name</label>
+                                        <input type="text" value="East" class="form-control" id="scorecard_name" name="scorecard_name" placeholder="Scorecard Name" required>
+                                        <label for="scorecard_desc">Scorecard Name</label>
                                         <div class="invalid-feedback">
                                             Please provide a valid scorecard name.
                                         </div>
@@ -73,7 +73,7 @@
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-floating">
-                                        <input type="text" class="form-control" id="scorecard__code" name="scorecard__code" placeholder="Scorecard Code" required minlength="2" maxlength="10">
+                                        <input type="text" value="v1.0.0" class="form-control" id="scorecard__code" name="scorecard__code" placeholder="Scorecard Code" required minlength="2" maxlength="10">
                                         <label for="scorecard__code">Scorecard Code *</label>
                                         <div class="invalid-feedback">
                                             Please provide a valid scorecard code (2-10 characters).
@@ -85,8 +85,8 @@
                             <div class="row">
                                 <div class="col-12">
                                     <div class="form-floating">
-                                        <textarea class="form-control" id="course_desc" name="course_desc" placeholder="Scorecard Description" style="height: 120px;" maxlength="500"></textarea>
-                                        <label for="course_desc">Scorecard Description</label>
+                                        <textarea class="form-control" value="East Course scorecard" id="scorecard_desc" name="scorecard_desc" placeholder="Scorecard Description" style="height: 120px;" maxlength="500"></textarea>
+                                        <label for="scorecard_desc">Scorecard Description</label>
                                         <div class="invalid-feedback">
                                             Scorecard description cannot exceed 500 characters.
                                         </div>
@@ -106,8 +106,9 @@
                                 <div class="col-md-6">
                                     <div class="form-floating mb-3">
                                         <select class="form-select" id="course" name="course" required>
-                                            <option value="">Select Course...</option>
+                                            {{-- <option value="">Select Course...</option> --}}
                                            @foreach ($courses as $course)
+
                                                <option value="{{ $course->course_id }}">{{ $course->course_name }}</option>
                                            @endforeach
                                         </select>
@@ -118,7 +119,7 @@
                                     </div>
                                     <div class="form-floating">
                                         <select class="form-select" id="course_type" name="course_type" required>
-                                            <option value="">Select Course Type...</option>
+                                            {{-- <option value="">Select Course Type...</option> --}}
                                             <option value="tournament">Tournament</option>
                                             <option value="regular">Regular</option>
                                         </select>
@@ -132,7 +133,7 @@
                                     <div class="form-floating">
                                         <select class="form-select" id="x_value" name="x_value" required>
                                             <option value="">Select X Value...</option>
-                                            <option value="bogey">Bogey</option>
+                                            {{-- <option value="bogey">Bogey</option> --}}
                                             <option value="DOUBLE_BOGEY">Double Bogey</option>
                                             <option value="TRIPLE_BOGEY">Triple Bogey</option>
                                         </select>
@@ -161,12 +162,12 @@
                                 Formulas
                             </div>
                             <div class="row g-3">
-                                <div class="col-md-6">
+                                <div class="col-md">
                                     <div class="form-floating">
                                         <select class="form-select" id="adjusted_gross_score_formula_id" name="adjusted_gross_score_formula_id">
                                             <option value="">-- Select Adjusted Gross Score Formula --</option>
                                             @if(isset($formulas) && $formulas->isNotEmpty())
-                                                @foreach($formulas as $formula)
+                                                @foreach($formulas->where('code', 'AGS') as $formula)
                                                     <option value="{{ $formula->id }}" {{ old('adjusted_gross_score_formula_id') == $formula->id ? 'selected' : '' }}>{{ $formula->name }}</option>
                                                 @endforeach
                                             @else
@@ -177,12 +178,12 @@
                                     </div>
                                 </div>
 
-                                <div class="col-md-6">
+                                <div class="col-md">
                                     <div class="form-floating">
                                         <select class="form-select" id="score_differential_formula_id" name="score_differential_formula_id">
-                                            <option value="">-- Select Score Differential Formula --</option>
+                                            {{-- <option value="">-- Select Score Differential Formula --</option> --}}
                                             @if(isset($formulas) && $formulas->isNotEmpty())
-                                                @foreach($formulas as $formula)
+                                                @foreach($formulas->where('code', 'SD') as $formula)
                                                     <option value="{{ $formula->id }}" {{ old('score_differential_formula_id') == $formula->id ? 'selected' : '' }}>{{ $formula->name }}</option>
                                                 @endforeach
                                             @else
@@ -193,37 +194,26 @@
                                     </div>
                                 </div>
 
-                                <div class="col-md-6">
+                                <div class="col-md">
                                     <div class="form-floating">
-                                        <select class="form-select" id="handicap_index_formula_id" name="handicap_index_formula_id">
-                                            <option value="">-- Select Handicap Index Formula --</option>
+                                        <select class="form-select" id="course_handicap_formula_id" name="course_handicap_formula_id">
+                                            {{-- <option value="">-- Select Course Handicalp Formula --</option> --}}
                                             @if(isset($formulas) && $formulas->isNotEmpty())
-                                                @foreach($formulas as $formula)
-                                                    <option value="{{ $formula->id }}" {{ old('handicap_index_formula_id') == $formula->id ? 'selected' : '' }}>{{ $formula->name }}</option>
+                                                @foreach($formulas->where('code', 'CH') as $formula)
+                                                    <option value="{{ $formula->id }}" {{ old('course_handicap_formula_id') == $formula->id ? 'selected' : '' }}>{{ $formula->name }}</option>
                                                 @endforeach
                                             @else
                                                 <option disabled>No formulas available</option>
                                             @endif
                                         </select>
-                                        <label for="handicap_index_formula_id">Handicap Index Formula</label>
+                                        <label for="course_handicap_formula_id">Course Handicap Formula</label>
                                     </div>
                                 </div>
 
-                                <div class="col-md-6">
-                                    <div class="form-floating">
-                                        <select class="form-select" id="course_rating_formula_id" name="course_rating_formula_id">
-                                            <option value="">-- Select Course Rating Formula --</option>
-                                            @if(isset($formulas) && $formulas->isNotEmpty())
-                                                @foreach($formulas as $formula)
-                                                    <option value="{{ $formula->id }}" {{ old('course_rating_formula_id') == $formula->id ? 'selected' : '' }}>{{ $formula->name }}</option>
-                                                @endforeach
-                                            @else
-                                                <option disabled>No formulas available</option>
-                                            @endif
-                                        </select>
-                                        <label for="course_rating_formula_id">Course Rating Formula</label>
-                                    </div>
-                                </div>
+                           
+
+
+                        
                             </div>
                         </div>
 
@@ -309,7 +299,7 @@
                                                 
 
                                                     <td style="color: #333;">
-                                                        <input type="number" value="" class="form-control form-control-sm scorecard-input tee-yardage-input" name="yardages[{{ $tee->tee_id }}][{{ $hole }}]" data-hole="{{ $hole }}" style="max-width: 60px; border-radius: 6px; border: 1px solid #8DA66E; background: #f8fafc;" title="Enter yardage for hole {{ $hole }}">
+                                                        <input type="number" value="{{ $yardage }}" class="form-control form-control-sm scorecard-input tee-yardage-input" name="yardages[{{ $tee->tee_id }}][{{ $hole }}]" data-hole="{{ $hole }}" style="max-width: 60px; border-radius: 6px; border: 1px solid #8DA66E; background: #f8fafc;" title="Enter yardage for hole {{ $hole }}">
                                                     </td>
                                                     @if ($hole == 9)
                                                         <td style="background: #f4f8f2; color: #5E7C4C; font-weight: 500;">{{ array_sum(array_slice($yardages[$tee->tee_id], 0, 9)) }}</td>
@@ -324,7 +314,7 @@
                                                 <td style="color: #2F4A3C; background-color: #d0d0d0;">PAR</td>
                                                 @for ($i = 1; $i <= 18; $i++)
                                                     <td>
-                                                        <input type="number" value="" class="form-control form-control-sm scorecard-input par-input" name="par[{{ $i }}]" data-hole="{{ $i }}" style="max-width: 60px; border-radius: 6px; border: 1px solid #8DA66E; background: #f8fafc;" title="Enter par for hole {{ $i }}">
+                                                        <input type="number" value="{{ $i+5 }}" class="form-control form-control-sm scorecard-input par-input" name="par[{{ $i }}]" data-hole="{{ $i }}" style="max-width: 60px; border-radius: 6px; border: 1px solid #8DA66E; background: #f8fafc;" title="Enter par for hole {{ $i }}">
                                                     </td>
                                                     @if ($i == 9)
                                                         <td style="background: #f4f8f2; color: #5E7C4C;"></td>
@@ -338,7 +328,7 @@
                                                 <td class="fw-bold">Handicap</td>
                                                 @for ($i = 1; $i <= 18; $i++)
                                                     <td>
-                                                        <input type="number" value="" class="form-control form-control-sm scorecard-input" name="male_handicap[{{ $i }}]" data-hole="{{ $i }}" style="max-width: 60px; border-radius: 6px; border: 1px solid #8DA66E; background: #f8fafc;" title="Enter men's handicap for hole {{ $i }}">
+                                                        <input type="number" value="{{ $i+1 }}" class="form-control form-control-sm scorecard-input" name="male_handicap[{{ $i }}]" data-hole="{{ $i }}" style="max-width: 60px; border-radius: 6px; border: 1px solid #8DA66E; background: #f8fafc;" title="Enter men's handicap for hole {{ $i }}">
                                                     </td>
                                                     @if ($i == 9)
                                                         <td style="background: #f4f8f2; color: #5E7C4C;"></td>
@@ -352,7 +342,7 @@
                                                 <td class="fw-bold">Ladies HDC</td>
                                                 @for ($i = 1; $i <= 18; $i++)
                                                     <td>
-                                                        <input type="number" value="" class="form-control form-control-sm scorecard-input" name="ladies_handicap[{{ $i }}]" data-hole="{{ $i }}" style="max-width: 60px; border-radius: 6px; border: 1px solid #8DA66E; background: #f8fafc;" title="Enter ladies' handicap for hole {{ $i }}">
+                                                        <input type="number" value="{{ $i + 2 }}" class="form-control form-control-sm scorecard-input" name="ladies_handicap[{{ $i }}]" data-hole="{{ $i }}" style="max-width: 60px; border-radius: 6px; border: 1px solid #8DA66E; background: #f8fafc;" title="Enter ladies' handicap for hole {{ $i }}">
                                                     </td>
                                                     @if ($i == 9)
                                                         <td style="background: #f4f8f2; color: #5E7C4C;"></td>
@@ -392,6 +382,39 @@
             </div>
         </div>
     </div>
+    <script>
+        // on load event listener
+        document.addEventListener('DOMContentLoaded', function() {
+            //on submit
+
+        //on submit #mainForm
+        document.getElementById('mainForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const submitBtn = document.getElementById('submitBtn');
+            const btnText = submitBtn.querySelector('.btn-text');
+            const btnLoading = submitBtn.querySelector('.btn-loading');
+
+            // Show loading state
+            btnText.classList.add('d-none');
+            btnLoading.classList.remove('d-none');
+
+            // Simulate form submission delay (replace with actual submission logic)
+            setTimeout(function() {
+                // Hide loading state
+                btnLoading.classList.add('d-none');
+                btnText.classList.remove('d-none');
+
+                // Optionally, reset the form or redirect
+                alert('Scorecard created successfully!');
+                document.getElementById('mainForm').reset();
+            }, 2000);
+
+
+                alert("Aaa");
+
+        });
+    </script>
 
 
 @endsection

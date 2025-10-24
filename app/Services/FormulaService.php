@@ -34,14 +34,15 @@ class FormulaService
             DB::beginTransaction();
 
             $formulaType = FormulaType::find($request->input('formula_type_id'));
-            $variableArr = $this->buildVariableArray($request->input('variables', []), $formulaType);
+
 
             $formula = Formula::create([
                 'formula_name' => $request->input('formula_name'),
                 'formula_code' => $request->input('formula_code'),
                 'formula_desc' => $request->input('formula_desc'),
                 'formula_expression' => $request->input('formula_expression'),
-                'formula_variables' => json_encode($variableArr),
+                'course_id' => $request->input('course_id'),
+
                 'formula_type_id' => $request->input('formula_type_id'),
                 'active' => $request->input('active', true),
                 'created_by' => Auth::id()
@@ -54,27 +55,5 @@ class FormulaService
             Log::error('Error creating formula: ' . $e->getMessage());
             return response()->json(['message' => 'An error occurred while creating the formula.' . $e->getMessage()], 500);
         }
-    }
-
-    private function buildVariableArray($variables, $formulaType)
-    {
-        $variableArr = [];
-        foreach ($variables as $var) {
-            $variableArr[] = [
-                'type' => 'variable',
-                'name' => $var['name'],
-                'value' => $var['value'],
-            ];
-        }
-        if ($formulaType && $formulaType->formula_type_fields) {
-            foreach (json_decode($formulaType->formula_type_fields) as $field) {
-                $variableArr[] = [
-                    'type' => 'field',
-                    'name' => $field,
-                    'value' => null,
-                ];
-            }
-        }
-        return $variableArr;
     }
 }

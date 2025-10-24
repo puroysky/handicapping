@@ -21,7 +21,9 @@ class ScorecardSeeder extends Seeder
                     'scorecard_name' => 'North',
                     'scorecard_desc' => 'The North Course Score Card Version 1',
                     'course_id' => 1, // Assuming North Course has ID 1
-                    'course_rating_formula_id' => 4,
+                    'adjusted_gross_score_formula_id' => 1,
+                    'score_differential_formula_id' => 3,
+                    'course_handicap_formula_id' => 7,
                     'x_value' => 2,
                     'total_holes' => 18,
                     'created_by' => 1, // Assuming admin user ID is 1
@@ -31,12 +33,15 @@ class ScorecardSeeder extends Seeder
                     'scorecard_name' => 'South',
                     'scorecard_desc' => 'The North Course Score Card Version 1',
                     'course_id' => 2, // Assuming North Course has ID 1
-                    'course_rating_formula_id' => 4,
+                    'adjusted_gross_score_formula_id' => 2,
+                    'score_differential_formula_id' => 4,
+                    'course_handicap_formula_id' => 8,
                     'x_value' => 3,
                     'total_holes' => 18,
                     'created_by' => 1, // Assuming admin user ID is 1
                 ]
             ]
+
         );
     }
 }

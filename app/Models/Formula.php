@@ -19,4 +19,14 @@ class Formula extends Model
         'updated_by',
 
     ];
+
+    public function formulaType()
+    {
+        return $this->belongsTo(FormulaType::class, 'formula_type_id');
+    }
+
+    public function course()
+    {
+        return $this->belongsTo(Course::class, 'course_id', 'course_id');
+    }
 }

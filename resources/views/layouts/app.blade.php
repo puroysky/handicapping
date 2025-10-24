@@ -44,20 +44,44 @@
                         <a class="nav-link" href="{{ route('admin.scores.index') }}">Scores</a>
                     </li>
 
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ route('admin.scorecards.index') }}">Scorecards</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ route('admin.players.index') }}">Players</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ route('admin.users.index') }}">Users</a>
-                    </li>
+             
+            
                     <li class="nav-item">
                         <a class="nav-link" href="{{ route('admin.tournaments.index') }}">Tournaments</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{{ route('admin.settings') }}">Settings</a>
+                    </li>
+                       <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            Maintenance
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ route('admin.courses.index') }}">Courses</a></li>
+                            <li><a class="dropdown-item" href="{{ route('admin.tees.index') }}">Tees</a></li>
+                            <li><a class="dropdown-item" href="{{ route('admin.formulas.index') }}">Fomulas</a></li>
+                                     <li><a class="dropdown-item" href="{{ route('admin.formula-types.index') }}">Fomula Types</a></li>
+                               <li><a class="dropdown-item" href="{{ route('admin.scorecards.index') }}">Scorecards</a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item" href="#">Tournament Results</a></li>
+                        </ul>
+                    </li>
+
+                     <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            Users
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ route('admin.players.index') }}">Player</a></li>
+                            <li><a class="dropdown-item" href="{{ route('admin.users.index') }}">Administrator</a></li>
+                  
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item" href="#">Tournament Results</a></li>
+                        </ul>
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">

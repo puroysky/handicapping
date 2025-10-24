@@ -13,7 +13,7 @@ class TournamentService
 
     public function index()
     {
-        $tournaments = \App\Models\Tournament::with('courses.course')->get();
+        $tournaments = \App\Models\Tournament::with('tournamentCourses.course')->get();
         $title = 'Tournaments';
         return view('admin.tournaments.tournaments', compact('tournaments', 'title'));
     }

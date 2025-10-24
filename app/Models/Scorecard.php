@@ -59,4 +59,21 @@ class Scorecard extends Model
     {
         return $this->hasOne(Formula::class, 'formula_id', 'course_rating_formula_id');
     }
+
+
+    public function adjustedGrossScoreFormula()
+    {
+        return $this->hasOne(Formula::class, 'formula_id', 'adjusted_gross_score_formula_id');
+    }
+
+
+    public function scoreDifferentialFormula()
+    {
+        return $this->hasOne(Formula::class, 'formula_id', 'score_differential_formula_id');
+    }
+
+    public function courseHandicapFormula()
+    {
+        return $this->hasOne(Formula::class, 'formula_id', 'course_handicap_formula_id');
+    }
 }

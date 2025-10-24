@@ -40,14 +40,11 @@ class ScoreController extends Controller
         $scorecard = Scorecard::with([
 
             // Eager load courseRatings for the selected tee
-            'courseRatings' => function ($query) use ($tee) {
+            'ratings' => function ($query) use ($tee) {
                 $query->where('tee_id', $tee);
             },
 
-            // Eager load slopeRatings for the selected tee
-            'slopeRatings' => function ($query) use ($tee) {
-                $query->where('tee_id', $tee);
-            },
+
 
             'scorecardHoles.yardage' => function ($query) use ($tee) {
                 $query->where('tee_id', $tee);

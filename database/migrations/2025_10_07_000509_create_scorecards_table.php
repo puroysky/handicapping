@@ -24,8 +24,9 @@ return new class extends Migration
             $table->unique(['scorecard_code', 'course_id'], 'scorecard_code_course_key')->comment('Ensure unique scorecard code per course');
             $table->unsignedBigInteger('adjusted_gross_score_formula_id')->nullable()->default(null)->comment('Formula used for Adjusted Gross Score calculation');
             $table->unsignedBigInteger('score_differential_formula_id')->nullable()->default(null)->comment('Formula used for Score Differential calculation');
-            $table->unsignedBigInteger('handicap_index_formula_id')->nullable()->default(null)->comment('Formula used for Handicap Index calculation');
-            $table->unsignedBigInteger('course_rating_formula_id')->nullable()->default(null)->comment('Formula used for Course Rating calculation');
+            $table->unsignedBigInteger('course_handicap_formula_id')->nullable()->default(null)->comment('Formula used for Handicap Index calculation');
+
+
 
 
 
@@ -50,8 +51,7 @@ return new class extends Migration
 
             $table->foreign('adjusted_gross_score_formula_id')->references('formula_id')->on('formulas')->onDelete('restrict');
             $table->foreign('score_differential_formula_id')->references('formula_id')->on('formulas')->onDelete('restrict');
-            $table->foreign('handicap_index_formula_id')->references('formula_id')->on('formulas')->onDelete('restrict');
-            $table->foreign('course_rating_formula_id')->references('formula_id')->on('formulas')->onDelete('restrict');
+            $table->foreign('course_handicap_formula_id')->references('formula_id')->on('formulas')->onDelete('restrict');
         });
     }
 

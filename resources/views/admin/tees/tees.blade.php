@@ -7,21 +7,21 @@
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
-                    <h6 class="header-title">Scorecards Management</h6>
+                    <h6 class="header-title">Tees Management</h6>
                     <p class="header-subtitle">
-                        <i class="fas fa-list me-2"></i>
-                        Manage golf scorecards
+                        <i class="fas fa-golf-ball me-2"></i>
+                        Manage golf tees
                     </p>
                 </div>
                 <div class="d-flex gap-2">
-                    <button class="btn btn-outline-secondary btn-modern" onclick="exportScorecards()">
+                    <button class="btn btn-outline-secondary btn-modern" onclick="exportTees()">
                         <i class="fas fa-download me-1"></i>Export
                     </button>
-                    <button class="btn btn-outline-secondary btn-modern" onclick="importScorecards()">
+                    <button class="btn btn-outline-secondary btn-modern" onclick="importTees()">
                         <i class="fas fa-upload me-1"></i>Import
                     </button>
-                    <a href="{{ route('admin.scorecards.create') }}" class="btn btn-primary btn-modern">
-                        <i class="fas fa-plus me-2"></i>Add New Scorecard
+                    <a href="{{ route('admin.tees.create') }}" class="btn btn-primary btn-modern">
+                        <i class="fas fa-plus me-2"></i>Add New Tee
                     </a>
                 </div>
             </div>
@@ -38,13 +38,13 @@
                         <div class="col-md-6">
                             <div class="search-wrapper">
                                 <i class="fas fa-search search-icon"></i>
-                                <input type="text" class="search-input" id="tableSearch" placeholder="Search scorecards..." autocomplete="off">
+                                <input type="text" class="search-input" id="tableSearch" placeholder="Search tees..." autocomplete="off">
                             </div>
                         </div>
                         <div class="col-md-6 text-end">
                             <div class="table-info">
                                 <small class="text-muted">
-                                    Showing <span id="showing-count">{{ count($scorecards ?? []) }}</span> of <span id="total-count">{{ count($scorecards ?? []) }}</span> scorecards
+                                    Showing <span id="showing-count">{{ count($tees) }}</span> of <span id="total-count">{{ count($tees) }}</span> tees
                                 </small>
                             </div>
                         </div>
@@ -58,41 +58,29 @@
                             <tr>
                                 <th class="sortable" data-column="0">
                                     <div class="d-flex align-items-center justify-content-between">
-                                        <span>Scorecard Code</span>
+                                        <span>Tee Name</span>
                                         <i class="fas fa-sort sort-icon"></i>
                                     </div>
                                 </th>
                                 <th class="sortable" data-column="1">
                                     <div class="d-flex align-items-center justify-content-between">
-                                        <span>Name</span>
+                                        <span>Course</span>
                                         <i class="fas fa-sort sort-icon"></i>
                                     </div>
                                 </th>
                                 <th class="sortable" data-column="2">
                                     <div class="d-flex align-items-center justify-content-between">
-                                        <span>Description</span>
+                                        <span>Gender</span>
                                         <i class="fas fa-sort sort-icon"></i>
                                     </div>
                                 </th>
                                 <th class="sortable" data-column="3">
                                     <div class="d-flex align-items-center justify-content-between">
-                                        <span>Scorecard Type</span>
-                                        <i class="fas fa-sort sort-icon"></i>
-                                    </div>
-                                </th>
-                                <th class="sortable" data-column="4">
-                                    <div class="d-flex align-items-center justify-content-between">
-                                        <span>Course</span>
-                                        <i class="fas fa-sort sort-icon"></i>
-                                    </div>
-                                </th>
-                                <th class="sortable" data-column="5">
-                                    <div class="d-flex align-items-center justify-content-between">
                                         <span>Status</span>
                                         <i class="fas fa-sort sort-icon"></i>
                                     </div>
                                 </th>
-                                <th class="sortable" data-column="6">
+                                <th class="sortable" data-column="4">
                                     <div class="d-flex align-items-center justify-content-between">
                                         <span>Created At</span>
                                         <i class="fas fa-sort sort-icon"></i>
@@ -104,25 +92,19 @@
                             </tr>
                         </thead>
                         <tbody id="mainTableBody">
-                            @foreach ($scorecards ?? [] as $scorecard)
+                            @foreach ($tees as $tee)
                             <tr class="table-row">
-                                <td class="scorecard-code-cell">
-                                    <span class="fw-bold" style="color: #2F4A3C;">{{ $scorecard->scorecard_code ?? 'N/A' }}</span>
+                                <td class="course-code-cell">
+                                    <span class="fw-bold" style="color: #2F4A3C;">{{ $tee->tee_name }}</span>
                                 </td>
-                                <td class="scorecard-name-cell">
-                                    <span class="fw-semibold">{{ $scorecard->scorecard_name ?? 'N/A' }}</span>
+                                <td class="course-name-cell">
+                                    <span class="fw-semibold">{{ $tee->course->course_name ?? 'N/A' }}</span>
                                 </td>
-                                <td class="scorecard-desc-cell">
-                                    <span class="text-muted" style="font-size: 0.9rem;">{{ Str::limit($scorecard->scorecard_desc ?? 'No description', 50) }}</span>
-                                </td>
-                                <td class="scorecard-type-cell">
-                                    <span class="text-muted">{{ ucfirst($scorecard->scorecard_type ?? 'N/A') }}</span>
-                                </td>
-                                <td class="course-cell">
-                                    <span class="text-muted">{{ $scorecard->course->course_name ?? 'N/A' }}</span>
+                                <td class="course-desc-cell">
+                                    <span class="text-muted" style="font-size: 0.9rem;">{{ ucfirst($tee->gender ?? 'N/A') }}</span>
                                 </td>
                                 <td class="status-cell">
-                                    @if ($scorecard->active ?? false)
+                                    @if ($tee->active)
                                     <span class="status-badge status-active">
                                         <i class="fas fa-check-circle me-1"></i>Active
                                     </span>
@@ -133,14 +115,14 @@
                                     @endif
                                 </td>
                                 <td class="date-cell">
-                                    <span class="cell-text-date">{{ \Carbon\Carbon::parse($scorecard->created_at)->format('M d, Y') }}</span>
-                                    <small class="cell-text-time d-block">{{ \Carbon\Carbon::parse($scorecard->created_at)->format('g:i A') }}</small>
+                                    <span class="cell-text-date">{{ \Carbon\Carbon::parse($tee->created_at)->format('M d, Y') }}</span>
+                                    <small class="cell-text-time d-block">{{ \Carbon\Carbon::parse($tee->created_at)->format('g:i A') }}</small>
                                 </td>
                                 <td class="action-cell text-center">
                                     <div class="action-wrapper">
                                         <button class="btn btn-outline-secondary btn-context-menu"
                                             type="button"
-                                            onclick="showScorecardContextMenu({{ $scorecard->scorecard_id ?? $scorecard->id }}, '{{ addslashes($scorecard->scorecard_name ?? 'Scorecard') }}', event)"
+                                            onclick="showTeeContextMenu({{ $tee->tee_id }}, '{{ $tee->tee_name }}', event)"
                                             title="Actions"
                                             data-label="Actions">
                                             <i class="fas fa-ellipsis-v me-1"></i>
@@ -360,28 +342,28 @@
         }, 10);
     }
 
-    // Scorecard-specific context menu
-    function showScorecardContextMenu(scorecardId, scorecardName, event) {
+    // Player-specific context menu
+    function showTeeContextMenu(teeId, teeName, event) {
         event.preventDefault();
         event.stopPropagation();
 
         modernContext({
             "data": {
-                "title": "Scorecard Actions",
-                "subtitle": scorecardName
+                "title": "Tee Actions",
+                "subtitle": teeName
             },
-            "recordId": scorecardId,
+            "recordId": teeId,
             "items": [{
                     "label": "View Details",
-                    "description": "View complete scorecard information",
+                    "description": "View complete tee information",
                     "icon": "eye",
                     "action": function(id) {
                         viewRecord(id);
                     }
                 },
                 {
-                    "label": "Edit Scorecard",
-                    "description": "Modify scorecard information",
+                    "label": "Edit Tee",
+                    "description": "Modify tee information",
                     "icon": "edit",
                     "action": function(id) {
                         editRecord(id);
@@ -391,8 +373,8 @@
                     "label": "---"
                 },
                 {
-                    "label": "Delete Scorecard",
-                    "description": "Permanently remove scorecard",
+                    "label": "Delete Tee",
+                    "description": "Permanently remove tee",
                     "icon": "trash",
                     "action": function(id) {
                         deleteRecord(id);
@@ -403,19 +385,19 @@
     }
 
     function viewRecord(id) {
-        window.location.href = `${BASE_URL}/admin/scorecards/${id}`;
+        window.location.href = `/admin/tees/${id}`;
     }
 
     function editRecord(id) {
-        window.location.href = `${BASE_URL}/admin/scorecards/${id}/edit`;
+        window.location.href = `/admin/tees/${id}/edit`;
     }
 
     function deleteRecord(id) {
-        if (confirm('Are you sure you want to delete this scorecard?')) {
+        if (confirm('Are you sure you want to delete this tee?')) {
             // Create a form and submit it for DELETE request
             const form = document.createElement('form');
             form.method = 'POST';
-            form.action = `/admin/scorecards/${id}`;
+            form.action = `/admin/tees/${id}`;
 
             // Add CSRF token
             const csrfToken = document.createElement('input');
@@ -436,13 +418,13 @@
         }
     }
 
-    function exportScorecards() {
-        console.log('Export scorecards functionality');
+    function exportCourses() {
+        console.log('Export tees functionality');
         // Implement export logic here
     }
 
-    function importScorecards() {
-        console.log('Import scorecards functionality');
+    function importCourses() {
+        console.log('Import tees functionality');
         // Implement import logic here
     }
 

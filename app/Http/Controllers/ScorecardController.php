@@ -66,7 +66,15 @@ class ScorecardController extends Controller
 
 
         // Load available formulas for select fields (id,name)
-        $formulas = Formula::select('formula_id as id', 'formula_name as name')->get();
+        $formulas = Formula::leftJoin('formula_types', 'formula_types.formula_type_id', '=', 'formulas.formula_type_id')
+            ->select('formulas.formula_id as id', 'formulas.formula_name as name', 'formula_types.formula_type_code as code')
+            ->get();
+
+
+        // echo '<pre>';
+        // print_r($formulas->where('code', 'AGS'));
+        // echo '</pre>';
+        // return;
 
         return view('admin.scorecards.create-scorecard-form', compact('scorecard', 'yardages', 'formulas', 'courses'));
     }

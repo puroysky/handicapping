@@ -83,10 +83,13 @@
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-floating">
-                                        <input type="number" class="form-control" id="total_holes" name="total_holes" placeholder="18" min="9" max="36" value="18" required>
+                                        <select class="form-select" id="total_holes" name="total_holes" required>
+                                            <option value="">Choose...</option>
+                                            <option value="18" selected>18</option>
+                                        </select>
                                         <label for="total_holes">Total Holes *</label>
                                         <div class="invalid-feedback">
-                                            Please enter a valid number of holes (9-36).
+                                            Please select a number of holes.
                                         </div>
                                     </div>
                                 </div>

@@ -112,8 +112,8 @@
                                     </span>
                                 </td>
                                 <td>
-                                    @foreach ($tournament->courses as $course)
-                                    <span class="badge bg-secondary me-1 mb-1">{{ $course->course->course_name }}</span>
+                                    @foreach ($tournament->tournamentCourses as $course)
+                                    <span class="badge bg-secondary me-1 mb-1">{{ $course->course_name }}</span>
                                     @endforeach
                                 </td>
                                 <td class="">

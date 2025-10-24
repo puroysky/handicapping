@@ -11,9 +11,9 @@
                 <div class="form-body">
                     <h3 class="mb-2 mt-0 text-center text-primary">
                         <i class="fas fa-plus-circle me-2 text-primary"></i>
-                        Add New Golf Formula
+                        Add New Formula
                     </h3>
-                    <p class="text-muted text-center mb-1">Create a new golf formula in the system</p>
+                    <p class="text-muted text-center mb-1">Create a new handicap calculation formula in the system</p>
 
                     <form class="needs-validation" novalidate id="mainForm">
                         @csrf
@@ -27,6 +27,15 @@
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-floating">
+                                        <input type="text" class="form-control" id="formula_code" name="formula_code" placeholder="Formula Code" required minlength="2" maxlength="10">
+                                        <label for="formula_code">Formula Code *</label>
+                                        <div class="invalid-feedback">
+                                            Please provide a valid formula code (2-10 characters).
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-floating">
                                         <input type="text" class="form-control" id="formula_name" name="formula_name" placeholder="Formula Name" required>
                                         <label for="formula_name">Formula Name *</label>
                                         <div class="invalid-feedback">
@@ -34,12 +43,34 @@
                                         </div>
                                     </div>
                                 </div>
+                            </div>
+
+                            <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-floating">
-                                        <input type="text" class="form-control" id="formula_ver" name="formula_code" placeholder="Formula Code" required minlength="2" maxlength="10">
-                                        <label for="formula_code">Formula Code *</label>
+                                        <select class="form-select" id="formula_type_id" name="formula_type_id" required>
+                                            <option value="">Choose...</option>
+                                           @foreach ($formulaTypes as $formulaType)
+                                               <option data-fields="{{ $formulaType->formula_type_fields }}" value="{{ $formulaType->formula_type_id }}">{{ $formulaType->formula_type_name }}</option>
+                                           @endforeach
+                                        </select>
+                                        <label for="formula_type_id">Formula Type *</label>
                                         <div class="invalid-feedback">
-                                            Please provide a valid formula code (2-10 characters).
+                                            Please select a formula type.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Data Fields Display Section -->
+                            <div class="row" id="dataFieldsRow" style="display: none;">
+                                <div class="col-12">
+                                    <div class="alert alert-info" role="alert">
+                                        <h6 class="alert-heading">
+                                            <i class="fas fa-list me-2"></i>Available Fields for Expression
+                                        </h6>
+                                        <div id="dataFieldsList" style="font-size: 0.95rem;">
+                                            <!-- Fields will be populated here by JavaScript -->
                                         </div>
                                     </div>
                                 </div>
@@ -48,8 +79,20 @@
                             <div class="row">
                                 <div class="col-12">
                                     <div class="form-floating">
-                                        <textarea class="form-control" id="formula_desc" name="formula_desc" placeholder="Formula Description" style="height: 120px;" maxlength="500"></textarea>
-                                        <label for="formula_desc">Formula Description</label>
+                                        <input type="text" class="form-control" id="formula_expression" name="formula_expression" placeholder="e.g., BOGEY+STROKE_INDEX" required>
+                                        <label for="formula_expression">Formula Definition (Expression) *</label>
+                                        <div class="invalid-feedback">
+                                            Please provide a formula definition (e.g., BOGEY+STROKE_INDEX).
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="form-floating">
+                                        <textarea class="form-control" id="formula_description" name="formula_description" placeholder="Formula Description" style="height: 120px;" maxlength="500"></textarea>
+                                        <label for="formula_description">Formula Description</label>
                                         <div class="invalid-feedback">
                                             Formula description cannot exceed 500 characters.
                                         </div>
@@ -68,27 +111,11 @@
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-floating">
-                                        <select class="form-select" id="formula_type_id" name="formula_type_id" required>
-                                            <option value="">Choose...</option>
-                                            @foreach($formulaTypes as $type)
-                                            <option value="{{ $type->formula_type_id }}">{{ $type->formula_type_name }}</option>
-                                            @endforeach
-
-                                        </select>
-                                        <label for="formula_type_id">Formula Type *</label>
-                                        <div class="invalid-feedback">
-                                            Please select a formula type.
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-floating">
                                         <select class="form-select" id="course_id" name="course_id" required>
                                             <option value="">Choose...</option>
                                             @foreach($courses as $course)
-                                            <option value="{{ $course->course_id }}">{{ $course->course_name }}</option>
+                                            <option value="{{ $course->course_id }}">{{ $course->course_name }} ({{ $course->course_code }})</option>
                                             @endforeach
-
                                         </select>
                                         <label for="course_id">Course *</label>
                                         <div class="invalid-feedback">
@@ -99,11 +126,11 @@
                             </div>
 
                             <div class="form-check-modern">
-                                <input class="form-check-input" type="checkbox" id="status" name="status" checked>
-                                <label class="form-check-label" for="status">
+                                <input class="form-check-input" type="checkbox" id="active_status" name="active_status" checked>
+                                <label class="form-check-label" for="active_status">
                                     <strong>Active Formula</strong>
                                     <br>
-                                    <small class="text-muted">Check if this formula is currently active for scoring</small>
+                                    <small class="text-muted">Check if this formula is currently active for use</small>
                                 </label>
                             </div>
                         </div>
@@ -111,52 +138,15 @@
 
 
                         <!-- Additional Remarks Section -->
-                        <!-- Variables Section -->
-                        <div class="form-section">
-                            <div class="section-title">
-                                <i class="fas fa-list"></i>
-                                Variables
-                            </div>
-                            <div id="variables-list">
-                                <div class="row mb-2 variable-row">
-                                    <div class="col-md-5">
-                                        <input type="text" class="form-control" name="variables[0][name]" placeholder="Variable Name" required>
-                                    </div>
-                                    <div class="col-md-5">
-                                        <input type="text" class="form-control" name="variables[0][value]" placeholder="Value" required>
-                                    </div>
-                                    <div class="col-md-2">
-                                        <button type="button" class="btn btn-danger remove-variable">Remove</button>
-                                    </div>
-                                </div>
-                            </div>
-                            <button type="button" class="btn btn-success" id="add-variable">Add Variable</button>
-                        </div>
-
-                        <!-- Expression Section -->
-                        <div class="form-section">
-                            <div class="section-title">
-                                <i class="fas fa-calculator"></i>
-                                Expression
-                            </div>
-                            <div class="form-floating">
-                                <textarea class="form-control" id="formula_expression" name="formula_expression" placeholder="e.g. (score - par) * slope" style="height: 80px;" required></textarea>
-                                <label for="formula_expression">Expression *</label>
-                                <div class="invalid-feedback">
-                                    Please provide a valid formula expression.
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Additional Remarks Section -->
                         <div class="form-section">
                             <div class="section-title">
                                 <i class="fas fa-sticky-note"></i>
                                 Additional Remarks
                             </div>
+
                             <div class="form-floating">
                                 <textarea class="form-control" id="remarks" name="remarks" placeholder="Enter any additional remarks about this formula..." maxlength="1000"></textarea>
-                                <label for="remarks">Formula Remarks (Optional)</label>
+                                <label for="remarks">Remarks (Optional)</label>
                                 <div class="invalid-feedback">
                                     Remarks cannot exceed 1000 characters.
                                 </div>
@@ -191,28 +181,12 @@
 </div>
 
 
-
 <style>
 
 </style>
 
 <script>
     $(document).ready(function() {
-        // Dynamic variable add/remove
-        let variableIndex = 1;
-        document.getElementById('add-variable').addEventListener('click', function() {
-            const list = document.getElementById('variables-list');
-            const row = document.createElement('div');
-            row.className = 'row mb-2 variable-row';
-            row.innerHTML = `<div class=\"col-md-5\">\n<input type=\"text\" class=\"form-control\" name=\"variables[${variableIndex}][name]\" placeholder=\"Variable Name\" required>\n</div>\n<div class=\"col-md-5\">\n<input type=\"text\" class=\"form-control\" name=\"variables[${variableIndex}][value]\" placeholder=\"Value\" required>\n</div>\n<div class=\"col-md-2\">\n<button type=\"button\" class=\"btn btn-danger remove-variable\">Remove</button>\n</div>`;
-            list.appendChild(row);
-            variableIndex++;
-        });
-        document.getElementById('variables-list').addEventListener('click', function(e) {
-            if (e.target.classList.contains('remove-variable')) {
-                e.target.closest('.variable-row').remove();
-            }
-        });
 
         let isSubmitting = false; // Flag to prevent multiple submissions
 
@@ -399,6 +373,46 @@
                 window.location.href = '/admin/formulas';
             }
         });
+
+        // Handle formula type change to display data fields
+        $('#formula_type_id').on('change', function() {
+            const selectedOption = $(this).find('option:selected');
+            let dataFieldsJson = selectedOption.attr('data-fields');
+            
+            if (dataFieldsJson) {
+                try {
+                    // Decode HTML entities (&quot; to ")
+                    dataFieldsJson = dataFieldsJson.replace(/&quot;/g, '"').replace(/&#039;/g, "'");
+                    
+                    // Parse the JSON data fields
+                    const dataFields = JSON.parse(dataFieldsJson);
+                    
+                    // Build HTML for the fields list
+                    let fieldsHtml = '<div class="row">';
+                    
+                    if (Array.isArray(dataFields)) {
+                        dataFields.forEach((field, index) => {
+                            const badgeClass = index % 2 === 0 ? 'bg-primary' : 'bg-info';
+                            fieldsHtml += `<div class="col-auto mb-2"><span class="badge ${badgeClass}">${field}</span></div>`;
+                        });
+                    }
+                    
+                    fieldsHtml += '</div>';
+                    
+                    // Display the data fields section
+                    $('#dataFieldsList').html(fieldsHtml);
+                    $('#dataFieldsRow').slideDown(300);
+                } catch (error) {
+                    console.error('Error parsing formula type fields:', error);
+                    console.log('Raw data-fields:', dataFieldsJson);
+                    $('#dataFieldsRow').slideUp(300);
+                }
+            } else {
+                // Hide the data fields section if no selection
+                $('#dataFieldsRow').slideUp(300);
+            }
+        });
     });
+
 </script>
 @endsection

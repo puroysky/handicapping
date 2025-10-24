@@ -8,7 +8,8 @@ use App\Http\Controllers\Admin\PlayerController;
 use App\Http\Controllers\Admin\ScoreController;
 use App\Http\Controllers\ScorecardController;
 use App\Http\Controllers\FormulaController;
-
+use App\Http\Controllers\FormulaTypeController;
+use App\Models\FormulaType;
 use NXP\MathExecutor;
 
 Route::get('/', function () {
@@ -30,6 +31,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::resource('scorecards', ScorecardController::class);
 
     Route::resource('formulas', FormulaController::class);
+    Route::resource('formula-types', FormulaTypeController::class);
     // Settings page routes
     Route::get('settings', [\App\Http\Controllers\Admin\SettingsController::class, 'index'])->name('settings');
     Route::post('settings/save', [\App\Http\Controllers\Admin\SettingsController::class, 'save'])->name('settings.save');

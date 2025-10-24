@@ -21,7 +21,9 @@ class TeeController extends Controller
      */
     public function index()
     {
-        //
+        return view('admin.tees.tees', [
+            'tees' => \App\Models\Tee::all()
+        ]);
     }
 
     /**

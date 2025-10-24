@@ -24,7 +24,13 @@ class FormulaController extends Controller
      */
     public function index()
     {
-        //
+        $formulas = Formula::with('course', 'formulaType')->get();
+
+
+
+        return view('admin.formulas.formulas', [
+            'formulas' => $formulas
+        ]);
     }
 
     /**
@@ -53,8 +59,9 @@ class FormulaController extends Controller
             'formula_name' => 'required|string|max:100|unique:formulas,formula_name',
             'formula_code' => 'required|string|max:10|unique:formulas,formula_code',
             'formula_desc' => 'nullable|string|max:500',
-            'formula_expression' => 'required|string|max:1000',
             'formula_type_id' => 'required|exists:formula_types,formula_type_id',
+            'formula_expression' => 'required|string|max:1000',
+            'course_id' => 'required|exists:courses,course_id',
             'active' => 'sometimes|boolean',
         ]);
 

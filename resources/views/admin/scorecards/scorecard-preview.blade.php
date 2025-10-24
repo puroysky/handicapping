@@ -2,21 +2,211 @@
 
 @section('content')
 <style>
+    .scorecard-container {
+        background: linear-gradient(135deg, #f8fafc 0%, #f0f5f0 100%);
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 10px 40px rgba(47, 74, 60, 0.1);
+        border: 1px solid rgba(141, 166, 110, 0.2);
+    }
+
+    .scorecard-header {
+        background: linear-gradient(135deg, #2F4A3C 0%, #5E7C4C 50%, #8DA66E 100%);
+        color: #fff;
+        padding: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .scorecard-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 300px;
+        height: 300px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+    }
+
+    .scorecard-header-content {
+        position: relative;
+        z-index: 1;
+    }
+
+    .scorecard-title {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        letter-spacing: -0.5px;
+    }
+
+    .scorecard-badge {
+        display: inline-block;
+        background: rgba(255, 255, 255, 0.2);
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-right: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .scorecard-meta {
+        font-size: 0.95rem;
+        opacity: 0.95;
+        margin-top: 0.5rem;
+    }
+
+    .scorecard-body {
+        padding: 2rem;
+    }
+
+    .details-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .detail-card {
+        background: #fff;
+        padding: 1.5rem;
+        border-radius: 12px;
+        border-left: 4px solid #8DA66E;
+        box-shadow: 0 2px 8px rgba(47, 74, 60, 0.08);
+        transition: all 0.3s ease;
+    }
+
+    .detail-card:hover {
+        box-shadow: 0 4px 16px rgba(47, 74, 60, 0.12);
+        transform: translateY(-2px);
+    }
+
+    .detail-card.type-regular {
+        border-left-color: #2F4A3C;
+    }
+
+    .detail-card.type-tournament {
+        border-left-color: #5E7C4C;
+    }
+
+    .detail-card.type-formula {
+        border-left-color: #8DA66E;
+    }
+
+    .detail-label {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #999;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .detail-value {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #2F4A3C;
+    }
+
+    .detail-value.formula-code {
+        font-family: 'Courier New', monospace;
+        background: #f5f5f5;
+        padding: 0.4rem 0.8rem;
+        border-radius: 6px;
+        display: inline-block;
+        font-size: 0.95rem;
+    }
+
+    .detail-value.not-set {
+        color: #e74c3c;
+        font-style: italic;
+    }
+
+    .ratings-section {
+        background: #fff;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 8px rgba(47, 74, 60, 0.08);
+    }
+
+    .ratings-header {
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #2F4A3C;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #8DA66E;
+    }
+
+    .ratings-table {
+        width: 100%;
+    }
+
+    .ratings-table th {
+        background: linear-gradient(135deg, #f0f5f0 0%, #e8ebe8 100%);
+        color: #2F4A3C;
+        font-weight: 600;
+        padding: 1rem;
+        text-align: center;
+        border: 1px solid rgba(141, 166, 110, 0.1);
+    }
+
+    .ratings-table td {
+        padding: 1rem;
+        text-align: center;
+        border: 1px solid rgba(141, 166, 110, 0.1);
+    }
+
+    .tee-name {
+        color: #2F4A3C;
+        font-weight: 600;
+    }
+
+    .course-slope {
+        color: #5E7C4C;
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+
+    .scorecard-table {
+        background: #fff;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(47, 74, 60, 0.08);
+    }
+
+    .scorecard-table thead {
+        background: linear-gradient(135deg, #2F4A3C 0%, #3d5a4a 100%) !important;
+        color: #fff !important;
+    }
+
+    .scorecard-table th {
+        font-weight: 600;
+        padding: 1rem 0.5rem !important;
+        font-size: 0.9rem;
+        border: none !important;
+    }
+
+    .scorecard-table td {
+        padding: 0.75rem 0.5rem !important;
+        border: 1px solid rgba(141, 166, 110, 0.1) !important;
+    }
+
+    .scorecard-table tbody tr:hover {
+        background-color: rgba(141, 166, 110, 0.05) !important;
+    }
+
     .scorecard-table th:nth-child(11),
     .scorecard-table td:nth-child(11) {
         background-color: #8DA66E !important;
         color: #fff !important;
         font-weight: bold !important;
-        border-left: 1px solid #2F4A3C !important;
-      
-    }
-
-    .scorecard-table th:nth-child(11) {
-        font-size: 1.1rem;
-    }
-
-    .scorecard-table tbody td:nth-child(11) {
-        font-size: 1.05rem;
+        border-left: 2px solid #2F4A3C !important;
     }
 
     .scorecard-table th:nth-child(22),
@@ -24,11 +214,7 @@
         background-color: #2F4A3C !important;
         color: #8DA66E !important;
         font-weight: bold !important;
-        border: 2px solid #8DA66E !important;
-    }
-
-    .scorecard-table tbody td:nth-child(22) {
-        font-size: 1.05rem;
+        border-left: 2px solid #8DA66E !important;
     }
 
     .scorecard-table th:nth-child(21),
@@ -37,46 +223,122 @@
         color: #fff !important;
         font-weight: bold !important;
     }
+
+    .row-par {
+        background-color: rgba(141, 166, 110, 0.15) !important;
+        font-weight: 600;
+    }
+
+    .row-handicap {
+        background-color: rgba(47, 74, 60, 0.08) !important;
+    }
+
+    .row-handicap-label {
+        color: #2F4A3C;
+        font-weight: 600;
+    }
+
+    .table-responsive {
+        border-radius: 12px;
+        overflow: hidden;
+    }
 </style>
 
-<div class="card border-0 shadow-lg rounded-4 overflow-hidden mb-4" style="background-color: #f8fafc; border: 2px solid #8DA66E;">
-    <div class="card-header py-3 px-4 d-flex flex-column flex-md-row align-items-md-center justify-content-between" style="background: linear-gradient(90deg, #2F4A3C 0%, #5E7C4C 50%, #8DA66E 100%); color: #fff;">
-        <div>
-            <h3 class="mb-0 fw-bold" style="color: #fff;">{{ $scorecard->scorecard_name ?? 'Scorecard' }}</h3>
+<div class="scorecard-container">
+    {{-- Header --}}
+    <div class="scorecard-header">
+        <div class="scorecard-header-content">
+            <h2 class="scorecard-title mb-2">{{ $scorecard->scorecard_name ?? 'Scorecard' }}</h2>
+            
+            <div>
+                @if(isset($scorecard->scorecard_code))
+                <span class="scorecard-badge">{{ $scorecard->scorecard_code }}</span>
+                @endif
+                
+                @if(isset($scorecard->scorecard_type))
+                <span class="scorecard-badge">{{ ucfirst($scorecard->scorecard_type) }}</span>
+                @endif
+            </div>
 
-            @if(isset($scorecard->scorecard_code))
-            <span class="badge" style="background-color: #8DA66E; color: #fff;">{{ $scorecard->scorecard_code }}</span>
-            @endif
             @if(isset($scorecard->scorecard_desc))
-            <div class="mt-1 text-light" style="font-size: 1rem;">{{ $scorecard->scorecard_desc }}</div>
+            <div class="scorecard-meta mt-2">{{ $scorecard->scorecard_desc }}</div>
             @endif
+
             @if(isset($scorecard->course->course_name))
-            <div class="mt-1 text-light" style="font-size: 1rem;">Course: <span style="color: #8DA66E;">{{ $scorecard->course->course_name }}</span></div>
+            <div class="scorecard-meta mt-1">
+                <i class="fas fa-map-marker-alt me-1"></i>
+                Course: <strong>{{ $scorecard->course->course_name }}</strong>
+            </div>
             @endif
-        </div>
-        <div class="mt-2 mt-md-0">
-            <span class="fw-semibold" style="color: #8DA66E;">Scorecard Preview</span>
         </div>
     </div>
-    <div class="card-body p-4">
 
+    {{-- Body --}}
+    <div class="scorecard-body">
+
+        {{-- Scorecard Details --}}
+        <div class="details-grid">
+            <div class="detail-card type-regular">
+                <div class="detail-label">Scorecard Type</div>
+                <div class="detail-value">{{ ucfirst($scorecard->scorecard_type ?? 'N/A') }}</div>
+            </div>
+            <div class="detail-card type-tournament">
+                <div class="detail-label">X Value</div>
+                <div class="detail-value">{{ str_replace('_', ' ', $scorecard->x_value ?? 'N/A') }}</div>
+            </div>
+            <div class="detail-card type-formula">
+                <div class="detail-label">Adjusted Gross Formula</div>
+                <div class="detail-value formula-code">
+                    @if($scorecard->adjusted_gross_score_formula)
+                        {{ $scorecard->adjusted_gross_score_formula->formula_code ?? 'N/A' }}
+                    @else
+                        <span class="not-set">Not Set</span>
+                    @endif
+                </div>
+            </div>
+            <div class="detail-card type-regular">
+                <div class="detail-label">Score Differential Formula</div>
+                <div class="detail-value formula-code">
+                    @if($scorecard->score_differential_formula)
+                        {{ $scorecard->score_differential_formula->formula_code ?? 'N/A' }}
+                    @else
+                        <span class="not-set">Not Set</span>
+                    @endif
+                </div>
+            </div>
+            <div class="detail-card type-tournament">
+                <div class="detail-label">Handicap Index Formula</div>
+                <div class="detail-value formula-code">
+                    @if($scorecard->handicap_index_formula)
+                        {{ $scorecard->handicap_index_formula->formula_code ?? 'N/A' }}
+                    @else
+                        <span class="not-set">Not Set</span>
+                    @endif
+                </div>
+            </div>
+        </div>
 
         {{-- Course & Slope Ratings --}}
         @if($scorecard->ratings->isNotEmpty())
-        <div class="table-responsive mb-3">
-            <table class="table table-borderless align-middle text-center mb-0">
-                <thead style="background-color: #e8e8e8;">
-                    <tr>
-                        <th class="text-uppercase text-muted small" style="color: #2F4A3C;">Course / Slope Rating</th>
-                        @foreach($scorecard->ratings as $rating)
-                        <th>
-                            <div class="fw-semibold" style="color: #2F4A3C;">{{ $rating->tee->tee_name }}</div>
-                            <div style="color: #5E7C4C; font-size: 0.9rem;">{{ $rating->course_rating }} / {{ $rating->slope_rating }}</div>
-                        </th>
-                        @endforeach
-                    </tr>
-                </thead>
-            </table>
+        <div class="ratings-section">
+            <div class="ratings-header">
+                <i class="fas fa-chart-bar me-2"></i>Course & Slope Ratings
+            </div>
+            <div class="table-responsive">
+                <table class="ratings-table">
+                    <thead>
+                        <tr>
+                            <th>TEE</th>
+                            @foreach($scorecard->ratings as $rating)
+                            <th>
+                                <div class="tee-name">{{ $rating->tee->tee_name }}</div>
+                                <div class="course-slope">{{ $rating->course_rating }} / {{ $rating->slope_rating }}</div>
+                            </th>
+                            @endforeach
+                        </tr>
+                    </thead>
+                </table>
+            </div>
         </div>
         @endif
 
@@ -134,8 +396,8 @@
                     @endforeach
 
                     {{-- Par Row --}}
-                    <tr style="background-color: #e8e8e8; font-weight: bold;">
-                        <td style="color: #2F4A3C; background-color: #d0d0d0;">PAR</td>
+                    <tr class="row-par">
+                        <td class="row-handicap-label">PAR</td>
                         @foreach ($scorecard->scorecardHoles as $hole)
                             <td style="color: #333;">{{ $hole->par }}</td>
                             @if ($hole->hole == 9)
@@ -154,8 +416,8 @@
                     </tr>
 
                     {{-- Men's Handicap --}}
-                    <tr style="background-color: #f8fafc;">
-                        <td class="fw-bold">Handicap</td>
+                    <tr class="row-handicap">
+                        <td class="row-handicap-label">Handicap</td>
                         @foreach ($scorecard->strokeIndexes as $index)
                             @if ($index->sex == 'M')
                                 <td style="color: #333;">{{ $index->stroke_index }}</td>
@@ -171,8 +433,8 @@
                     </tr>
 
                     {{-- Ladies' Handicap --}}
-                    <tr style="background-color: #f8fafc;">
-                        <td class="fw-bold">Ladies HDC</td>
+                    <tr class="row-handicap">
+                        <td class="row-handicap-label">Ladies HDC</td>
                         @foreach ($scorecard->strokeIndexes as $index)
                             @if ($index->sex == 'F')
                                 <td style="color: #333;">{{ $index->stroke_index }}</td>
