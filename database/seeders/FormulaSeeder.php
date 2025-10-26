@@ -65,7 +65,7 @@ class FormulaSeeder extends Seeder
                 'formula_name' => 'Score Differential v1.0',
                 'formula_code' => 'N-SD01',
                 'formula_desc' => 'Initial version of Score Differential formula',
-                'formula_expression' => 'SD = (AGS - Course Rating) x 113 / Slope Rating',
+                'formula_expression' => 'SCORE_DIFFERENTIAL = (113 / SLOPE_RATING) * (ADJUSTED_GROSS_SCORE - COURSE_RATING)',
                 'formula_variables' => json_encode([
                     'adjusted_gross_score',
                     'course_rating',
@@ -83,7 +83,7 @@ class FormulaSeeder extends Seeder
                 'formula_name' => 'Score Differential v1.0',
                 'formula_code' => 'S-SD01',
                 'formula_desc' => 'Initial version of Score Differential formula',
-                'formula_expression' => 'SD = (AGS - Course Rating) x 113 / Slope Rating',
+                'formula_expression' => 'SCORE_DIFFERENTIAL = (113 / SLOPE_RATING) * (ADJUSTED_GROSS_SCORE - COURSE_RATING)',
                 'formula_variables' => json_encode([
                     'adjusted_gross_score',
                     'course_rating',
@@ -133,13 +133,8 @@ class FormulaSeeder extends Seeder
                 'formula_code' => 'N-CH01',
                 'formula_desc' => '',
 
-                'formula_expression' => 'HANDICAP_INDEX * (SLOPE_RATING / STANDARD_SLOPE_RATING) + (COURSE_RATING - PAR)',
-                'formula_variables' => json_encode([
-                    [
-                        'name' => 'STANDARD_SLOPE_RATING',
-                        'value' => 113,
-                    ],
-                ]),
+                'formula_expression' => 'HANDICAP_INDEX * (SLOPE_RATING / 113) + (COURSE_RATING - PAR)',
+                'formula_variables' => null,
                 'remarks' => 'Used for calculating Course Hadicap',
                 'active' => true,
                 'created_by' => 1, // Assuming admin user ID is 1
@@ -154,13 +149,8 @@ class FormulaSeeder extends Seeder
                 'formula_code' => 'S-CH01',
                 'formula_desc' => '',
 
-                'formula_expression' => 'HANDICAP_INDEX * (SLOPE_RATING / STANDARD_SLOPE_RATING) + (COURSE_RATING - PAR)',
-                'formula_variables' => json_encode([
-                    [
-                        'name' => 'STANDARD_SLOPE_RATING',
-                        'value' => 113,
-                    ],
-                ]),
+                'formula_expression' => 'HANDICAP_INDEX * (SLOPE_RATING / 113) + (COURSE_RATING - PAR)',
+                'formula_variables' => null,
                 'remarks' => 'Used for calculating Course Hadicap',
                 'active' => true,
                 'created_by' => 1, // Assuming admin user ID is 1

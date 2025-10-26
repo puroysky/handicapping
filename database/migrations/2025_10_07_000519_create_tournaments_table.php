@@ -20,6 +20,13 @@ return new class extends Migration
             $table->date('tournament_end');
 
 
+            $table->date('score_diff_start_date')->nullable()->default(null);
+            $table->date('score_diff_end_date')->nullable()->default(null);
+
+
+            //a fields to set the start and end of the tournament handicap index calculation period (usually the  score differentials submission period)
+
+
             $table->datetime('cancelled_at')->nullable()->default(null);
             $table->unsignedBigInteger('cancelled_by')->nullable()->default(null);
             $table->string('cancel_reason', 255)->nullable()->default(null);

@@ -94,12 +94,13 @@ class ScorecardController extends Controller
     {
 
         $scorecard = Scorecard::with(
+            'adjustedGrossScoreFormula',
+            'scoreDifferentialFormula',
+            'courseHandicapFormula',
             'strokeIndexes',
             'scorecardHoles',
             'ratings.tee',
             'course.tees'
-
-
 
         )->findOrFail($id);
 
@@ -113,7 +114,7 @@ class ScorecardController extends Controller
         }
 
         // echo '<pre>';
-        // print_r($scorecard->scorecardHoles->pluck('par')->sum());
+        // print_r($scorecard->toArray());
         // echo '</pre>';
         // return;
 

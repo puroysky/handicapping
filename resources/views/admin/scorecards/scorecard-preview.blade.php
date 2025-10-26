@@ -289,8 +289,8 @@
             <div class="detail-card type-formula">
                 <div class="detail-label">Adjusted Gross Formula</div>
                 <div class="detail-value formula-code">
-                    @if($scorecard->adjusted_gross_score_formula)
-                        {{ $scorecard->adjusted_gross_score_formula->formula_code ?? 'N/A' }}
+                    @if($scorecard->adjustedGrossScoreFormula)
+                        {{ $scorecard->adjustedGrossScoreFormula->formula_expression ?? 'N/A' }}
                     @else
                         <span class="not-set">Not Set</span>
                     @endif
@@ -299,18 +299,18 @@
             <div class="detail-card type-regular">
                 <div class="detail-label">Score Differential Formula</div>
                 <div class="detail-value formula-code">
-                    @if($scorecard->score_differential_formula)
-                        {{ $scorecard->score_differential_formula->formula_code ?? 'N/A' }}
+                    @if($scorecard->scoreDifferentialFormula)
+                        {{ $scorecard->scoreDifferentialFormula->formula_expression ?? 'N/A' }}
                     @else
                         <span class="not-set">Not Set</span>
                     @endif
                 </div>
             </div>
             <div class="detail-card type-tournament">
-                <div class="detail-label">Handicap Index Formula</div>
+                <div class="detail-label">Course Handicap Formula</div>
                 <div class="detail-value formula-code">
-                    @if($scorecard->handicap_index_formula)
-                        {{ $scorecard->handicap_index_formula->formula_code ?? 'N/A' }}
+                    @if($scorecard->courseHandicapFormula)
+                        {{ $scorecard->courseHandicapFormula->formula_expression ?? 'N/A' }}
                     @else
                         <span class="not-set">Not Set</span>
                     @endif
