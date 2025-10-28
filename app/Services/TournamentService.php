@@ -18,6 +18,15 @@ class TournamentService
         return view('admin.tournaments.tournaments', compact('tournaments', 'title'));
     }
 
+
+    public function show($id)
+    {
+        $tournament = \App\Models\Tournament::where('tournament_id', $id)
+            ->with('tournamentCourses.course', 'tournamentCourses.scorecard')
+            ->first();
+
+        return response()->json($tournament);
+    }
     public function create()
     {
         $scorecards = \App\Models\Scorecard::where('active', true)->orderBy('scorecard_name')->get();
@@ -39,11 +48,34 @@ class TournamentService
             $tournament->remarks = $request['remarks'];
             $tournament->tournament_start = $request['tournament_start'];
             $tournament->tournament_end = $request['tournament_end'];
+
+
+
+            $tournament->score_diff_start_date = $request['score_diff_start_date'] ?? null;
+            $tournament->score_diff_end_date = $request['score_diff_end_date'] ?? null;
+            $tournament->recent_scores_count = $request['recent_scores_count'] ?? null;
+            $tournament->score_selection_type = $request['score_selection_type'];
+            $tournament->scores_to_average = $request['scores_to_average'] ?? null;
+            $tournament->handicap_formula_expression = $request['handicap_formula_expression'] ?? null;
             $tournament->created_by = Auth::id();
 
             $tournament->save();
 
-            $this->storeTournamentCourses($tournament, $request['course_ids']);
+
+
+            // echo '<pre>';
+            // print_r($request['course_scorecards']);
+            // echo '</pre>';
+
+            // return;
+
+
+
+            // return response()->json([
+            //     'message' => 'Tournament error occurred',
+            //     'tournament' => $tournament
+            // ], 500);
+            $this->storeTournamentCourses($tournament, $request['course_ids'], $request['course_scorecards']);
 
 
             DB::commit();
@@ -57,15 +89,19 @@ class TournamentService
             DB::rollBack();
             return response()->json([
                 'message' => 'Error creating tournament: ' . $e->getMessage(),
+                'line' => $e->getLine(),
+                'file' => $e->getFile()
+
             ], 500);
         }
     }
 
-    private function storeTournamentCourses($tournament, $courseIds)
+    private function storeTournamentCourses($tournament, $courseIds, $scorecardIds)
     {
         foreach ($courseIds as $courseId) {
-            $tournament->courses()->create([
+            $tournament->tournamentcourses()->create([
                 'tournament_id' => $tournament->tournament_id,
+                'scorecard_id' => $scorecardIds[$courseId],
                 'course_id' => $courseId,
                 'created_by' => Auth::id()
             ]);

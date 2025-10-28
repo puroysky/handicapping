@@ -10,6 +10,7 @@ class TournamentCourse extends Model
     protected $fillable = [
         'tournament_id',
         'course_id',
+        'scorecard_id',
         'created_by',
         'updated_by',
     ];

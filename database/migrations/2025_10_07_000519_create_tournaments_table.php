@@ -22,9 +22,12 @@ return new class extends Migration
 
             $table->date('score_diff_start_date')->nullable()->default(null);
             $table->date('score_diff_end_date')->nullable()->default(null);
+            $table->unsignedSmallInteger('recent_scores_count')->nullable()->default(null);
+            $table->enum('score_selection_type', ['HIGHEST', 'LOWEST'])->default('LOWEST');
+            $table->unsignedSmallInteger('scores_to_average')->comment('Number of scores to average for tournament handicap index calculation')->nullable()->default(null);
 
 
-            //a fields to set the start and end of the tournament handicap index calculation period (usually the  score differentials submission period)
+            $table->string('handicap_formula_expression', 255)->nullable()->default(null);
 
 
             $table->datetime('cancelled_at')->nullable()->default(null);

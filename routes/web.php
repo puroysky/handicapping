@@ -9,7 +9,10 @@ use App\Http\Controllers\Admin\ScoreController;
 use App\Http\Controllers\ScorecardController;
 use App\Http\Controllers\FormulaController;
 use App\Http\Controllers\FormulaTypeController;
+use App\Http\Controllers\ParticipantController;
+use App\Http\Controllers\TournamentPlayerController;
 use App\Models\FormulaType;
+use App\Models\TournamentPlayer;
 use NXP\MathExecutor;
 
 Route::get('/', function () {
@@ -44,4 +47,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     Route::resource('tournaments', App\Http\Controllers\Admin\TournamentController::class);
     Route::get('tournaments/{tournament_id}/courses', [App\Http\Controllers\Admin\TournamentController::class, 'getCourses'])->name('tournaments.courses');
+
+    Route::post('participants/import', [ParticipantController::class, 'import'])->name('participants.import');
+    Route::resource('participants', ParticipantController::class);
 });

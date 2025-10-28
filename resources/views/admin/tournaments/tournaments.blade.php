@@ -159,7 +159,7 @@
         </div>
     </div>
 </div>
-
+@include('admin.tournaments.tournament-preview-modal')
 {{-- Custom Action Functions --}}
 <script>
     // Modern Context Menu Implementation
@@ -315,6 +315,14 @@
                     }
                 },
                 {
+                    "label": "View Players",
+                    "description": "View and manage tournament players",
+                    "icon": "users",
+                    "action": function(id) {
+                        window.open(`${BASE_URL}/admin/participants/${id}`, '_blank');
+                    }
+                },
+                {
                     "label": "---"
                 },
                 {
@@ -330,7 +338,29 @@
     }
 
     function viewRecord(id) {
-        window.location.href = `/admin/tournaments/${id}`;
+
+
+
+        // Fetch tournament details from backend and show modal
+        fetch(`${BASE_URL}/admin/participants/${id}?preview=1`, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
+            }
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('Failed to fetch tournament details');
+            return response.json();
+        })
+        .then(data => {
+            showTournamentPreview(data);
+        })
+        .catch(err => {
+            alert('Could not load tournament details.');
+        });
+
+
+        // window.location.href = `/admin/tournaments/${id}`;
     }
 
     function editRecord(id) {

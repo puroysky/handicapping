@@ -21,7 +21,7 @@
 
     </script>
 
-    <script src="{{ asset('js/handicapping.js') }}"></script>
+ 
     <link rel="stylesheet" href="{{ asset('css/handicapping.css') }}">
 </head>
 

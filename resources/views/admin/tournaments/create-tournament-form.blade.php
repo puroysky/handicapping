@@ -141,7 +141,88 @@
                             </div>
                         </div>
 
-                        <!-- Additional Remarks Section -->
+                        <!-- Local Handicap Index Configuration Section -->
+                        <div class="form-section">
+                            <div class="section-title">
+                                <i class="fas fa-calculator"></i>
+                                Local Handicap Index Configuration
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <input type="date" class="form-control" id="scores_start_date" name="scores_start_date">
+                                        <label for="scores_start_date">Score Date Range Start</label>
+                                        <div class="invalid-feedback">
+                                            Please provide a valid start date.
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <input type="date" class="form-control" id="scores_end_date" name="scores_end_date">
+                                        <label for="scores_end_date">Score Date Range End</label>
+                                        <div class="invalid-feedback">
+                                            Please provide a valid end date.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <input type="number" class="form-control" id="recent_scores_count" name="recent_scores_count" placeholder="Number of Recent Scores" min="1" max="100" value="20" required>
+                                        <label for="recent_scores_count">Number of Recent Scores to Consider *</label>
+                                        <div class="invalid-feedback">
+                                            Please provide a valid number of scores (1-100).
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <select class="form-control" id="score_selection_type" name="score_selection_type" required>
+                                            <option value="">Select Type...</option>
+                                            <option value="LOWEST">Lowest Scores</option>
+                                            <option value="HIGHEST">Highest Scores</option>
+                                        </select>
+                                        <label for="score_selection_type">Select Type *</label>
+                                        <div class="invalid-feedback">
+                                            Please select a score selection type.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <input type="number" class="form-control" id="scores_to_average" name="scores_to_average" placeholder="How Many to Average" min="1" max="100" value="8" required>
+                                        <label for="scores_to_average">How Many Scores to Average *</label>
+                                        <div class="invalid-feedback">
+                                            Please provide a valid number of scores to average (1-100).
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="form-floating">
+                                        <textarea class="form-control" id="handicap_formula_expression" name="handicap_formula_expression" placeholder="Formula Expression" style="height: 100px;" required>AVG(SELECTED_DIFFERENTIALS) * 0.96</textarea>
+                                        <label for="handicap_formula_expression">Formula Expression *</label>
+                                        <small class="form-text text-muted d-block mt-1">
+                                            <i class="fas fa-info-circle me-1"></i>
+                                            Use the variable <code>SELECTED_DIFFERENTIALS</code> to represent the chosen score differential values.
+                                            <br>Example: <code>AVERAGE(SELECTED_DIFFERENTIALS) * 0.96</code> or <code>ROUND(AVG(SELECTED_DIFFERENTIALS), 1)</code>
+                                        </small>
+                                        <div class="invalid-feedback">
+                                            Please provide a valid formula expression.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         <div class="form-section">
                             <div class="section-title">
                                 <i class="fas fa-sticky-note"></i>
@@ -596,11 +677,6 @@
                 }
             });
         });
-
-        // Set minimum date to today for tournament start
-        const today = new Date();
-        const todayString = today.toISOString().slice(0, 10); // Format: YYYY-MM-DD
-        document.getElementById('tournament_start').min = todayString;
 
         // Cancel button functionality
         $('#cancelBtn').on('click', function() {

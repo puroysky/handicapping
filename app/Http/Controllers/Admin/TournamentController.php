@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Tournament;
 use App\Services\TournamentService;
 use Illuminate\Auth\Events\Validated;
 use Illuminate\Http\Request;
@@ -25,6 +26,7 @@ class TournamentController extends Controller
     {
         return $this->tournamentService->index();
     }
+
 
     /**
      * Show the form for creating a new resource.
@@ -49,7 +51,20 @@ class TournamentController extends Controller
             'tournament_end' => 'required|date|after_or_equal:tournament_start',
             'course_ids' => 'required|array|min:1',
             'course_ids.*' => 'exists:courses,course_id',
+
+            'course_scorecards' => 'required|array|min:1',
+            'course_scorecards.*' => 'exists:scorecards,scorecard_id',
+
+            'score_diff_start_date' => 'nullable|date',
+            'score_diff_end_date' => 'nullable|date|after_or_equal:score_diff_start_date',
+            'recent_scores_count' => 'nullable|integer|min:1',
+            'score_selection_type' => 'required|in:HIGHEST,LOWEST',
+            'scores_to_average' => 'required|integer|min:1',
+            'handicap_formula_expression' => 'required|string|max:255',
         ]);
+
+
+
 
         return $this->tournamentService->store($validatedData);
     }
@@ -59,7 +74,7 @@ class TournamentController extends Controller
      */
     public function show(string $id)
     {
-        //
+        return $this->tournamentService->show($id);
     }
 
     /**

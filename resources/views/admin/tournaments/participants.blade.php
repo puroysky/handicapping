@@ -7,21 +7,21 @@
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
-                    <h6 class="header-title">Tees Management</h6>
+                    <h6 class="header-title">{{ $tournament->tournament_name }} Management</h6>
                     <p class="header-subtitle">
-                        <i class="fas fa-golf-ball me-2"></i>
-                        Manage golf tees
+                        <i class="fas fa-users me-2"></i>
+                        Manage tournament players and handicaps
                     </p>
                 </div>
                 <div class="d-flex gap-2">
-                    <button class="btn btn-outline-secondary btn-modern" onclick="exportTees()">
+                    <button class="btn btn-outline-secondary btn-modern" onclick="exportPlayers()">
                         <i class="fas fa-download me-1"></i>Export
                     </button>
-                    <button class="btn btn-outline-secondary btn-modern" onclick="importTees()">
+                    <button class="btn btn-outline-secondary btn-modern" onclick="importParticipants()">
                         <i class="fas fa-upload me-1"></i>Import
                     </button>
-                    <a href="{{ route('admin.tees.create') }}" class="btn btn-primary btn-modern">
-                        <i class="fas fa-plus me-2"></i>Add New Tee
+                    <a href="{{ route('admin.participants.create') }}?id={{ $tournamentId }}" class="btn btn-primary btn-modern">
+                        <i class="fas fa-plus me-2"></i>Add New Player
                     </a>
                 </div>
             </div>
@@ -38,13 +38,13 @@
                         <div class="col-md-6">
                             <div class="search-wrapper">
                                 <i class="fas fa-search search-icon"></i>
-                                <input type="text" class="search-input" id="tableSearch" placeholder="Search tees..." autocomplete="off">
+                                <input type="text" class="search-input" id="tableSearch" placeholder="Search players..." autocomplete="off">
                             </div>
                         </div>
                         <div class="col-md-6 text-end">
                             <div class="table-info">
                                 <small class="text-muted">
-                                    Showing <span id="showing-count">{{ count($tees) }}</span> of <span id="total-count">{{ count($tees) }}</span> tees
+                                    Showing <span id="showing-count">{{ count($players) }}</span> of <span id="total-count">{{ count($players) }}</span> players
                                 </small>
                             </div>
                         </div>
@@ -58,80 +58,75 @@
                             <tr>
                                 <th class="sortable" data-column="0">
                                     <div class="d-flex align-items-center justify-content-between">
-                                        <span>Tee Name</span>
+                                        <span>Player Name</span>
                                         <i class="fas fa-sort sort-icon"></i>
                                     </div>
                                 </th>
                                 <th class="sortable" data-column="1">
                                     <div class="d-flex align-items-center justify-content-between">
-                                        <span>Tee Code</span>
+                                        <span>Local Handicap Index</span>
                                         <i class="fas fa-sort sort-icon"></i>
                                     </div>
                                 </th>
                                 <th class="sortable" data-column="2">
                                     <div class="d-flex align-items-center justify-content-between">
-                                        <span>Course</span>
+                                        <span>Tournament Handicap Index</span>
                                         <i class="fas fa-sort sort-icon"></i>
                                     </div>
                                 </th>
                                 <th class="sortable" data-column="3">
                                     <div class="d-flex align-items-center justify-content-between">
-                                        <span>Gender</span>
+                                        <span>WHS Handicap</span>
                                         <i class="fas fa-sort sort-icon"></i>
                                     </div>
                                 </th>
                                 <th class="sortable" data-column="4">
                                     <div class="d-flex align-items-center justify-content-between">
-                                        <span>Status</span>
+                                        <span>Course Handicap</span>
                                         <i class="fas fa-sort sort-icon"></i>
                                     </div>
                                 </th>
-                                <th class="sortable" data-column="5">
-                                    <div class="d-flex align-items-center justify-content-between">
-                                        <span>Created At</span>
-                                        <i class="fas fa-sort sort-icon"></i>
-                                    </div>
-                                </th>
+                                <!-- Removed Tee and Course columns per request -->
                                 <th class="text-center">
                                     <i class="fas fa-cogs me-2"></i>Actions
                                 </th>
                             </tr>
                         </thead>
                         <tbody id="mainTableBody">
-                            @foreach ($tees as $tee)
+                            @foreach ($players as $player)
                             <tr class="table-row">
-                                <td class="tee-name-cell">
-                                    <span class="fw-bold" style="color: #2F4A3C;">{{ $tee->tee_name }}</span>
+                                <td class="player-name-cell">
+                                    <span class="fw-bold" style="color: #2F4A3C;">{{ $player->user->profile->first_name ?? '' }} {{ $player->user->profile->last_name ?? 'N/A' }}</span>
                                 </td>
-                                <td class="tee-code-cell">
-                                    <span class="fw-semibold text-primary">{{ $tee->tee_code ?? 'N/A' }}</span>
+                                <td class="local-handicap-index-cell">
+                                    <span class="fw-semibold">{{ $player->local_handicap_index ?? 'N/A' }}</span>
                                 </td>
-                                <td class="course-name-cell">
-                                    <span class="fw-semibold">{{ $tee->course->course_name ?? 'N/A' }}</span>
+                                <td class="tournament-handicap-index-cell">
+                                    <span class="text-muted" style="font-size: 0.9rem;">{{ $player->tournament_handicap_index ?? 'N/A' }}</span>
                                 </td>
-                                <td class="gender-cell">
-                                    <span class="text-muted" style="font-size: 0.9rem;">{{ ucfirst($tee->gender ?? 'N/A') }}</span>
+                                <td class="whs-handicap-cell">
+                                    <span class="text-muted" style="font-size: 0.9rem;">{{ $player->whs_handicap_index ?? 'N/A' }}</span>
                                 </td>
-                                <td class="status-cell">
-                                    @if ($tee->active)
-                                    <span class="status-badge status-active">
-                                        <i class="fas fa-check-circle me-1"></i>Active
-                                    </span>
+                                <td class="course-handicap-cell">
+                                    @if($player->playerCourseHandicaps && count($player->playerCourseHandicaps) > 0)
+                                        <div class="course-handicap-list">
+                                            @foreach ($player->playerCourseHandicaps as $handicap)
+                                                <div class="handicap-item mb-1">
+                                                    <span class="badge bg-secondary me-1" style="font-size: 0.75rem;">{{ $handicap->course->course_code ?? 'N/A' }}</span>
+                                                    <span class="badge bg-info me-1" style="font-size: 0.75rem;">{{ $handicap->tee->tee_code ?? 'N/A' }}</span>
+                                                    <span class="fw-bold text-primary" style="font-size: 0.9rem;">{{ $handicap->course_handicap ?? 'N/A' }}</span>
+                                                </div>
+                                            @endforeach
+                                        </div>
                                     @else
-                                    <span class="status-badge status-inactive">
-                                        <i class="fas fa-times-circle me-1"></i>Inactive
-                                    </span>
+                                        <span class="text-muted fst-italic">No handicaps assigned</span>
                                     @endif
-                                </td>
-                                <td class="date-cell">
-                                    <span class="cell-text-date">{{ \Carbon\Carbon::parse($tee->created_at)->format('M d, Y') }}</span>
-                                    <small class="cell-text-time d-block">{{ \Carbon\Carbon::parse($tee->created_at)->format('g:i A') }}</small>
                                 </td>
                                 <td class="action-cell text-center">
                                     <div class="action-wrapper">
                                         <button class="btn btn-outline-secondary btn-context-menu"
                                             type="button"
-                                            onclick="showTeeContextMenu({{ $tee->tee_id }}, '{{ $tee->tee_name }}', event)"
+                                            onclick="showPlayerContextMenu({{ $player->participant_id }}, '{{ $player->user->profile->first_name ?? '' }} {{ $player->user->profile->last_name ?? '' }}', event)"
                                             title="Actions"
                                             data-label="Actions">
                                             <i class="fas fa-ellipsis-v me-1"></i>
@@ -150,18 +145,18 @@
     </div>
 </div>
 
-<!-- Import Players Modal -->
-<div class="modal fade" id="importTeesModal" tabindex="-1" aria-labelledby="importTeesModalLabel" aria-hidden="true">
+<!-- Import Participants Modal -->
+<div class="modal fade" id="importParticipantsModal" tabindex="-1" aria-labelledby="importParticipantsModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="importTeesModalLabel">
-                    <i class="fas fa-upload me-2"></i>Import Tees
+                <h5 class="modal-title" id="importParticipantsModalLabel">
+                    <i class="fas fa-upload me-2"></i>Import Players
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="importTeesForm" enctype="multipart/form-data">
+                <form id="importPlayersForm" enctype="multipart/form-data">
                     @csrf
                     <!-- File Upload Section -->
                     <div class="mb-4">
@@ -186,18 +181,12 @@
                             <i class="fas fa-list me-1"></i>Required Column Headers
                         </h6>
                         <div class="row">
-                            <div class="col-md-6">
+                            <div class="col-md-12">
                                 <ul class="mb-0 small">
-                                    <li><strong>whs_no</strong> - WHS Number (numeric)</li>
-                                    <li><strong>account_no</strong> - Account Number (string)</li>
-                                    <li><strong>first_name</strong> - First Name</li>
-                                </ul>
-                            </div>
-                            <div class="col-md-6">
-                                <ul class="mb-0 small">
-                                    <li><strong>last_name</strong> - Last Name</li>
-                                    <li><strong>birthdate</strong> - Birth Date (YYYY-MM-DD)</li>
-                                    <li><strong>sex</strong> - Gender (M/F or MALE/FEMALE)</li>
+                                    <li><strong>whs_no</strong> - WHS Number (string or numeric)</li>
+                                    <li><strong>handicap_index</strong> - Handicap Index (decimal)</li>
+                                    <li><strong>north_tee</strong> - North Tee (string or code)</li>
+                                    <li><strong>south_tee</strong> - South Tee (string or code)</li>
                                 </ul>
                             </div>
                         </div>
@@ -233,7 +222,7 @@
                     <i class="fas fa-times me-1"></i>Cancel
                 </button>
                 <button type="button" class="btn btn-primary" onclick="startImport()" id="importBtn">
-                    <i class="fas fa-upload me-1"></i>Import Tees
+                    <i class="fas fa-upload me-1"></i>Import Players
                 </button>
             </div>
         </div>
@@ -352,27 +341,27 @@
     }
 
     // Player-specific context menu
-    function showTeeContextMenu(teeId, teeName, event) {
+    function showPlayerContextMenu(playerId, playerName, event) {
         event.preventDefault();
         event.stopPropagation();
 
         modernContext({
             "data": {
-                "title": "Tee Actions",
-                "subtitle": teeName
+                "title": "Player Actions",
+                "subtitle": playerName
             },
-            "recordId": teeId,
+            "recordId": playerId,
             "items": [{
                     "label": "View Details",
-                    "description": "View complete tee information",
+                    "description": "View complete player information",
                     "icon": "eye",
                     "action": function(id) {
                         viewRecord(id);
                     }
                 },
                 {
-                    "label": "Edit Tee",
-                    "description": "Modify tee information",
+                    "label": "Edit Player",
+                    "description": "Modify player information",
                     "icon": "edit",
                     "action": function(id) {
                         editRecord(id);
@@ -382,8 +371,8 @@
                     "label": "---"
                 },
                 {
-                    "label": "Delete Tee",
-                    "description": "Permanently remove tee",
+                    "label": "Delete Player",
+                    "description": "Permanently remove player",
                     "icon": "trash",
                     "action": function(id) {
                         deleteRecord(id);
@@ -394,19 +383,19 @@
     }
 
     function viewRecord(id) {
-        window.location.href = `/admin/tees/${id}`;
+        window.location.href = `/admin/tournament-players/${id}`;
     }
 
     function editRecord(id) {
-        window.location.href = `/admin/tees/${id}/edit`;
+        window.location.href = `/admin/tournament-players/${id}/edit`;
     }
 
     function deleteRecord(id) {
-        if (confirm('Are you sure you want to delete this tee?')) {
+        if (confirm('Are you sure you want to delete this player?')) {
             // Create a form and submit it for DELETE request
             const form = document.createElement('form');
             form.method = 'POST';
-            form.action = `/admin/tees/${id}`;
+            form.action = `/admin/tournament-players/${id}`;
 
             // Add CSRF token
             const csrfToken = document.createElement('input');
@@ -427,13 +416,13 @@
         }
     }
 
-    function exportCourses() {
-        console.log('Export tees functionality');
+    function exportPlayers() {
+        console.log('Export players functionality');
         // Implement export logic here
     }
 
-    function importCourses() {
-        console.log('Import tees functionality');
+    function importPlayers() {
+        console.log('Import players functionality');
         // Implement import logic here
     }
 
@@ -517,9 +506,9 @@
     });
 
     // Import Players Functionality
-    function importUsers() {
+    function importParticipants() {
         // Try Bootstrap 5 first, then fallback to jQuery/Bootstrap 4
-        const modalElement = document.getElementById('importTeesModal');
+        const modalElement = document.getElementById('importParticipantsModal');
 
         if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
             // Bootstrap 5
@@ -527,7 +516,7 @@
             modal.show();
         } else if (typeof $ !== 'undefined' && $.fn.modal) {
             // jQuery/Bootstrap 4
-            $('#importTeesModal').modal('show');
+            $('#importParticipantsModal').modal('show');
         } else {
             // Fallback - manual modal display
             modalElement.style.display = 'block';
@@ -546,15 +535,15 @@
     }
 
     function resetImportModal() {
-        document.getElementById('importTeesForm').reset();
+        document.getElementById('importPlayersForm').reset();
         document.getElementById('importProgress').style.display = 'none';
         document.getElementById('importResults').style.display = 'none';
         document.getElementById('importBtn').disabled = false;
-        document.getElementById('importBtn').innerHTML = '<i class="fas fa-upload me-1"></i>Import Tees';
+        document.getElementById('importBtn').innerHTML = '<i class="fas fa-upload me-1"></i>Import Players';
     }
 
     function startImport() {
-        const form = document.getElementById('importTeesForm');
+        const form = document.getElementById('importPlayersForm');
         const fileInput = document.getElementById('import_file');
         const importBtn = document.getElementById('importBtn');
         const progressSection = document.getElementById('importProgress');
@@ -581,7 +570,7 @@
         simulateProgress();
 
         // Make the import request
-        fetch(BASE_URL + '/admin/tees/import', {
+        fetch(BASE_URL + '/admin/tournament-players/import', {
                 method: 'POST',
                 body: formData,
                 headers: {
@@ -638,7 +627,7 @@
                         <i class="fas fa-check-circle me-1"></i>Import Successful!
                     </h6>
                     <p class="mb-1">${data.message}</p>
-                    <small>Successfully imported ${data.imported} tees.</small>
+                    <small>Successfully imported ${data.imported} players.</small>
                     ${data.errors && data.errors.length > 0 ? 
                         `<div class="mt-2">
                             <strong>Warnings/Skipped rows:</strong>
@@ -714,10 +703,10 @@
     function downloadSampleFile() {
         // Create sample CSV data
         const sampleData = [
-            ['tee_name', 'course_id', 'gender'],
-            ['White', '1', 'M'],
-            ['Blue', '1', 'F'],
-            ['Gold', '2', 'MALE']
+            ['account_no', 'whs_handicap_index', 'north_tee', 'south_tee'],
+            ['1111', '8.2', 'BACK', 'CHAMPIONSHIP'],
+            ['2222', '15.0', 'FRONT', 'BACK'],
+            ['3333', '5.0', 'MIDDLE', 'MIDDLE']
         ];
 
         // Convert to CSV
@@ -730,7 +719,7 @@
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'tees_import_sample.csv';
+        a.download = 'tournament_players_import_sample.csv';
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -738,7 +727,7 @@
     }
 
     // Export Users Function (placeholder)
-    function exportUsers() {
+    function exportPlayers() {
         alert('Export functionality coming soon!');
     }
 
@@ -782,7 +771,7 @@
         // Close modal when clicking backdrop
         document.addEventListener('click', function(e) {
             if (e.target.classList.contains('modal-backdrop')) {
-                closeModal('importTeesModal');
+                closeModal('importParticipantsModal');
             }
         });
 
@@ -800,5 +789,66 @@
 
 <style>
     /* Modern Header Card */
+    
+    /* Course Handicap Column Improvements */
+    .course-handicap-list {
+        max-height: 120px;
+        overflow-y: auto;
+        padding: 2px;
+    }
+    
+    .handicap-item {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 4px;
+        padding: 2px 0;
+        border-bottom: 1px solid #f8f9fa;
+    }
+    
+    .handicap-item:last-child {
+        border-bottom: none;
+    }
+    
+    .course-handicap-cell .badge {
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .course-handicap-cell .badge.bg-secondary {
+        background-color: #6c757d !important;
+    }
+    
+    .course-handicap-cell .badge.bg-info {
+        background-color: #0dcaf0 !important;
+    }
+    
+    .course-handicap-cell .fw-bold {
+        min-width: 30px;
+        text-align: center;
+        font-size: 1rem !important;
+        font-weight: 600 !important;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .course-handicap-list {
+            max-height: 80px;
+        }
+        
+        .handicap-item {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .course-handicap-cell .badge {
+            font-size: 0.65rem !important;
+        }
+        
+        .course-handicap-cell .fw-bold {
+            font-size: 0.85rem !important;
+        }
+    }
 </style>
 @endsection

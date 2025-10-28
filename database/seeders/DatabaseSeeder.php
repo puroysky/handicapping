@@ -7,6 +7,7 @@ use App\Models\Member;
 use App\Models\PlayerProfile;
 use App\Models\ScorecardHandicapHole;
 use App\Models\Tournament;
+use App\Models\TournamentPlayer;
 use App\Models\User;
 use App\Models\UserProfile;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -153,6 +154,8 @@ class DatabaseSeeder extends Seeder
 
             TournamentSeeder::class,
             TournamentCourseSeeder::class,
+            ParticipantSeeder::class,
+            ParticipantCourseHandicapSeeder::class,
 
         ]);
     }
