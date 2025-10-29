@@ -12,14 +12,74 @@ use App\Http\Controllers\FormulaTypeController;
 use App\Http\Controllers\ParticipantController;
 use App\Http\Controllers\TournamentPlayerController;
 use App\Models\FormulaType;
+use App\Models\PlayerProfile;
+use App\Models\Tee;
+use App\Models\TournamentCourse;
 use App\Models\TournamentPlayer;
+use Illuminate\Support\Facades\Log;
 use NXP\MathExecutor;
 
 Route::get('/', function () {
     return view('welcome');
 })->name('home');
 
-Route::get('test', function () {})->name('test');
+Route::get('test', function () {
+
+
+
+    $playerInfo = PlayerProfile::get()->keyBy('account_no');
+
+    // echo '<pre>';
+    // print_r($playerInfo->toArray());
+    // echo '</pre>';
+
+    // return;
+
+
+    $tournamentCourses = TournamentCourse::where('tournament_id', 1)->get();
+    $tees = Tee::with('course')
+        ->whereIn('course_id', $tournamentCourses->pluck('course_id'))
+        ->get();
+
+    $courseTees = [];
+    foreach ($tees as $tee) {
+        $courseCode = $tee->course->course_code;
+        $teeId = $tee->tee_id;
+        $teeCode = $tee->tee_code;
+        $courseTees[$courseCode]['course_id'] = $tee->course->course_id;
+        $courseTees[$courseCode]['tees'][$teeCode] = $teeId;
+    }
+
+
+    echo '<pre>';
+    print_r($courseTees);
+    echo '</pre>';
+
+    return;
+
+
+
+    $participantCourseHandicaps = TournamentCourse::where('tournament_id', 2)->get();
+
+    $tees = Tee::with('course')->whereIn('course_id', $participantCourseHandicaps->pluck('course_id'))->get();
+
+    $courses = [];
+    foreach ($tees as $tee) {
+        $courses[$tee->course->course_code][$tee->tee_id] = $tee->tee_code;
+    }
+    // echo '<pre>';
+    // print_r($participantCourseHandicaps->toArray());
+    // echo '</pre>';
+
+    echo '<pre>';
+    print_r($courses);
+    echo '</pre>';
+
+
+    // echo '<pre>';
+    // print_r($participantCourseHandicaps->toArray());
+    // echo '</pre>';
+})->name('test');
 
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::resource('users', App\Http\Controllers\Admin\UserController::class);
