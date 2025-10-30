@@ -23,18 +23,21 @@ use Maatwebsite\Excel\Facades\Excel;
 use PhpOffice\PhpSpreadsheet\Shared\Date as ExcelDate;
 use Carbon\Carbon;
 
-class PlayerImportService
+/**
+ * Service for importing participants into tournaments.
+ */
+class ParticipantImportService
 {
-
-
     protected Tournament $tournament;
 
-
-
-
+    /**
+     * Import participants from uploaded file.
+     * @param Request $request
+     * @return array
+     */
     public function import($request)
     {
-        $this->tournament = Tournament::find(1);
+        $this->tournament = Tournament::find($request->input('tournament_id'));
 
         ini_set('max_execution_time', 300); // 300 seconds = 5 minutes
 
@@ -61,7 +64,7 @@ class PlayerImportService
             }
 
             // Perform bulk insertion
-            $insertResult = $this->bulkInsertPlayers($validationResult['validRows']);
+            $insertResult = $this->bulkInsertParticipants($validationResult['validRows']);
             if (!$insertResult['success']) {
                 return $insertResult;
             }
@@ -117,7 +120,9 @@ class PlayerImportService
 
         // Extract header and validate required columns
         $header = array_map('strtolower', array_map('trim', $data[0]));
-        $requiredColumns = ['account_no', 'handicp_index', 'north_tee', 'south_tee'];
+
+        Log::debug('Import file header', ['header' => $header]);
+        $requiredColumns = ['account_no', 'whs_handicap_index', 'north_tee', 'south_tee'];
 
         foreach ($requiredColumns as $column) {
             if (!in_array($column, $header)) {
@@ -144,7 +149,7 @@ class PlayerImportService
         $validRows = [];
 
         // Get existing data for duplicate checking
-        $existingData = $this->getExistingPlayerData();
+        $existingData = $this->getExistingParticipantData();
 
         // Process each data row
         for ($i = 1; $i < count($data); $i++) {
@@ -180,37 +185,43 @@ class PlayerImportService
     }
 
     /**
-     * Get existing player data for duplicate checking
+     * Get existing participant data for duplicate checking.
+     * @return array
      */
-    private function getExistingPlayerData()
+    private function getExistingParticipantData()
     {
-        return [
+        $accountNumbers = Participant::with('playerProfile')
+            ->where('tournament_id', $this->tournament->tournament_id)
+            ->get()
+            ->pluck('playerProfile.account_no')
+            ->toArray();
 
-            'account_numbers' => Participant::with('playerProfile')->get()->pluck('playerProfile.account_no')->toArray()
-        ];
+        return ['account_numbers' => $accountNumbers];
     }
 
     /**
-     * Validate a single row of import data
+     * Validate a single row of participant import data.
+     * @param array $row
+     * @param array $columnMap
+     * @param int $rowNumber
+     * @param array $existingData
+     * @param array $validRows
+     * @return array
      */
     private function validateSingleRow($row, $columnMap, $rowNumber, $existingData, $validRows)
     {
         // Extract and clean row data
         $rowData = [
-
             'account_no' => isset($row[$columnMap['account_no']]) ? trim($row[$columnMap['account_no']]) : '',
             'whs_handicap_index' => isset($row[$columnMap['whs_handicap_index']]) ? trim($row[$columnMap['whs_handicap_index']]) : '',
             'north_tee' => isset($row[$columnMap['north_tee']]) ? trim($row[$columnMap['north_tee']]) : '',
             'south_tee' => isset($row[$columnMap['south_tee']]) ? trim($row[$columnMap['south_tee']]) : '',
         ];
 
-
-
         Log::debug('Validating row', ['row_number' => $rowNumber, 'row_data' => $rowData]);
-        // Validate field formats
         $rowValidator = Validator::make($rowData, [
             'account_no' => 'required|string|max:50',
-            'whs_handicap_index' => 'required|integer',
+            'whs_handicap_index' => 'required|numeric',
             'north_tee' => 'required|string|max:100',
             'south_tee' => 'required|string|max:100',
         ]);
@@ -243,8 +254,14 @@ class PlayerImportService
         ];
     }
 
+
     /**
-     * Check for duplicate data in database and import batch
+     * Check for duplicate participant data in database and import batch.
+     * @param array $rowData
+     * @param array $existingData
+     * @param array $validRows
+     * @param int $rowNumber
+     * @return array
      */
     private function checkForDuplicates($rowData, $existingData, $validRows, $rowNumber)
     {
@@ -278,12 +295,13 @@ class PlayerImportService
     }
 
     /**
-     * Perform bulk insertion of validated player data
+     * Perform bulk insertion of validated participant data.
+     * @param array $validRows
+     * @return array
      */
-    private function bulkInsertPlayers($validRows)
+    private function bulkInsertParticipants($validRows)
     {
-
-        Log::info('Starting bulk insert of players', ['count' => count($validRows)]);
+        Log::info('Starting bulk insert of participants', ['count' => count($validRows)]);
 
         DB::beginTransaction();
 
@@ -293,15 +311,10 @@ class PlayerImportService
 
             // Prepare and insert participants
             $participantsData = $this->prepareParticipantsData($validRows, $now);
+
+            Log::debug('Prepared participant data for bulk insert', ['participant_data' => $participantsData['participants']]);
             Participant::insert($participantsData['participants']);
             ParticipantCourseHandicap::insert($participantsData['participantCourseHandicaps']);
-
-
-            Log::info('Inserting user profiles and player profiles', [
-                'user_profiles_count' => count($participantsData['userProfiles']),
-                'player_profiles_count' => count($participantsData['playerProfiles'])
-            ]);
-
 
             DB::commit();
 
@@ -310,7 +323,6 @@ class PlayerImportService
                 'imported' => count($validRows)
             ];
         } catch (Exception $e) {
-
             Log::error('Bulk insert failed', [
                 'error' => $e->getMessage(),
                 'file' => $e->getFile(),
@@ -325,67 +337,59 @@ class PlayerImportService
     }
 
     /**
-     * Prepare participant data for bulk insertion
+     * Prepare participant data for bulk insertion.
+     * @param array $validRows
+     * @param \Carbon\Carbon|string $now
+     * @return array
      */
     private function prepareParticipantsData($validRows, $now): array
     {
-
-
-
         $maxParticipantId = Participant::max('participant_id');
-
-
         Log::info('Preparing participant data for bulk insert', ['count' => count($validRows)]);
-        $participantsData = [];
-
-        $participanttCourseHandicapsData = [];
-
+        $participants = [];
+        $participantCourseHandicaps = [];
         $tees = $this->getTeesForCourse($this->tournament->tournament_id);
-
-
-
-
         $playerInfo = PlayerProfile::get()->keyBy('account_no')->toArray();
 
-
-
-
+        Log::debug('Player Info', ['player_info' => $playerInfo]);
 
 
         foreach ($validRows as $rowData) {
-
+            // Log::debug('Processing valid row', ['row_data' => $rowData['account_no']]);
+            // Log::debug('Player profile lookup', ['player_profile' => $playerInfo[$rowData['account_no']]]);
             $maxParticipantId++;
-
-
-
             $playerProfileId = $playerInfo[$rowData['account_no']]['player_profile_id'] ?? null;
             $userId = $playerInfo[$rowData['account_no']]['user_id'] ?? null;
 
 
-            $participantCourseHandicapsData[] = [
-                'participant_id' => $maxParticipantId,
-                'tournament_id' => $this->tournament->tournament_id,
-                'course_id' => $tees['N']['course_id'] ?? null,
-                'tee_id' => $tees['N']['tees'][$rowData['north_tee']] ?? null,
-                'created_at' => $now,
-                'updated_at' => $now,
-                'created_by' => Auth::id()
-            ];
+            if (isset($tees['N'])) {
 
-            $participanttCourseHandicapsData[] = [
-                'participant_id' => $maxParticipantId,
-                'tournament_id' => $this->tournament->tournament_id,
-                'course_id' => $tees['S']['course_id'] ?? null,
-                'tee_id' => $tees['S']['tees'][$rowData['south_tee']] ?? null,
-                'created_at' => $now,
-                'updated_at' => $now,
-                'created_by' => Auth::id()
-            ];
+                // North course
+                $participantCourseHandicaps[] = [
+                    'participant_id' => $maxParticipantId,
+                    'tournament_id' => $this->tournament->tournament_id,
+                    'course_id' => $tees['N']['course_id'] ?? null,
+                    'tee_id' => $tees['N']['tees'][$rowData['north_tee']] ?? null,
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                    'created_by' => Auth::id()
+                ];
+            }
 
+            if (isset($tees['S'])) {
+                // South course
+                $participantCourseHandicaps[] = [
+                    'participant_id' => $maxParticipantId,
+                    'tournament_id' => $this->tournament->tournament_id,
+                    'course_id' => $tees['S']['course_id'] ?? null,
+                    'tee_id' => $tees['S']['tees'][$rowData['south_tee']] ?? null,
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                    'created_by' => Auth::id()
+                ];
+            }
 
-
-
-            $participantsData[] = [
+            $participants[] = [
                 'participant_id' => $maxParticipantId,
                 'tournament_id' => $this->tournament->tournament_id,
                 'player_profile_id' => $playerProfileId,
@@ -396,27 +400,26 @@ class PlayerImportService
                 'updated_at' => $now,
                 'created_by' => Auth::id()
             ];
-
-            Log::info('Prepared participant for bulk insert', ['participant' => end($participantsData)]);
+            Log::info('Prepared participant for bulk insert', ['participant' => end($participants)]);
         }
 
-
-        Log::info('Prepared participant data for bulk insert', ['participant_data' => $participantsData]);
-
-        return $participantsData;
+        Log::info('Prepared participant data for bulk insert', ['participant_data' => $participants]);
+        return [
+            'participants' => $participants,
+            'participantCourseHandicaps' => $participantCourseHandicaps
+        ];
     }
 
 
 
     /**
      * Get all tees grouped by course code for a given tournament.
-     *
      * @param int $tournamentId
      * @return array
      */
     private function getTeesForCourse(int $tournamentId)
     {
-        $tournamentCourses = TournamentCourse::where('tournament_id', 1)->get();
+        $tournamentCourses = TournamentCourse::where('tournament_id', $tournamentId)->get();
         $tees = Tee::with('course')
             ->whereIn('course_id', $tournamentCourses->pluck('course_id'))
             ->get();
@@ -424,10 +427,8 @@ class PlayerImportService
         $courseTees = [];
         foreach ($tees as $tee) {
             $courseCode = $tee->course->course_code;
-            $teeId = $tee->tee_id;
-            $teeCode = $tee->tee_code;
             $courseTees[$courseCode]['course_id'] = $tee->course->course_id;
-            $courseTees[$courseCode]['tees'][$teeCode] = $teeId;
+            $courseTees[$courseCode]['tees'][$tee->tee_code] = $tee->tee_id;
         }
         return $courseTees;
     }

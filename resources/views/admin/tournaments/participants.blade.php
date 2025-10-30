@@ -383,11 +383,11 @@
     }
 
     function viewRecord(id) {
-        window.location.href = `/admin/tournament-players/${id}`;
+        window.location.href = `/admin/participants/${id}`;
     }
 
     function editRecord(id) {
-        window.location.href = `/admin/tournament-players/${id}/edit`;
+        window.location.href = `/admin/participants/${id}/edit`;
     }
 
     function deleteRecord(id) {
@@ -395,7 +395,7 @@
             // Create a form and submit it for DELETE request
             const form = document.createElement('form');
             form.method = 'POST';
-            form.action = `/admin/tournament-players/${id}`;
+            form.action = `/admin/participants/${id}`;
 
             // Add CSRF token
             const csrfToken = document.createElement('input');
@@ -559,6 +559,8 @@
         const formData = new FormData();
         formData.append('import_file', fileInput.files[0]);
         formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
+        //tournament_id
+        formData.append('tournament_id', {{ $tournament->tournament_id }});
 
         // Update UI to show progress
         importBtn.disabled = true;
@@ -570,7 +572,7 @@
         simulateProgress();
 
         // Make the import request
-        fetch(BASE_URL + '/admin/tournament-players/import', {
+        fetch(BASE_URL + '/admin/participants/import', {
                 method: 'POST',
                 body: formData,
                 headers: {
@@ -704,9 +706,8 @@
         // Create sample CSV data
         const sampleData = [
             ['account_no', 'whs_handicap_index', 'north_tee', 'south_tee'],
-            ['1111', '8.2', 'BACK', 'CHAMPIONSHIP'],
-            ['2222', '15.0', 'FRONT', 'BACK'],
-            ['3333', '5.0', 'MIDDLE', 'MIDDLE']
+            ['0001-00', '8.2', 'BLUE', 'GOLD'],
+            ['0001-02', '15.0', 'WHITE', 'BLUE']
         ];
 
         // Convert to CSV

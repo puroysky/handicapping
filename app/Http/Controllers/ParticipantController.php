@@ -6,6 +6,7 @@ use App\Models\Participant;
 use App\Models\PlayerProfile;
 use App\Models\Tournament;
 use App\Models\Participat;
+use App\Services\ParticipantImportService;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -14,6 +15,9 @@ use Illuminate\Support\Facades\Log;
 
 class ParticipantController extends Controller
 {
+
+
+
     /**
      * Display a listing of the resource.
      */
@@ -143,5 +147,12 @@ class ParticipantController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+
+    public function import(Request $request)
+    {
+
+        $importService = new ParticipantImportService();
+        return $importService->import($request);
     }
 }
