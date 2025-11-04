@@ -76,11 +76,23 @@
                                 </th>
                                 <th class="sortable" data-column="3">
                                     <div class="d-flex align-items-center justify-content-between">
-                                        <span>Status</span>
+                                        <span>Birthdate</span>
                                         <i class="fas fa-sort sort-icon"></i>
                                     </div>
                                 </th>
                                 <th class="sortable" data-column="4">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <span>Sex</span>
+                                        <i class="fas fa-sort sort-icon"></i>
+                                    </div>
+                                </th>
+                                <th class="sortable" data-column="5">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <span>Status</span>
+                                        <i class="fas fa-sort sort-icon"></i>
+                                    </div>
+                                </th>
+                                <th class="sortable" data-column="6">
                                     <div class="d-flex align-items-center justify-content-between">
                                         <span>Created At</span>
                                         <i class="fas fa-sort sort-icon"></i>
@@ -113,7 +125,7 @@
                                             </div>
                                         </div>
                                         <div>
-                                            <div class="user-name">{{ ($player->profile->first_name ?? '') . ' ' . ($player->profile->last_name ?? '') }}</div>
+                                            <div class="user-name">{{ ($player->profile->last_name ?? '') . ', ' . ($player->profile->first_name ?? '') }}</div>
                                             @if($player->profile->phone)
                                             <small class="user-whs-no">{{ $player->player->whs_no }}</small>
                                             @endif
@@ -127,6 +139,14 @@
                                 </td>
                                 <td class="email-cell">
                                     <span class="user-email">{{ $player->email }}</span>
+                                </td>
+                                <td class="birthdate-cell">
+                                    <span class="birthdate-text">{{ $player->profile->birthdate ? \Carbon\Carbon::parse($player->profile->birthdate)->format('M d, Y') : 'N/A' }}</span>
+                                </td>
+                                <td class="sex-cell">
+                                    <span class="badge {{ $player->profile->sex === 'M' ? 'bg-primary' : 'bg-danger' }}">
+                                        {{ $player->profile->sex === 'M' ? 'Male' : ($player->profile->sex === 'F' ? 'Female' : 'N/A') }}
+                                    </span>
                                 </td>
                                 <td class="status-cell">
                                     @if ($player->active)

@@ -73,7 +73,7 @@ return new class extends Migration
             $table->id('player_profile_id');
             $table->unsignedBigInteger('user_id')->unique();
             $table->unsignedBigInteger('user_profile_id');
-            $table->unsignedBigInteger('member_id');
+            $table->unsignedBigInteger('member_id')->nullable()->default(null);
             $table->string('account_no', 15)->unique();
             $table->integer('whs_no')->unique();
             $table->unsignedBigInteger('created_by');

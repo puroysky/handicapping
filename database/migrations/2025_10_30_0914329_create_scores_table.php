@@ -38,7 +38,7 @@ return new class extends Migration
 
             $table->decimal('tournament_handicap_index', 4, 1)->nullable()->default(NULL)->comment('Handicap index used for this round (may differ from official index) - required for form/import entries');
             $table->enum('handicap_index_type', ['whs', 'local', 'none', 'legacy'])->default('whs')->comment('Type of handicap index used: WHS official, local club, none, or unknown');
-            $table->unsignedSmallInteger('course_handicap')->comment('Course handicap for the player at time of round');
+            $table->unsignedSmallInteger('course_handicap')->nullable()->comment('Course handicap for the player at time of round');
 
             // $table->decimal('course_rating', 5, 2)->comment('Course rating for the tee played');
             // $table->unsignedSmallInteger('slope_rating')->comment('Slope rating for the tee played');
@@ -85,6 +85,7 @@ return new class extends Migration
         DB::statement('ALTER TABLE scores ADD CONSTRAINT chk_tournament_handicap_index_required CHECK (NOT (entry_type IN (\'import\', \'form\') AND tournament_handicap_index IS NULL))');
         DB::statement('ALTER TABLE scores ADD CONSTRAINT chk_net_score_required CHECK (NOT (entry_type IN (\'import\', \'form\') AND net_score IS NULL))');
         DB::statement('ALTER TABLE scores ADD CONSTRAINT chk_participant_id_required CHECK (NOT (entry_type IN (\'import\', \'form\') AND participant_id IS NULL))');
+        DB::statement('ALTER TABLE scores ADD CONSTRAINT chk_course_handicap_required CHECK (NOT (entry_type IN (\'import\', \'form\') AND course_handicap IS NULL))');
     }
 
     /**

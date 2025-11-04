@@ -24,8 +24,10 @@ class PlayerService
     {
 
         $players = User::with('profile', 'player')
-            ->whereIn('role', ['player', 'member'])
-            ->orderBy('created_at', 'desc')
+            ->whereIn('role', ['player', 'user'])
+            ->join('user_profiles', 'users.id', '=', 'user_profiles.user_id')
+            ->orderBy('user_profiles.last_name', 'desc')
+            ->select('users.*')
             ->get();
 
 
