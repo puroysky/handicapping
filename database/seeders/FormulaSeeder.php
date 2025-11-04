@@ -15,9 +15,6 @@ class FormulaSeeder extends Seeder
     {
 
 
-
-
-
         Formula::insert([
             [
                 'formula_id' => 1,
@@ -65,11 +62,11 @@ class FormulaSeeder extends Seeder
                 'formula_name' => 'Score Differential v1.0',
                 'formula_code' => 'N-SD01',
                 'formula_desc' => 'Initial version of Score Differential formula',
-                'formula_expression' => 'SCORE_DIFFERENTIAL = (113 / SLOPE_RATING) * (ADJUSTED_GROSS_SCORE - COURSE_RATING)',
+                'formula_expression' => '(113 / SLOPE_RATING) * (ADJUSTED_GROSS_SCORE - COURSE_RATING)',
                 'formula_variables' => json_encode([
-                    'adjusted_gross_score',
-                    'course_rating',
-                    'slope_rating',
+                    'ADJUSTED_GROSS_SCORE',
+                    'COURSE_RATING',
+                    'SLOPE_RATING',
                 ]),
                 'remarks' => 'Used for calculating Score Differential',
                 'active' => true,
@@ -83,11 +80,11 @@ class FormulaSeeder extends Seeder
                 'formula_name' => 'Score Differential v1.0',
                 'formula_code' => 'S-SD01',
                 'formula_desc' => 'Initial version of Score Differential formula',
-                'formula_expression' => 'SCORE_DIFFERENTIAL = (113 / SLOPE_RATING) * (ADJUSTED_GROSS_SCORE - COURSE_RATING)',
+                'formula_expression' => '(113 / SLOPE_RATING) * (ADJUSTED_GROSS_SCORE - COURSE_RATING)',
                 'formula_variables' => json_encode([
-                    'adjusted_gross_score',
-                    'course_rating',
-                    'slope_rating',
+                    'ADJUSTED_GROSS_SCORE',
+                    'COURSE_RATING',
+                    'SLOPE_RATING',
                 ]),
                 'remarks' => 'Used for calculating Score Differential',
                 'active' => true,

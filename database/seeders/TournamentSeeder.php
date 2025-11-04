@@ -16,13 +16,13 @@ class TournamentSeeder extends Seeder
         Tournament::insert([
             [
                 'tournament_id' => 1,
-                'tournament_name' => 'Spring Invitational',
-                'tournament_desc' => 'Annual Spring Golf Tournament',
-                'tournament_start' => '2024-03-15',
-                'tournament_end' => '2024-03-17',
+                'tournament_name' => 'All Seniors 2025',
+                'tournament_desc' => 'Tournament for All Senior 2025',
+                'tournament_start' => '2025-08-30',
+                'tournament_end' => '2025-08-30',
                 'handicap_formula_expression' => 'AVG(SELECTED_DIFFERENTIALS) * 0.96',
-                'score_diff_start_date' => '2024-01-01',
-                'score_diff_end_date' => '2024-03-14',
+                'score_diff_start_date' => '2023-01-01',
+                'score_diff_end_date' => '2025-07-31',
                 'recent_scores_count' => 20,
                 'score_selection_type' => 'LOWEST',
                 'created_by' => 1

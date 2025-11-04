@@ -156,6 +156,7 @@ class DatabaseSeeder extends Seeder
             TournamentCourseSeeder::class,
             ParticipantSeeder::class,
             ParticipantCourseHandicapSeeder::class,
+            ScoreSeeder::class,
 
         ]);
     }

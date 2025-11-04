@@ -28,7 +28,9 @@ class ScoreService
     public function index()
     {
 
-        $scores = Score::with(['playerProfile', 'userProfile', 'scoreHoles', 'tournament', 'tournamentCourse.course'])->orderBy('created_at', 'desc')->get();
+        $scores = Score::with(['playerProfile.userProfile', 'tournament', 'tournamentCourse.course', 'tee'])
+            ->orderBy('created_at', 'desc')
+            ->get();
         $title = 'Scores';
 
 
@@ -37,6 +39,89 @@ class ScoreService
         // echo '</pre>';
         // return;
         return view('admin.scores.scores', compact('scores', 'title'));
+    }
+
+    public function filter($request)
+    {
+        $filters = $request->input('filters', []);
+        
+        $query = Score::with(['playerProfile.userProfile', 'tournament', 'tournamentCourse.course', 'tee']);
+
+        foreach ($filters as $filter) {
+            $field = $filter['field'];
+            $value = $filter['value'];
+            $type = $filter['type'];
+
+            switch ($field) {
+                case 'player_name':
+                    $query->whereHas('playerProfile.userProfile', function ($q) use ($value) {
+                        $q->where(DB::raw("CONCAT(first_name, ' ', last_name)"), 'LIKE', "%{$value}%");
+                    });
+                    break;
+
+                case 'whs_no':
+                    $query->whereHas('playerProfile', function ($q) use ($value) {
+                        $q->where('whs_handicap_no', 'LIKE', "%{$value}%");
+                    });
+                    break;
+
+                case 'account_no':
+                    $query->whereHas('playerProfile', function ($q) use ($value) {
+                        $q->where('account_no', 'LIKE', "%{$value}%");
+                    });
+                    break;
+
+                case 'tournament':
+                    $query->whereHas('tournament', function ($q) use ($value) {
+                        $q->where('tournament_name', 'LIKE', "%{$value}%");
+                    });
+                    break;
+
+                case 'course':
+                    $query->whereHas('tournamentCourse.course', function ($q) use ($value) {
+                        $q->where('course_code', 'LIKE', "%{$value}%");
+                    });
+                    break;
+
+                case 'tee':
+                    $query->whereHas('tee', function ($q) use ($value) {
+                        $q->where('tee_code', 'LIKE', "%{$value}%");
+                    });
+                    break;
+
+                case 'adjusted_score':
+                    if ($type === 'number') {
+                        $query->where('adjusted_score', $value);
+                    }
+                    break;
+
+                case 'date_played':
+                    if ($type === 'date') {
+                        $query->whereDate('played_date', $value);
+                    }
+                    break;
+            }
+        }
+
+        $scores = $query->orderBy('created_at', 'desc')->get();
+        
+        // Generate HTML for filtered rows
+        $html = view('admin.scores.partials.scores-table-rows', compact('scores'))->render();
+
+        return response()->json([
+            'success' => true,
+            'html' => $html,
+            'count' => $scores->count(),
+            'total' => Score::count()
+        ]);
+    }
+
+    public function show($id)
+    {
+
+        $score = Score::where('score_id', $id)
+            ->with(['playerProfile', 'userProfile', 'scoreHoles', 'tournament', 'tournamentCourse.course'])
+            ->firstOrFail();
     }
 
     public function getTees($request, $courseId) {}

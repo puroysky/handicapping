@@ -1,27 +1,30 @@
 @extends('layouts.app')
 
 @section('content')
+<!-- Include Reusable Table Filter Script -->
+<script src="{{ asset('js/table-filter.js') }}"></script>
+
 <div class="container-fluid py-0">
     <!-- Compact Modern Header Section -->
     <div class="row mb-3">
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
-                    <h6 class="header-title">Scores Management</h6>
+                    <h6 class="header-title">Courses Management</h6>
                     <p class="header-subtitle">
-                        <i class="fas fa-users me-2"></i>
-                        Manage system scores and their golf profiles
+                        <i class="fas fa-golf-ball me-2"></i>
+                        Manage golf courses
                     </p>
                 </div>
                 <div class="d-flex gap-2">
-                    <button class="btn btn-outline-secondary btn-modern" onclick="exportUsers()">
+                    <button class="btn btn-outline-secondary btn-modern" onclick="exportCourses()">
                         <i class="fas fa-download me-1"></i>Export
                     </button>
-                    <button class="btn btn-outline-secondary btn-modern" onclick="importUsers()">
+                    <button class="btn btn-outline-secondary btn-modern" onclick="importCourses()">
                         <i class="fas fa-upload me-1"></i>Import
                     </button>
-                    <a href="{{ route('admin.scores.create') }}" class="btn btn-primary btn-modern">
-                        <i class="fas fa-plus me-2"></i>Add New Score
+                    <a href="{{ route('admin.courses.create') }}" class="btn btn-primary btn-modern">
+                        <i class="fas fa-plus me-2"></i>Add New Course
                     </a>
                 </div>
             </div>
@@ -36,9 +39,15 @@
                 <div class="table-search-section">
                     <div class="row align-items-center">
                         <div class="col-md-6">
-                            <div class="search-wrapper">
-                                <i class="fas fa-search search-icon"></i>
-                                <input type="text" class="search-input" id="tableSearch" placeholder="Search scores..." autocomplete="off">
+                            <div class="d-flex gap-2">
+                                <div class="search-wrapper flex-grow-1">
+                                    <i class="fas fa-search search-icon"></i>
+                                    <input type="text" class="search-input" id="tableSearch" placeholder="Search scores..." autocomplete="off">
+                                </div>
+                                <button class="btn btn-outline-secondary btn-modern d-flex align-items-center" id="filterButton" title="Filter Scores">
+                                    <i class="fas fa-filter me-2"></i>Filter
+                                    <span class="badge bg-primary ms-2" id="activeFilterCount" style="display: none;">0</span>
+                                </button>
                             </div>
                         </div>
                         <div class="col-md-6 text-end">
@@ -58,43 +67,67 @@
                             <tr>
                                 <th class="sortable" data-column="0">
                                     <div class="d-flex align-items-center justify-content-between">
-                                        <span></i>Name</span>
+                                        <span>Player Name</span>
                                         <i class="fas fa-sort sort-icon"></i>
                                     </div>
                                 </th>
                                 <th class="sortable" data-column="1">
                                     <div class="d-flex align-items-center justify-content-between">
-                                        <span>Account No</span>
+                                        <span>WHS No</span>
                                         <i class="fas fa-sort sort-icon"></i>
                                     </div>
                                 </th>
                                 <th class="sortable" data-column="2">
                                     <div class="d-flex align-items-center justify-content-between">
-                                        <span>Email</span>
+                                        <span>Account Number</span>
                                         <i class="fas fa-sort sort-icon"></i>
                                     </div>
                                 </th>
                                 <th class="sortable" data-column="3">
                                     <div class="d-flex align-items-center justify-content-between">
-                                        <span>Tournament / Course</span>
+                                        <span>Tournament</span>
                                         <i class="fas fa-sort sort-icon"></i>
                                     </div>
                                 </th>
                                 <th class="sortable" data-column="4">
                                     <div class="d-flex align-items-center justify-content-between">
-                                        <span>Adjusted Score</span>
+                                        <span>Course / Tee</span>
                                         <i class="fas fa-sort sort-icon"></i>
                                     </div>
                                 </th>
                                 <th class="sortable" data-column="5">
                                     <div class="d-flex align-items-center justify-content-between">
-                                        <span>Status</span>
+                                        <span>Adjusted Gross Score</span>
                                         <i class="fas fa-sort sort-icon"></i>
                                     </div>
                                 </th>
                                 <th class="sortable" data-column="6">
                                     <div class="d-flex align-items-center justify-content-between">
-                                        <span>Created At</span>
+                                        <span>Handicap Index Used</span>
+                                        <i class="fas fa-sort sort-icon"></i>
+                                    </div>
+                                </th>
+                                <th class="sortable" data-column="7">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <span>Score Differential</span>
+                                        <i class="fas fa-sort sort-icon"></i>
+                                    </div>
+                                </th>
+                                <th class="sortable" data-column="8">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <span>Date Played</span>
+                                        <i class="fas fa-sort sort-icon"></i>
+                                    </div>
+                                </th>
+                                <th class="sortable" data-column="9">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <span>Entry Type</span>
+                                        <i class="fas fa-sort sort-icon"></i>
+                                    </div>
+                                </th>
+                                <th class="sortable" data-column="10">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <span>Holes Played</span>
                                         <i class="fas fa-sort sort-icon"></i>
                                     </div>
                                 </th>
@@ -106,100 +139,77 @@
                         <tbody id="mainTableBody">
                             @foreach ($scores as $score)
                             <tr class="table-row">
-                                <td class="name-cell">
-                                    <div class="d-flex align-items-center">
-                                        <div class="user-avatar me-3">
-                                            @if($score->playerProfile->avatar !== null)
-                                            <img src="{{ $score->playerProfile->avatar }}" alt="Avatar" class="avatar-img">
-                                            @else
-                                            <div class="avatar-placeholder">
-                                                {{ strtoupper(
-                                                    (isset($score->userProfile->first_name) ? substr($score->userProfile->first_name, 0, 1) : '') . 
-                                                    (isset($score->userProfile->last_name) ? substr($score->userProfile->last_name, 0, 1) : '')
-                                                ) ?: 'U' }}
-                                            </div>
-                                            @endif
-                                            <!-- Status Indicator -->
-                                            <div class="status-indicator {{ $score->playerProfile->active ? 'status-online' : 'status-offline' }}"
-                                                title="{{ $score->playerProfile->active ? 'Active Score' : 'Inactive Score' }}">
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <div class="user-name">{{ ($score->userProfile->first_name ?? '') . ' ' . ($score->userProfile->last_name ?? '') }}</div>
-                                            @if($score->userProfile->phone)
-                                            <small class="user-whs-no">{{ $score->playerProfile->whs_no }}</small>
-                                            @endif
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="account-cell">
-                                    <span class="account-number">
-                                        {{ $score->playerProfile->account_no ?? 'Not Set' }}
+                                <td class="player-name-cell">
+                                    <span class="fw-bold" style="color: #2F4A3C;">
+                                        {{ $score->playerProfile->userProfile->first_name ?? '' }} 
+                                        {{ $score->playerProfile->userProfile->last_name ?? 'N/A' }}
                                     </span>
                                 </td>
-                                <td class="email-cell">
-                                    <span class="user-email">{{ $score->userProfile->email }}</span>
+                                <td class="whs-no-cell">
+                                    <span class="fw-semibold">{{ $score->playerProfile->whs_handicap_no ?? 'N/A' }}</span>
                                 </td>
-                                <td class="tournament-course-cell">
-                                    <div class="tournament-course-info">
-                                        <div class="tournament-name">
-                                            <i class="fas fa-trophy me-1" style="font-size: 0.75rem; color: #fbbf24;"></i>
-                                            {{ $score->tournament->tournament_name ?? 'N/A' }}
-                                        </div>
-                                        <small class="course-name">
-                                            <i class="fas fa-golf-ball-tee me-1" style="font-size: 0.65rem; color: #5E7C4C;"></i>
-                                            {{ $score->tournamentCourse->course->course_name ?? 'N/A' }}
-                                        </small>
-                                    </div>
+                                <td class="account-no-cell">
+                                    <span class="text-muted">{{ $score->playerProfile->account_no ?? 'N/A' }}</span>
                                 </td>
-                                <td class="score-cell">
-                                    @if($score->scoreHoles && $score->scoreHoles->count() > 0)
-                                    @php
-                                    // Calculate total from score holes if not already calculated
-                                    $totalScore = $score->adjusted_score ?: $score->scoreHoles->sum('strokes');
-                                    // Separate front and back nine
-                                    $frontNine = $score->scoreHoles->filter(fn($h) => $h->hole >= 1 && $h->hole <= 9)->sortBy('hole');
-                                        $backNine = $score->scoreHoles->filter(fn($h) => $h->hole >= 10 && $h->hole <= 18)->sortBy('hole');
-                                            $frontTotal = $frontNine->sum('strokes');
-                                            $backTotal = $backNine->sum('strokes');
-                                            @endphp
-                                            <div class="modern-score-hover-preview-badge-wrapper">
-                                                <span class="modern-score-hover-preview-badge"
-                                                    data-bs-toggle="tooltip"
-                                                    data-bs-html="true"
-                                                    data-bs-placement="top"
-                                                    title="<div class='modern-score-hover-preview-tooltip'><strong>Hole-by-Hole Scorecard:</strong>@if($frontNine->count() > 0)<div class='modern-score-hover-preview-nine-section'><div class='modern-score-hover-preview-nine-header'>Front 9</div><div class='modern-score-hover-preview-holes-horizontal'>@foreach($frontNine as $hole)<div class='modern-score-hover-preview-hole-item-h'><span class='modern-score-hover-preview-hole-number-h'>{{ $hole->hole }}</span><span class='modern-score-hover-preview-hole-score-h'>{{ $hole->strokes }}</span></div>@endforeach<div class='modern-score-hover-preview-hole-item-h modern-score-hover-preview-total-hole'><span class='modern-score-hover-preview-hole-number-h'>OUT</span><span class='modern-score-hover-preview-hole-score-h modern-score-hover-preview-total-score'>{{ $frontTotal }}</span></div></div></div>@endif @if($backNine->count() > 0)<div class='modern-score-hover-preview-nine-section'><div class='modern-score-hover-preview-nine-header'>Back 9</div><div class='modern-score-hover-preview-holes-horizontal'>@foreach($backNine as $hole)<div class='modern-score-hover-preview-hole-item-h'><span class='modern-score-hover-preview-hole-number-h'>{{ $hole->hole }}</span><span class='modern-score-hover-preview-hole-score-h'>{{ $hole->strokes }}</span></div>@endforeach<div class='modern-score-hover-preview-hole-item-h modern-score-hover-preview-total-hole'><span class='modern-score-hover-preview-hole-number-h'>IN</span><span class='modern-score-hover-preview-hole-score-h modern-score-hover-preview-total-score'>{{ $backTotal }}</span></div></div></div>@endif<div class='modern-score-hover-preview-score-total'><strong>Total:</strong> {{ $totalScore }} strokes</div></div>">
-                                                    <i class="fas fa-golf-ball me-1"></i>{{ $totalScore }}
-                                                </span>
-                                                @if($score->scoring_method === 'hole_by_hole')
-                                                @endif
-                                            </div>
-                                            @elseif($score->adjusted_score !== null)
-                                            <span>{{ $score->adjusted_score }}</span>
-                                            @else
-                                            <span class="text-muted">N/A</span>
-                                            @endif
+                                <td class="tournament-cell">
+                                    <span class="fw-semibold">{{ $score->tournament->tournament_name ?? 'N/A' }}</span>
                                 </td>
-                                <td class="status-cell">
-                                    @if ($score->playerProfile->active)
-                                    <span class="status-badge status-active">
-                                        <i class="fas fa-check-circle me-1"></i>Active
-                                    </span>
-                                    @else
-                                    <span class="status-badge status-inactive">
-                                        <i class="fas fa-times-circle me-1"></i>Inactive
-                                    </span>
-                                    @endif
+                                <td class="course-tee-cell">
+                                    <span class="badge bg-secondary me-1">{{ $score->course->course_name ?? 'N/A' }}</span>
+                                    <span class="badge bg-info">{{ $score->tee->tee_code ?? 'N/A' }}</span>
+                                </td>
+                                <td class="adjusted-score-cell">
+                                    <span class="fw-bold text-primary" style="font-size: 1.1rem;">{{ $score->adjusted_score ?? 'N/A' }}</span>
+                                </td>
+                                <td class="handicap-index-cell">
+                                    <span class="fw-semibold">{{ $score->handicap_index ?? 'N/A' }}</span>
+                                </td>
+                                <td class="score-diff-cell">
+                                    <span class="fw-semibold text-success">{{ number_format($score->score_differential ?? 0, 2) }}</span>
                                 </td>
                                 <td class="date-cell">
-                                    <span class="cell-text-date">{{ \Carbon\Carbon::parse($score->created_at)->format('M d, Y') }}</span>
-                                    <small class="cell-text-time d-block">{{ \Carbon\Carbon::parse($score->created_at)->format('g:i A') }}</small>
+                                    <span class="cell-text-date">{{ \Carbon\Carbon::parse($score->played_date)->format('M d, Y') }}</span>
+                                    <small class="cell-text-time d-block">{{ \Carbon\Carbon::parse($score->played_date)->format('l') }}</small>
+                                </td>
+                                <td class="entry-type-cell">
+                                    @php
+                                        $entryTypeColors = [
+                                            'form' => 'bg-primary',
+                                            'import' => 'bg-success',
+                                            'migrate' => 'bg-warning'
+                                        ];
+                                        $entryTypeLabels = [
+                                            'form' => 'Form Entry',
+                                            'import' => 'Import',
+                                            'migrate' => 'Migrate'
+                                        ];
+                                    @endphp
+                                    <span class="badge {{ $entryTypeColors[$score->entry_type] ?? 'bg-secondary' }}">
+                                        {{ $entryTypeLabels[$score->entry_type] ?? 'N/A' }}
+                                    </span>
+                                </td>
+                                <td class="holes-played-cell">
+                                    @php
+                                        $holesPlayedColors = [
+                                            'F9' => 'bg-info',
+                                            'B9' => 'bg-info',
+                                            '18' => 'bg-success'
+                                        ];
+                                        $holesPlayedLabels = [
+                                            'F9' => 'Front 9',
+                                            'B9' => 'Back 9',
+                                            '18' => '18 Holes'
+                                        ];
+                                    @endphp
+                                    <span class="badge {{ $holesPlayedColors[$score->holes_played] ?? 'bg-secondary' }}">
+                                        {{ $holesPlayedLabels[$score->holes_played] ?? 'N/A' }}
+                                    </span>
                                 </td>
                                 <td class="action-cell text-center">
                                     <div class="action-wrapper">
                                         <button class="btn btn-outline-secondary btn-context-menu"
                                             type="button"
-                                            onclick="showUserContextMenu()"
+                                            onclick="showScoreContextMenu({{ $score->score_id }}, '{{ $score->playerProfile->userProfile->first_name ?? '' }} {{ $score->playerProfile->userProfile->last_name ?? '' }}', event)"
                                             title="Actions"
                                             data-label="Actions">
                                             <i class="fas fa-ellipsis-v me-1"></i>
@@ -218,13 +228,13 @@
     </div>
 </div>
 
-<!-- Import Scores Modal -->
+<!-- Import Players Modal -->
 <div class="modal fade" id="importPlayersModal" tabindex="-1" aria-labelledby="importPlayersModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="importPlayersModalLabel">
-                    <i class="fas fa-upload me-2"></i>Import Scores
+                    <i class="fas fa-upload me-2"></i>Import Players
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -281,7 +291,7 @@
                     <!-- Progress Bar (hidden initially) -->
                     <div id="importProgress" class="mb-3" style="display: none;">
                         <div class="d-flex justify-content-between mb-1">
-                            <small class="text-muted">Importing scores...</small>
+                            <small class="text-muted">Importing players...</small>
                             <small class="text-muted" id="importProgressText">0%</small>
                         </div>
                         <div class="progress">
@@ -301,7 +311,7 @@
                     <i class="fas fa-times me-1"></i>Cancel
                 </button>
                 <button type="button" class="btn btn-primary" onclick="startImport()" id="importBtn">
-                    <i class="fas fa-upload me-1"></i>Import Scores
+                    <i class="fas fa-upload me-1"></i>Import Players
                 </button>
             </div>
         </div>
@@ -419,20 +429,20 @@
         }, 10);
     }
 
-    // Score-specific context menu
-    function showUserContextMenu(userId, userName, event) {
+    // Player-specific context menu
+    function showScoreContextMenu(scoreId, playerName, event) {
         event.preventDefault();
         event.stopPropagation();
 
         modernContext({
             "data": {
                 "title": "Score Actions",
-                "subtitle": userName
+                "subtitle": playerName
             },
-            "recordId": userId,
+            "recordId": scoreId,
             "items": [{
                     "label": "View Details",
-                    "description": "View complete score profile",
+                    "description": "View complete score information",
                     "icon": "eye",
                     "action": function(id) {
                         viewRecord(id);
@@ -447,19 +457,11 @@
                     }
                 },
                 {
-                    "label": "Manage Profile",
-                    "description": "Update golf profile settings",
-                    "icon": "user-cog",
-                    "action": function(id) {
-                        window.location.href = `/admin/scores/${id}/profile`;
-                    }
-                },
-                {
-                    "label": "View Handicap",
-                    "description": "Check current handicap status",
+                    "label": "View Scorecard",
+                    "description": "View detailed scorecard",
                     "icon": "golf-ball",
                     "action": function(id) {
-                        window.location.href = `/admin/scores/${id}/handicap`;
+                        window.location.href = `/admin/scores/${id}/scorecard`;
                     }
                 },
                 {
@@ -511,9 +513,14 @@
         }
     }
 
-    function exportUsers() {
-        console.log('Export scores functionality');
+    function exportCourses() {
+        console.log('Export courses functionality');
         // Implement export logic here
+    }
+
+    function importCourses() {
+        console.log('Import courses functionality');
+        // Implement import logic here
     }
 
     // Search functionality
@@ -537,17 +544,6 @@
 
     // Enhanced context menu button functionality
     document.addEventListener('DOMContentLoaded', function() {
-        // Initialize Bootstrap tooltips
-        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-        const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => {
-            if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
-                return new bootstrap.Tooltip(tooltipTriggerEl, {
-                    html: true,
-                    sanitize: false
-                });
-            }
-        });
-
         // Add keyboard navigation for context menu buttons
         document.querySelectorAll('.btn-context-menu').forEach(button => {
             button.addEventListener('keydown', function(e) {
@@ -606,7 +602,7 @@
         });
     });
 
-    // Import Scores Functionality
+    // Import Players Functionality
     function importUsers() {
         // Try Bootstrap 5 first, then fallback to jQuery/Bootstrap 4
         const modalElement = document.getElementById('importPlayersModal');
@@ -640,7 +636,7 @@
         document.getElementById('importProgress').style.display = 'none';
         document.getElementById('importResults').style.display = 'none';
         document.getElementById('importBtn').disabled = false;
-        document.getElementById('importBtn').innerHTML = '<i class="fas fa-upload me-1"></i>Import Scores';
+        document.getElementById('importBtn').innerHTML = '<i class="fas fa-upload me-1"></i>Import Players';
     }
 
     function startImport() {
@@ -671,7 +667,7 @@
         simulateProgress();
 
         // Make the import request
-        fetch(BASE_URL + '/admin/scores/import', {
+        fetch(BASE_URL + '/admin/players/import', {
                 method: 'POST',
                 body: formData,
                 headers: {
@@ -728,7 +724,7 @@
                         <i class="fas fa-check-circle me-1"></i>Import Successful!
                     </h6>
                     <p class="mb-1">${data.message}</p>
-                    <small>Successfully imported ${data.imported} scores.</small>
+                    <small>Successfully imported ${data.imported} players.</small>
                     ${data.errors && data.errors.length > 0 ? 
                         `<div class="mt-2">
                             <strong>Warnings/Skipped rows:</strong>
@@ -746,7 +742,7 @@
             importBtn.classList.remove('btn-primary');
             importBtn.classList.add('btn-success');
 
-            // Refresh page after delay to show new scores
+            // Refresh page after delay to show new players
             setTimeout(() => {
                 window.location.reload();
             }, 2000);
@@ -886,217 +882,33 @@
             }
         });
     });
+
+    // ==================== INITIALIZE FILTER FUNCTIONALITY ====================
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize the reusable table filter
+        tableFilterInstance = new TableFilter({
+            tableBodyId: 'mainTableBody',
+            filterButtonId: 'filterButton',
+            showingCountId: 'showing-count',
+            totalCountId: 'total-count',
+            modalId: 'filterModal',
+            fields: [
+                { value: 'player_name', label: 'Player Name', type: 'text', selector: '.player-name-cell span' },
+                { value: 'whs_no', label: 'WHS Number', type: 'text', selector: '.whs-no-cell span' },
+                { value: 'account_no', label: 'Account Number', type: 'text', selector: '.account-no-cell span' },
+                { value: 'tournament', label: 'Tournament', type: 'select', selector: '.tournament-cell span' },
+                { value: 'course', label: 'Course', type: 'select', selector: '.course-tee-cell .badge.bg-secondary' },
+                { value: 'tee', label: 'Tee', type: 'select', selector: '.course-tee-cell .badge.bg-info' },
+                { value: 'adjusted_score', label: 'Adjusted Score', type: 'number', selector: '.adjusted-score-cell span' },
+                { value: 'date_played', label: 'Date Played', type: 'date', selector: '.date-cell .cell-text-date' },
+                { value: 'entry_type', label: 'Entry Type', type: 'select', selector: '.entry-type-cell .badge' },
+                { value: 'holes_played', label: 'Holes Played', type: 'select', selector: '.holes-played-cell .badge' }
+            ]
+        });
+    });
 </script>
 
 <style>
     /* Modern Header Card */
-    .modern-score-hover-preview-badge-wrapper {
-        display: inline-block;
-        text-align: center;
-    }
-
-    .modern-score-hover-preview-badge {
-        display: inline-flex;
-        align-items: center;
-        padding: 0.5rem 1rem;
-        background: linear-gradient(135deg, #2F4A3C 0%, #5E7C4C 100%);
-        color: white;
-        border-radius: 20px;
-        font-weight: 600;
-        font-size: 1rem;
-        cursor: help;
-        transition: all 0.3s ease;
-        box-shadow: 0 2px 8px rgba(47, 74, 60, 0.3);
-    }
-
-    .modern-score-hover-preview-badge:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(94, 124, 76, 0.4);
-        background: linear-gradient(135deg, #5E7C4C 0%, #8DA66E 100%);
-    }
-
-    .modern-score-hover-preview-badge i {
-        font-size: 0.875rem;
-    }
-
-    /* Tooltip Styles */
-    .tooltip-inner {
-        max-width: 550px;
-        padding: 0.75rem;
-        background-color: #ffffff;
-        border: 2px solid #e2e8f0;
-        border-radius: 8px;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-        text-align: left;
-    }
-
-    .modern-score-hover-preview-tooltip {
-        font-size: 0.8rem;
-    }
-
-    .modern-score-hover-preview-tooltip strong {
-        display: block;
-        margin-bottom: 0.5rem;
-        color: #2F4A3C;
-        font-size: 0.9rem;
-        border-bottom: 2px solid #5E7C4C;
-        padding-bottom: 0.4rem;
-    }
-
-    .modern-score-hover-preview-nine-section {
-        margin-bottom: 0.75rem;
-    }
-
-    .modern-score-hover-preview-nine-header {
-        font-weight: 600;
-        color: #5E7C4C;
-        font-size: 0.75rem;
-        margin-bottom: 0.4rem;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-
-    .modern-score-hover-preview-holes-horizontal {
-        display: flex;
-        gap: 0.2rem;
-        flex-wrap: nowrap;
-        overflow-x: auto;
-    }
-
-    .modern-score-hover-preview-hole-item-h {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        min-width: 38px;
-        padding: 0.2rem 0.25rem;
-        background-color: #f7fafc;
-        border: 1px solid #e2e8f0;
-        border-radius: 3px;
-        transition: all 0.2s ease;
-    }
-
-    .modern-score-hover-preview-hole-item-h:hover {
-        background-color: #edf2f7;
-        border-color: #cbd5e0;
-        transform: translateY(-1px);
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-
-    .modern-score-hover-preview-hole-item-h.modern-score-hover-preview-total-hole {
-        background-color: #f0fdf4;
-        border: 2px solid #5E7C4C;
-        min-width: 42px;
-    }
-
-    .modern-score-hover-preview-hole-number-h {
-        font-weight: 600;
-        color: #64748b;
-        font-size: 0.65rem;
-        margin-bottom: 0.15rem;
-    }
-
-    .modern-score-hover-preview-hole-score-h {
-        font-weight: 700;
-        color: #ffffff;
-        font-size: 0.85rem;
-        background-color: #5E7C4C;
-        padding: 0.1rem 0.4rem;
-        border-radius: 8px;
-        min-width: 26px;
-        text-align: center;
-    }
-
-    .modern-score-hover-preview-hole-score-h.modern-score-hover-preview-total-score {
-        background-color: #2F4A3C;
-        color: #ffffff;
-        font-weight: 800;
-        font-size: 0.9rem;
-    }
-
-    .score-holes-grid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 0.5rem;
-        margin-top: 0.5rem;
-    }
-
-    .hole-item {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 0.375rem 0.5rem;
-        background-color: rgba(94, 124, 76, 0.3);
-        border-radius: 4px;
-        transition: background-color 0.2s ease;
-    }
-
-    .hole-item:hover {
-        background-color: rgba(94, 124, 76, 0.5);
-    }
-
-    .hole-number {
-        font-weight: 600;
-        color: #8DA66E;
-        font-size: 0.8rem;
-    }
-
-    .hole-score {
-        font-weight: 700;
-        color: #ffffff;
-        font-size: 0.9rem;
-        background-color: #5E7C4C;
-        padding: 0.125rem 0.5rem;
-        border-radius: 12px;
-    }
-
-    .modern-score-hover-preview-score-total {
-        padding-top: 0.6rem;
-        margin-top: 0.6rem;
-        border-top: 2px solid #e2e8f0;
-        color: #2F4A3C;
-        font-size: 0.95rem;
-        text-align: center;
-        background-color: #f8fafc;
-        padding: 0.5rem;
-        border-radius: 4px;
-    }
-
-    .modern-score-hover-preview-score-total strong {
-        border: none;
-        padding: 0;
-        margin-right: 0.5rem;
-        color: #2F4A3C;
-    }
-
-    .score-cell {
-        vertical-align: middle;
-    }
-
-    /* Tournament/Course Cell Styles */
-    .tournament-course-cell {
-        vertical-align: middle;
-    }
-
-    .tournament-course-info {
-        display: flex;
-        flex-direction: column;
-        gap: 0.25rem;
-    }
-
-    .tournament-name {
-        font-weight: 600;
-        color: #2c3e50;
-        font-size: 0.875rem;
-        display: flex;
-        align-items: center;
-    }
-
-    .course-name {
-        color: #6c757d;
-        font-size: 0.75rem;
-        display: flex;
-        align-items: center;
-        padding-left: 0.125rem;
-    }
 </style>
 @endsection

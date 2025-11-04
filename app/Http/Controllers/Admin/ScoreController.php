@@ -7,6 +7,7 @@ use App\Models\Score;
 use App\Models\Scorecard;
 use App\Models\Tournament;
 use App\Models\TournamentCourse;
+use App\Services\ScoreMigrateService;
 use Illuminate\Http\Request;
 use App\Services\ScoreService;
 use Illuminate\Support\Facades\Auth;
@@ -139,7 +140,7 @@ class ScoreController extends Controller
      */
     public function show(string $id)
     {
-        //
+        return $this->scoreService->show($id);
     }
 
     /**
@@ -164,5 +165,13 @@ class ScoreController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+
+    public function migrate(Request $request)
+    {
+
+        $scoreMigrateService = new ScoreMigrateService();
+
+        return $scoreMigrateService->migrate($request);
     }
 }

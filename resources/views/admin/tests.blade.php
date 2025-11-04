@@ -7,18 +7,21 @@
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
-                    <h6 class="header-title">Players Management</h6>
+                    <h6 class="header-title">Courses Management</h6>
                     <p class="header-subtitle">
-                        <i class="fas fa-users me-2"></i>
-                        Manage system tournaments and their golf profiles
+                        <i class="fas fa-golf-ball me-2"></i>
+                        Manage golf courses
                     </p>
                 </div>
                 <div class="d-flex gap-2">
-                    <button class="btn btn-outline-secondary btn-modern" onclick="exportUsers()">
+                    <button class="btn btn-outline-secondary btn-modern" onclick="exportCourses()">
                         <i class="fas fa-download me-1"></i>Export
                     </button>
-                    <a href="{{ route('admin.tournaments.create') }}" class="btn btn-primary btn-modern">
-                        <i class="fas fa-plus me-2"></i>Add New Tournament
+                    <button class="btn btn-outline-secondary btn-modern" onclick="importCourses()">
+                        <i class="fas fa-upload me-1"></i>Import
+                    </button>
+                    <a href="{{ route('admin.courses.create') }}" class="btn btn-primary btn-modern">
+                        <i class="fas fa-plus me-2"></i>Add New Course
                     </a>
                 </div>
             </div>
@@ -35,13 +38,13 @@
                         <div class="col-md-6">
                             <div class="search-wrapper">
                                 <i class="fas fa-search search-icon"></i>
-                                <input type="text" class="search-input" id="tableSearch" placeholder="Search tournaments..." autocomplete="off">
+                                <input type="text" class="search-input" id="tableSearch" placeholder="Search courses..." autocomplete="off">
                             </div>
                         </div>
                         <div class="col-md-6 text-end">
                             <div class="table-info">
                                 <small class="text-muted">
-                                    Showing <span id="showing-count">{{ count($tournaments) }}</span> of <span id="total-count">{{ count($tournaments) }}</span> tournaments
+                                    Showing <span id="showing-count">{{ count($courses) }}</span> of <span id="total-count">{{ count($courses) }}</span> courses
                                 </small>
                             </div>
                         </div>
@@ -55,41 +58,29 @@
                             <tr>
                                 <th class="sortable" data-column="0">
                                     <div class="d-flex align-items-center justify-content-between">
-                                        <span></i>Name</span>
+                                        <span>Course Code</span>
                                         <i class="fas fa-sort sort-icon"></i>
                                     </div>
                                 </th>
                                 <th class="sortable" data-column="1">
                                     <div class="d-flex align-items-center justify-content-between">
-                                        <span>Description</span>
-                                        <i class="fas fa-sort sort-icon"></i>
-                                    </div>
-                                </th>
-                                <th class="sortable" data-column="1">
-                                    <div class="d-flex align-items-center justify-content-between">
-                                        <span>Course</span>
+                                        <span>Course Name</span>
                                         <i class="fas fa-sort sort-icon"></i>
                                     </div>
                                 </th>
                                 <th class="sortable" data-column="2">
                                     <div class="d-flex align-items-center justify-content-between">
-                                        <span>Start Date</span>
+                                        <span>Description</span>
                                         <i class="fas fa-sort sort-icon"></i>
                                     </div>
                                 </th>
                                 <th class="sortable" data-column="3">
                                     <div class="d-flex align-items-center justify-content-between">
-                                        <span>End Date</span>
-                                        <i class="fas fa-sort sort-icon"></i>
-                                    </div>
-                                </th>
-                                <th class="sortable" data-column="4">
-                                    <div class="d-flex align-items-center justify-content-between">
                                         <span>Status</span>
                                         <i class="fas fa-sort sort-icon"></i>
                                     </div>
                                 </th>
-                                <th class="sortable" data-column="5">
+                                <th class="sortable" data-column="4">
                                     <div class="d-flex align-items-center justify-content-between">
                                         <span>Created At</span>
                                         <i class="fas fa-sort sort-icon"></i>
@@ -101,29 +92,19 @@
                             </tr>
                         </thead>
                         <tbody id="mainTableBody">
-                            @foreach ($tournaments as $tournament)
+                            @foreach ($courses as $course)
                             <tr class="table-row">
-                                <td class="name-cell">
-                                    <span class="user-name">{{ $tournament->tournament_name ?? 'N/A' }}</span>
+                                <td class="course-code-cell">
+                                    <span class="fw-bold" style="color: #2F4A3C;">{{ $course->course_code }}</span>
                                 </td>
-                                <td class="">
-                                    <span class="">
-                                        {{ $tournament->tournament_desc ?? '-' }}
-                                    </span>
+                                <td class="course-name-cell">
+                                    <span class="fw-semibold">{{ $course->course_name }}</span>
                                 </td>
-                                <td>
-                                    @foreach ($tournament->tournamentCourses as $course)
-                                    <span class="badge bg-secondary me-1 mb-1">{{ $course->course_name }}</span>
-                                    @endforeach
-                                </td>
-                                <td class="">
-                                    <span class="">{{ $tournament->tournament_start }}</span>
-                                </td>
-                                <td class="">
-                                    <span class="">{{ $tournament->tournament_end }}</span>
+                                <td class="course-desc-cell">
+                                    <span class="text-muted" style="font-size: 0.9rem;">{{ Str::limit($course->course_desc ?? 'No description', 50) }}</span>
                                 </td>
                                 <td class="status-cell">
-                                    @if ($tournament->active)
+                                    @if ($course->active)
                                     <span class="status-badge status-active">
                                         <i class="fas fa-check-circle me-1"></i>Active
                                     </span>
@@ -134,14 +115,14 @@
                                     @endif
                                 </td>
                                 <td class="date-cell">
-                                    <span class="cell-text-date">{{ \Carbon\Carbon::parse($tournament->created_at)->format('M d, Y') }}</span>
-                                    <small class="cell-text-time d-block">{{ \Carbon\Carbon::parse($tournament->created_at)->format('g:i A') }}</small>
+                                    <span class="cell-text-date">{{ \Carbon\Carbon::parse($course->created_at)->format('M d, Y') }}</span>
+                                    <small class="cell-text-time d-block">{{ \Carbon\Carbon::parse($course->created_at)->format('g:i A') }}</small>
                                 </td>
                                 <td class="action-cell text-center">
                                     <div class="action-wrapper">
                                         <button class="btn btn-outline-secondary btn-context-menu"
                                             type="button"
-                                            onclick="showUserContextMenu({{ $tournament->tournament_id }}, '{{ $tournament->tournament_name }}', event)"
+                                            onclick="showCourseContextMenu({{ $course->course_id }}, '{{ $course->course_name }}', event)"
                                             title="Actions"
                                             data-label="Actions">
                                             <i class="fas fa-ellipsis-v me-1"></i>
@@ -160,23 +141,23 @@
     </div>
 </div>
 
-<!-- Import Tournaments Modal -->
-<div class="modal fade" id="importTournamentsModal" tabindex="-1" aria-labelledby="importTournamentsModalLabel" aria-hidden="true">
+<!-- Import Players Modal -->
+<div class="modal fade" id="importPlayersModal" tabindex="-1" aria-labelledby="importPlayersModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="importTournamentsModalLabel">
-                    <i class="fas fa-upload me-2"></i>Migrate from Excel
+                <h5 class="modal-title" id="importPlayersModalLabel">
+                    <i class="fas fa-upload me-2"></i>Import Players
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="importTournamentsForm" enctype="multipart/form-data">
+                <form id="importPlayersForm" enctype="multipart/form-data">
                     @csrf
                     <!-- File Upload Section -->
                     <div class="mb-4">
                         <label for="import_file" class="form-label fw-bold">
-                            <i class="fas fa-file-excel me-1"></i>Select Excel File
+                            <i class="fas fa-file-excel me-1"></i>Select Import File
                         </label>
                         <input type="file"
                             class="form-control"
@@ -198,19 +179,16 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <ul class="mb-0 small">
+                                    <li><strong>whs_no</strong> - WHS Number (numeric)</li>
                                     <li><strong>account_no</strong> - Account Number (string)</li>
-                                    <li><strong>name</strong> - Player Name (string)</li>
-                                    <li><strong>adjusted_gross_score</strong> - Adjusted Score (numeric)</li>
-                                    <li><strong>slope_rating</strong> - Slope Rating (numeric)</li>
-                                    <li><strong>course_rating</strong> - Course Rating (decimal)</li>
+                                    <li><strong>first_name</strong> - First Name</li>
                                 </ul>
                             </div>
                             <div class="col-md-6">
                                 <ul class="mb-0 small">
-                                    <li><strong>holes_completed</strong> - Holes Played (F9, B9, or 18)</li>
-                                    <li><strong>date_played</strong> - Date Played (YYYY-MM-DD)</li>
-                                    <li><strong>tee_id</strong> - Tee ID (numeric)</li>
-                                    <li><strong>course_id</strong> - Course ID (numeric)</li>
+                                    <li><strong>last_name</strong> - Last Name</li>
+                                    <li><strong>birthdate</strong> - Birth Date (YYYY-MM-DD)</li>
+                                    <li><strong>sex</strong> - Gender (M/F or MALE/FEMALE)</li>
                                 </ul>
                             </div>
                         </div>
@@ -218,7 +196,7 @@
 
                     <!-- Sample Format -->
                     <div class="mb-3">
-                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="downloadTournamentSampleFile()">
+                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="downloadSampleFile()">
                             <i class="fas fa-download me-1"></i>Download Sample Format
                         </button>
                     </div>
@@ -226,7 +204,7 @@
                     <!-- Progress Bar (hidden initially) -->
                     <div id="importProgress" class="mb-3" style="display: none;">
                         <div class="d-flex justify-content-between mb-1">
-                            <small class="text-muted">Migrating scores...</small>
+                            <small class="text-muted">Importing players...</small>
                             <small class="text-muted" id="importProgressText">0%</small>
                         </div>
                         <div class="progress">
@@ -245,15 +223,20 @@
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                     <i class="fas fa-times me-1"></i>Cancel
                 </button>
-                <button type="button" class="btn btn-primary" onclick="startTournamentImport()" id="importBtn">
-                    <i class="fas fa-upload me-1"></i>Migrate Scores
+                <button type="button" class="btn btn-primary" onclick="startImport()" id="importBtn">
+                    <i class="fas fa-upload me-1"></i>Import Players
                 </button>
             </div>
         </div>
     </div>
 </div>
 
-@include('admin.tournaments.tournament-preview-modal')
+
+@include('partials.sample-modal')
+
+<button onclick="showSampleModal()" class="btn btn-primary">
+    View Example
+</button>
 {{-- Custom Action Functions --}}
 <script>
     // Modern Context Menu Implementation
@@ -365,55 +348,47 @@
         }, 10);
     }
 
-    // Tournament-specific context menu
-    function showUserContextMenu(userId, userName, event) {
+    // Player-specific context menu
+    function showCourseContextMenu(courseId, courseName, event) {
         event.preventDefault();
         event.stopPropagation();
 
         modernContext({
             "data": {
-                "title": "Tournament Actions",
-                "subtitle": userName
+                "title": "Course Actions",
+                "subtitle": courseName
             },
-            "recordId": userId,
+            "recordId": courseId,
             "items": [{
                     "label": "View Details",
-                    "description": "View complete tournament profile",
+                    "description": "View complete course information",
                     "icon": "eye",
                     "action": function(id) {
                         viewRecord(id);
                     }
                 },
                 {
-                    "label": "Edit Tournament",
-                    "description": "Modify tournament information",
+                    "label": "Edit Course",
+                    "description": "Modify course information",
                     "icon": "edit",
                     "action": function(id) {
                         editRecord(id);
                     }
                 },
                 {
-                    "label": "View Players",
-                    "description": "View and manage tournament players",
-                    "icon": "users",
+                    "label": "Manage Tees",
+                    "description": "Manage course tees and ratings",
+                    "icon": "golf-ball",
                     "action": function(id) {
-                        window.open(`${BASE_URL}/admin/participants/${id}`, '_blank');
-                    }
-                },
-                {
-                    "label": "Migrate Scores from Excel",
-                    "description": "Migrate scores from Excel file",
-                    "icon": "file-excel",
-                    "action": function(id) {
-                        importTournaments(id);
+                        window.location.href = `/admin/courses/${id}/tees`;
                     }
                 },
                 {
                     "label": "---"
                 },
                 {
-                    "label": "Delete Tournament",
-                    "description": "Permanently remove tournament",
+                    "label": "Delete Course",
+                    "description": "Permanently remove course",
                     "icon": "trash",
                     "action": function(id) {
                         deleteRecord(id);
@@ -424,41 +399,19 @@
     }
 
     function viewRecord(id) {
-
-
-
-        // Fetch tournament details from backend and show modal
-        fetch(`${BASE_URL}/admin/participants/${id}?preview=1`, {
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'Accept': 'application/json'
-            }
-        })
-        .then(response => {
-            if (!response.ok) throw new Error('Failed to fetch tournament details');
-            return response.json();
-        })
-        .then(data => {
-            showTournamentPreview(data);
-        })
-        .catch(err => {
-            alert('Could not load tournament details.');
-        });
-
-
-        // window.location.href = `/admin/tournaments/${id}`;
+        window.location.href = `/admin/courses/${id}`;
     }
 
     function editRecord(id) {
-        window.location.href = `/admin/tournaments/${id}/edit`;
+        window.location.href = `/admin/courses/${id}/edit`;
     }
 
     function deleteRecord(id) {
-        if (confirm('Are you sure you want to delete this tournament?')) {
+        if (confirm('Are you sure you want to delete this course?')) {
             // Create a form and submit it for DELETE request
             const form = document.createElement('form');
             form.method = 'POST';
-            form.action = `/admin/tournaments/${id}`;
+            form.action = `/admin/courses/${id}`;
 
             // Add CSRF token
             const csrfToken = document.createElement('input');
@@ -479,9 +432,14 @@
         }
     }
 
-    function exportUsers() {
-        console.log('Export tournaments functionality');
+    function exportCourses() {
+        console.log('Export courses functionality');
         // Implement export logic here
+    }
+
+    function importCourses() {
+        console.log('Import courses functionality');
+        // Implement import logic here
     }
 
     // Search functionality
@@ -563,23 +521,10 @@
         });
     });
 
-    // Import Tournaments Functionality
-    function importTournaments(tournamentId) {
+    // Import Players Functionality
+    function importUsers() {
         // Try Bootstrap 5 first, then fallback to jQuery/Bootstrap 4
-        const modalElement = document.getElementById('importTournamentsModal');
-
-        // Store tournament ID in modal for later use
-        modalElement.dataset.tournamentId = tournamentId;
-
-        // Find tournament name from the table
-        const tournamentRow = document.querySelector(`[onclick*="showUserContextMenu(${tournamentId}"]`);
-        const tournamentName = tournamentRow ? tournamentRow.closest('tr').querySelector('.name-cell .user-name').textContent.trim() : 'Selected Tournament';
-        
-        // Update modal title to show which tournament
-        document.getElementById('importTournamentsModalLabel').innerHTML = `
-            <i class="fas fa-upload me-2"></i>Migrate Scores from Excel
-            <br><small class="text-muted" style="font-size: 0.85rem;">Tournament: ${tournamentName}</small>
-        `;
+        const modalElement = document.getElementById('importPlayersModal');
 
         if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
             // Bootstrap 5
@@ -587,7 +532,7 @@
             modal.show();
         } else if (typeof $ !== 'undefined' && $.fn.modal) {
             // jQuery/Bootstrap 4
-            $('#importTournamentsModal').modal('show');
+            $('#importPlayersModal').modal('show');
         } else {
             // Fallback - manual modal display
             modalElement.style.display = 'block';
@@ -606,21 +551,19 @@
     }
 
     function resetImportModal() {
-        document.getElementById('importTournamentsForm').reset();
+        document.getElementById('importPlayersForm').reset();
         document.getElementById('importProgress').style.display = 'none';
         document.getElementById('importResults').style.display = 'none';
         document.getElementById('importBtn').disabled = false;
-        document.getElementById('importBtn').innerHTML = '<i class="fas fa-upload me-1"></i>Migrate Scores';
+        document.getElementById('importBtn').innerHTML = '<i class="fas fa-upload me-1"></i>Import Players';
     }
 
-    function startTournamentImport() {
-        const form = document.getElementById('importTournamentsForm');
+    function startImport() {
+        const form = document.getElementById('importPlayersForm');
         const fileInput = document.getElementById('import_file');
         const importBtn = document.getElementById('importBtn');
         const progressSection = document.getElementById('importProgress');
         const resultsSection = document.getElementById('importResults');
-        const modalElement = document.getElementById('importTournamentsModal');
-        const tournamentId = modalElement.dataset.tournamentId;
 
         // Validate file selection
         if (!fileInput.files[0]) {
@@ -631,20 +574,19 @@
         // Prepare form data
         const formData = new FormData();
         formData.append('import_file', fileInput.files[0]);
-        formData.append('tournament_id', tournamentId);
         formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
 
         // Update UI to show progress
         importBtn.disabled = true;
-        importBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Migrating...';
+        importBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Importing...';
         progressSection.style.display = 'block';
         resultsSection.style.display = 'none';
 
         // Simulate progress (since we don't have real-time progress from backend)
-        simulateTournamentProgress();
+        simulateProgress();
 
         // Make the import request
-        fetch(BASE_URL + '/admin/scores/migrate', {
+        fetch(BASE_URL + '/admin/players/import', {
                 method: 'POST',
                 body: formData,
                 headers: {
@@ -653,17 +595,17 @@
             })
             .then(response => response.json())
             .then(data => {
-                handleTournamentImportResponse(data);
+                handleImportResponse(data);
             })
             .catch(error => {
                 console.error('Import error:', error);
-                handleTournamentImportError(error);
+                handleImportError(error);
             });
     }
 
-    function simulateTournamentProgress() {
+    function simulateProgress() {
         const progressBar = document.getElementById('importProgressBar');
-        const progressText = document.getElementById('importProgressText');
+        const progressText = document.getElementById('importProgressText'); 
         let progress = 0;
 
         const interval = setInterval(() => {
@@ -678,7 +620,7 @@
         window.importProgressInterval = interval;
     }
 
-    function handleTournamentImportResponse(data) {
+    function handleImportResponse(data) {
         // Clear progress simulation
         if (window.importProgressInterval) {
             clearInterval(window.importProgressInterval);
@@ -698,10 +640,10 @@
             resultsSection.innerHTML = `
                 <div class="alert alert-success">
                     <h6 class="alert-heading">
-                        <i class="fas fa-check-circle me-1"></i>Migration Successful!
+                        <i class="fas fa-check-circle me-1"></i>Import Successful!
                     </h6>
                     <p class="mb-1">${data.message}</p>
-                    <small>Successfully migrated ${data.imported} scores.</small>
+                    <small>Successfully imported ${data.imported} players.</small>
                     ${data.errors && data.errors.length > 0 ? 
                         `<div class="mt-2">
                             <strong>Warnings/Skipped rows:</strong>
@@ -715,11 +657,11 @@
             `;
 
             // Update button
-            importBtn.innerHTML = '<i class="fas fa-check me-1"></i>Migration Complete';
+            importBtn.innerHTML = '<i class="fas fa-check me-1"></i>Import Complete';
             importBtn.classList.remove('btn-primary');
             importBtn.classList.add('btn-success');
 
-            // Refresh page after delay to show new tournaments
+            // Refresh page after delay to show new players
             setTimeout(() => {
                 window.location.reload();
             }, 2000);
@@ -728,7 +670,7 @@
             resultsSection.innerHTML = `
                 <div class="alert alert-danger">
                     <h6 class="alert-heading">
-                        <i class="fas fa-exclamation-triangle me-1"></i>Migration Failed
+                        <i class="fas fa-exclamation-triangle me-1"></i>Import Failed
                     </h6>
                     <p class="mb-1">${data.message}</p>
                     ${data.errors && data.errors.length > 0 ? 
@@ -751,7 +693,7 @@
         resultsSection.style.display = 'block';
     }
 
-    function handleTournamentImportError(error) {
+    function handleImportError(error) {
         // Clear progress simulation
         if (window.importProgressInterval) {
             clearInterval(window.importProgressInterval);
@@ -763,9 +705,9 @@
         resultsSection.innerHTML = `
             <div class="alert alert-danger">
                 <h6 class="alert-heading">
-                    <i class="fas fa-exclamation-triangle me-1"></i>Migration Error
+                    <i class="fas fa-exclamation-triangle me-1"></i>Import Error
                 </h6>
-                <p class="mb-0">An unexpected error occurred during migration. Please try again.</p>
+                <p class="mb-0">An unexpected error occurred during import. Please try again.</p>
             </div>
         `;
 
@@ -774,13 +716,13 @@
         importBtn.innerHTML = '<i class="fas fa-upload me-1"></i>Try Again';
     }
 
-    function downloadTournamentSampleFile() {
+    function downloadSampleFile() {
         // Create sample CSV data
         const sampleData = [
-            ['account_no', 'name', 'adjusted_gross_score', 'slope_rating', 'course_rating', 'holes_completed', 'date_played', 'tee_id', 'course_id'],
-            ['ACC001', 'John Doe', '85', '130', '72.5', '18', '2025-01-15', '1', '1'],
-            ['ACC002', 'Jane Smith', '78', '130', '72.5', '18', '2025-01-15', '1', '1'],
-            ['ACC003', 'Bob Johnson', '42', '130', '72.5', 'F9', '2025-01-16', '1', '1']
+            ['whs_no', 'account_no', 'first_name', 'last_name', 'birthdate', 'sex'],
+            ['12345', 'ACC001', 'John', 'Doe', '1990-01-15', 'M'],
+            ['67890', 'ACC002', 'Jane', 'Smith', '1985-05-20', 'F'],
+            ['11111', 'ACC003', 'Bob', 'Johnson', '1992-12-10', 'MALE']
         ];
 
         // Convert to CSV
@@ -793,11 +735,16 @@
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'scores_import_sample.csv';
+        a.download = 'players_import_sample.csv';
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
         window.URL.revokeObjectURL(url);
+    }
+
+    // Export Users Function (placeholder)
+    function exportUsers() {
+        alert('Export functionality coming soon!');
     }
 
     // Modal close functionality for fallback
@@ -840,10 +787,7 @@
         // Close modal when clicking backdrop
         document.addEventListener('click', function(e) {
             if (e.target.classList.contains('modal-backdrop')) {
-                const openModal = document.querySelector('.modal.show');
-                if (openModal) {
-                    closeModal(openModal.id);
-                }
+                closeModal('importPlayersModal');
             }
         });
 

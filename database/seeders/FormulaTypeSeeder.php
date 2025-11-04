@@ -38,9 +38,9 @@ class FormulaTypeSeeder extends Seeder
                 'remarks' => 'Used for calculating Score Differential',
 
                 'formula_type_fields' => json_encode([
-                    'adjusted_gross_score',
-                    'course_rating',
-                    'slope_rating',
+                    'ADJUSTED_GROSS_SCORE',
+                    'COURSE_RATING',
+                    'SLOPE_RATING',
                 ]),
 
                 'active' => true,

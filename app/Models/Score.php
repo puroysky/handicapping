@@ -64,4 +64,14 @@ class Score extends Model
     {
         return $this->belongsTo(TournamentCourse::class, 'tournament_course_id', 'tournament_course_id');
     }
+
+
+    public function course()
+    {
+        return $this->belongsTo(Course::class, 'course_id', 'course_id');
+    }
+    public function tee()
+    {
+        return $this->belongsTo(Tee::class, 'tee_id', 'tee_id');
+    }
 }
