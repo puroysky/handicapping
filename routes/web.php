@@ -30,36 +30,16 @@ Route::get('test', function () {
 
 
 
-    // $tournament = Tournament::with('tournamentCourses.scorecard.scoreDifferentialFormula', 'tournamentCourses.scorecard.ratings')->find(1);
-    // $tournament->setRelation('tournamentCourses', $tournament->tournamentCourses->keyBy('course_id'));
-
-    // // Key the ratings by rating_id for each tournament course
-    // foreach ($tournament->tournamentCourses as $tournamentCourse) {
-    //     if ($tournamentCourse->scorecard && $tournamentCourse->scorecard->ratings) {
-    //         $tournamentCourse->scorecard->setRelation('ratings', $tournamentCourse->scorecard->ratings->keyBy('tee_id'));
-    //     }
-    // }
+    $testService = new \App\Services\ImportCheckerService();
+    $testService->test('Tournament.xlsx');
+})->name('test');
 
 
 
+Route::get('test-2', function () {
 
 
 
-
-
-    // echo '<pre>';
-    // print_r($tournament->tournamentCourses[1]->scorecard->ratings[2]->toArray());
-    // echo '</pre>';
-    // return;
-    // $scorecard = Scorecard::with('scoreDifferentialFormula')->find(1);
-    // // $players = PlayerProfile::all()->keyBy('account_no');
-    // echo '<pre>';
-    // print_r($scorecard->scoreDifferentialFormula->formula_expression);
-    // echo '</pre>';
-    // return;
-    // return view('admin.tests', [
-    //     'courses' => Course::all()
-    // ]);
 
 
     $file = storage_path('Tournament.xlsx');
@@ -104,7 +84,16 @@ Route::get('test', function () {
         foreach ($courses as $tee => $tees) {
             foreach ($tees as $tournament => $tournaments) {
                 foreach ($tournaments as $holePlayed => $holesPlayed) {
+
+                    // echo '<pre>';
+                    // print_r(array_keys($holesPlayed));
+                    // echo '</pre>';
+
                     if (count($holesPlayed) > 1) {
+
+
+
+
                         $errors[] = array(
                             "course" => $course,
                             "tournament" => $tournament,
@@ -146,7 +135,7 @@ Route::get('test', function () {
     print_r($newFormat);
     echo '<pre>';
     return;
-})->name('test');
+})->name('test-2');
 
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::resource('users', App\Http\Controllers\Admin\UserController::class);
