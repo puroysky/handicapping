@@ -32,7 +32,7 @@ return new class extends Migration
 
             $table->unsignedBigInteger('course_id');
 
-            $table->unsignedTinyInteger('total_holes')->default(18)->comment('Total number of holes on the scorecard, typically 9 or 18');
+
             $table->enum('x_value', ['BOGEY', 'DOUBLE_BOGEY', 'TRIPLE_BOGEY'])->default('DOUBLE_BOGEY')->comment('X value for the scorecard');
 
             $table->boolean('active')->default(true);

@@ -73,8 +73,8 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="form-floating">
-                                    <input type="text" value="v1.0.0" class="form-control" id="scorecard__code" name="scorecard__code" placeholder="Scorecard Code" required minlength="2" maxlength="10">
-                                    <label for="scorecard__code">Scorecard Code *</label>
+                                    <input type="text" value="v2.0.0" class="form-control" id="scorecard_code" name="scorecard_code" placeholder="Scorecard Code" required minlength="2" maxlength="10">
+                                    <label for="scorecard_code">Scorecard Code *</label>
                                     <div class="invalid-feedback">
                                         Please provide a valid scorecard code (2-10 characters).
                                     </div>
@@ -85,7 +85,9 @@
                         <div class="row">
                             <div class="col-12">
                                 <div class="form-floating">
-                                    <textarea class="form-control" value="East Course scorecard" id="scorecard_desc" name="scorecard_desc" placeholder="Scorecard Description" style="height: 120px;" maxlength="500"></textarea>
+                                    <textarea class="form-control" value="East Course scorecard" id="scorecard_desc" name="scorecard_desc" placeholder="Scorecard Description" style="height: 120px;" maxlength="500">
+                                        East Course scorecard
+                                    </textarea>
                                     <label for="scorecard_desc">Scorecard Description</label>
                                     <div class="invalid-feedback">
                                         Scorecard description cannot exceed 500 characters.
@@ -105,25 +107,25 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-floating mb-3">
-                                    <select class="form-select" id="course" name="course" required>
+                                    <select class="form-select" id="course_id" name="course_id" required>
                                         {{-- <option value="">Select Course...</option> --}}
                                         @foreach ($courses as $course)
 
                                         <option value="{{ $course->course_id }}">{{ $course->course_name }}</option>
                                         @endforeach
                                     </select>
-                                    <label for="course">Course *</label>
+                                    <label for="course_id">Course *</label>
                                     <div class="invalid-feedback">
                                         Please select a course.
                                     </div>
                                 </div>
                                 <div class="form-floating">
-                                    <select class="form-select" id="course_type" name="course_type" required>
+                                    <select class="form-select" id="scorecard_type" name="scorecard_type" required>
                                         {{-- <option value="">Select Course Type...</option> --}}
                                         <option value="tournament">Tournament</option>
                                         <option value="regular">Regular</option>
                                     </select>
-                                    <label for="course_type">Course Type *</label>
+                                    <label for="scorecard_type">Course Type *</label>
                                     <div class="invalid-feedback">
                                         Please select a course type.
                                     </div>
@@ -132,8 +134,8 @@
                             <div class="col-md-4">
                                 <div class="form-floating">
                                     <select class="form-select" id="x_value" name="x_value" required>
-                                        <option value="">Select X Value...</option>
-                                        {{-- <option value="bogey">Bogey</option> --}}
+                                        {{-- <option value="">Select X Value...</option> --}}
+                                 >
                                         <option value="DOUBLE_BOGEY">Double Bogey</option>
                                         <option value="TRIPLE_BOGEY">Triple Bogey</option>
                                     </select>
@@ -165,7 +167,7 @@
                             <div class="col-md">
                                 <div class="form-floating">
                                     <select class="form-select" id="adjusted_gross_score_formula_id" name="adjusted_gross_score_formula_id">
-                                        <option value="">-- Select Adjusted Gross Score Formula --</option>
+                                        {{-- <option value="">-- Select Adjusted Gross Score Formula --</option> --}}
                                         @if(isset($formulas) && $formulas->isNotEmpty())
                                         @foreach($formulas->where('code', 'AGS') as $formula)
                                         <option value="{{ $formula->id }}" {{ old('adjusted_gross_score_formula_id') == $formula->id ? 'selected' : '' }}>{{ $formula->name }}</option>
@@ -227,7 +229,10 @@
                         </div>
 
                         <div class="form-floating">
-                            <textarea class="form-control" id="remarks" name="remarks" placeholder="Enter any additional remarks about this scorecard..." maxlength="1000"></textarea>
+                            <textarea class="form-control" id="remarks" name="remarks" placeholder="Enter any additional remarks about this scorecard..." maxlength="1000">
+
+                                Add any additional remarks about this scorecard...
+                            </textarea>
                             <label for="remarks">Scorecard Remarks (Optional)</label>
                             <div class="invalid-feedback">
                                 Remarks cannot exceed 1000 characters.

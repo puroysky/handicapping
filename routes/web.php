@@ -30,6 +30,10 @@ Route::get('test', function () {
 
 
 
+    $course = Tee::where('course_id', 1)->pluck('tee_id')->toArray();
+
+    return;
+
     $testService = new \App\Services\ImportCheckerService();
     $testService->test('Tournament.xlsx');
 })->name('test');

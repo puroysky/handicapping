@@ -18,6 +18,8 @@ return new class extends Migration
             $table->unsignedTinyInteger('par');
 
 
+            $table->unsignedTinyInteger('men_stroke_index')->nullable();
+            $table->unsignedTinyInteger('ladies_stroke_index')->nullable();
 
             // Composite unique key for scorecard, tee, and hole
             $table->unique(['scorecard_id', 'hole'], 'scorecardd_detail_key')->comment('Ensure unique combination of scorecard, and hole');

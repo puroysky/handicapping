@@ -11,6 +11,20 @@ class Scorecard extends Model
     protected $table = 'scorecards';
     protected $primaryKey = 'scorecard_id';
 
+
+    protected $fillable = [
+        'scorecard_code',
+        'scorecard_name',
+        'scorecard_desc',
+        'adjusted_gross_score_formula_id',
+        'score_differential_formula_id',
+        'course_handicap_formula_id',
+        'course_id',
+        'x_value',
+        'active',
+        'created_by',
+    ];
+
     public function course()
     {
         return $this->belongsTo(Course::class, 'course_id', 'course_id');

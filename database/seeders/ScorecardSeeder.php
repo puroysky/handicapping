@@ -25,7 +25,7 @@ class ScorecardSeeder extends Seeder
                     'score_differential_formula_id' => 3,
                     'course_handicap_formula_id' => 7,
                     'x_value' => 2,
-                    'total_holes' => 18,
+
                     'created_by' => 1, // Assuming admin user ID is 1
                 ],
                 [
@@ -37,7 +37,7 @@ class ScorecardSeeder extends Seeder
                     'score_differential_formula_id' => 4,
                     'course_handicap_formula_id' => 8,
                     'x_value' => 3,
-                    'total_holes' => 18,
+
                     'created_by' => 1, // Assuming admin user ID is 1
                 ]
             ]

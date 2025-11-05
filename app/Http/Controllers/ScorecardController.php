@@ -85,6 +85,50 @@ class ScorecardController extends Controller
     public function store(Request $request)
     {
 
+
+        $validated = $request->validate([
+
+            'scorecard_code' => 'required|string|max:50|unique:scorecards,scorecard_code',
+            'scorecard_name' => 'required|string|max:255',
+            'scorecard_desc' => 'nullable|string|max:500',
+            'scorecard_type' => 'required|in:tournament,regular',
+            'adjusted_gross_score_formula_id' => 'nullable|exists:formulas,formula_id',
+            'score_differential_formula_id' => 'nullable|exists:formulas,formula_id',
+            'course_handicap_formula_id' => 'nullable|exists:formulas,formula_id',
+            'course_id' => 'required|exists:courses,course_id',
+            'x_value' => 'required|in:BOGEY,DOUBLE_BOGEY,TRIPLE_BOGEY',
+            'active' => 'sometimes|boolean',
+
+            'course_rating' => 'required|array',
+            'course_rating.*' => 'required|numeric|min:0',
+            'front_nine_course_rating' => 'required|array',
+            'front_nine_course_rating.*' => 'required|numeric|min:0',
+
+            'slope_rating' => 'required|array',
+            'slope_rating.*' => 'required|numeric|min:55|max:155',
+            'front_nine_slope_rating' => 'required|array',
+            'front_nine_slope_rating.*' => 'required|numeric|min:55|max:155',
+
+            'yardages' => 'required|array',
+            'yardages.*' => 'required|array',
+            'yardages.*.*' => 'required|integer|min:50|max:800',
+
+            'par' => 'required|array',
+            'par.*' => 'required|integer|min:1|max:50',
+            'par' => 'required|array|size:18',
+
+
+            'male_handicap' => 'required|array',
+            'male_handicap.*' => 'required|integer|min:1|max:100',
+
+            'ladies_handicap' => 'required|array',
+            'ladies_handicap.*' => 'required|integer|min:1|max:100',
+
+
+        ]);
+
+
+        return $this->scorecardService->store($request);
         echo '<pre>';
         print_r($request->all());
         echo '</pre>';
