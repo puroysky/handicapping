@@ -62,7 +62,7 @@ Route::get('test', function () {
     // ]);
 
 
-    $file = storage_path('app/Tournament.xlsx');
+    $file = storage_path('Tournament.xlsx');
 
     $data = Excel::toArray([], $file)[0];
 
