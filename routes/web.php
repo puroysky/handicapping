@@ -30,33 +30,33 @@ Route::get('test', function () {
 
 
 
-    $tournament = Tournament::with('tournamentCourses.scorecard.scoreDifferentialFormula', 'tournamentCourses.scorecard.ratings')->find(1);
-    $tournament->setRelation('tournamentCourses', $tournament->tournamentCourses->keyBy('course_id'));
+    // $tournament = Tournament::with('tournamentCourses.scorecard.scoreDifferentialFormula', 'tournamentCourses.scorecard.ratings')->find(1);
+    // $tournament->setRelation('tournamentCourses', $tournament->tournamentCourses->keyBy('course_id'));
 
-    // Key the ratings by rating_id for each tournament course
-    foreach ($tournament->tournamentCourses as $tournamentCourse) {
-        if ($tournamentCourse->scorecard && $tournamentCourse->scorecard->ratings) {
-            $tournamentCourse->scorecard->setRelation('ratings', $tournamentCourse->scorecard->ratings->keyBy('tee_id'));
-        }
-    }
-
-
+    // // Key the ratings by rating_id for each tournament course
+    // foreach ($tournament->tournamentCourses as $tournamentCourse) {
+    //     if ($tournamentCourse->scorecard && $tournamentCourse->scorecard->ratings) {
+    //         $tournamentCourse->scorecard->setRelation('ratings', $tournamentCourse->scorecard->ratings->keyBy('tee_id'));
+    //     }
+    // }
 
 
 
 
 
 
-    echo '<pre>';
-    print_r($tournament->tournamentCourses[1]->scorecard->ratings[2]->toArray());
-    echo '</pre>';
-    return;
-    $scorecard = Scorecard::with('scoreDifferentialFormula')->find(1);
-    // $players = PlayerProfile::all()->keyBy('account_no');
-    echo '<pre>';
-    print_r($scorecard->scoreDifferentialFormula->formula_expression);
-    echo '</pre>';
-    return;
+
+
+    // echo '<pre>';
+    // print_r($tournament->tournamentCourses[1]->scorecard->ratings[2]->toArray());
+    // echo '</pre>';
+    // return;
+    // $scorecard = Scorecard::with('scoreDifferentialFormula')->find(1);
+    // // $players = PlayerProfile::all()->keyBy('account_no');
+    // echo '<pre>';
+    // print_r($scorecard->scoreDifferentialFormula->formula_expression);
+    // echo '</pre>';
+    // return;
     // return view('admin.tests', [
     //     'courses' => Course::all()
     // ]);
@@ -129,10 +129,10 @@ Route::get('test', function () {
     }
 
 
-    echo '<pre>';
-    print_r($goods);
+    // echo '<pre>';
+    // print_r($goods);
 
-    echo '</pre>';
+    // echo '</pre>';
 
     echo '<pre>';
     print_r($errors);
