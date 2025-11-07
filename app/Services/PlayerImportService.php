@@ -225,6 +225,7 @@ class PlayerImportService
         // Check for duplicates
         $duplicateCheck = $this->checkForDuplicates($rowData, $email, $existingData, $validRows, $rowNumber);
         if (!$duplicateCheck['success']) {
+
             return $duplicateCheck;
         }
 
