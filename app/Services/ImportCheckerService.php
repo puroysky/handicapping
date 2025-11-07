@@ -51,11 +51,37 @@ class ImportCheckerService
 
 
         $newFormatWithTournamentLevel = [];
+        $formatDateChecker = [];
         foreach ($data as $index => $row) {
 
             if ($index === 0) {
                 continue;
             }
+
+
+            // normalize/format date in column 6 (Excel date or string) to Y-m-d
+            $rawDate = $row[6];
+            $formattedDate = null;
+
+            if (is_numeric($rawDate)) {
+                try {
+                    $dt = ExcelDate::excelToDateTimeObject($rawDate);
+                    $formattedDate = Carbon::instance($dt)->toDateString();
+                } catch (Exception $e) {
+                    $formattedDate = trim((string)$rawDate);
+                }
+            } else {
+                try {
+                    $formattedDate = Carbon::parse($rawDate)->toDateString();
+                } catch (Exception $e) {
+                    $formattedDate = trim((string)$rawDate);
+                }
+            }
+
+            $row[6] = $formattedDate;
+
+            $formatDateChecker[$row[9]][$row[0]][$row[6]][] = $row;
+
 
             $newFormatWithTournamentLevel[$row[8]][$row[7]][$row[9]][$row[5]][$row[3] . '_' . $row[4]][] = $row;
 
@@ -121,10 +147,33 @@ class ImportCheckerService
         }
 
 
-        // echo '<pre>';
-        // print_r($goods);
 
-        // echo '</pre>';
+        $dateErrors = [];
+
+
+        foreach ($formatDateChecker as $tournaments) {
+            foreach ($tournaments as $accountNos) {
+                foreach ($accountNos as $tournamentDates) {
+                    if (count($tournamentDates) > 1) {
+                        $dateErrors[] = $tournamentDates;
+                    }
+                }
+            }
+        }
+
+
+
+        echo '<pre>';
+        print_r($dateErrors);
+
+        echo '</pre>';
+        return;
+
+
+        echo '<pre>';
+        print_r($errors);
+
+        echo '</pre>';
 
         echo '<pre>';
         print_r($errorsWithoutTournamentLevel);

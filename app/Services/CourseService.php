@@ -58,9 +58,7 @@ class CourseService
 
             $tournamentCourse = TournamentCourse::where('tournament_course_id', $tournamentCourseId)->firstOrFail();
 
-            $pars = ScorecardHole::with([
-                'strokeIndex'
-            ])->whereHas('scorecard', function ($query) use ($tournamentCourse) {
+            $pars = ScorecardHole::whereHas('scorecard', function ($query) use ($tournamentCourse) {
                 $query->where('scorecard_id', $tournamentCourse->scorecard_id);
             })->where('scorecard_id', $tournamentCourse->scorecard_id)
                 ->orderBy('hole')

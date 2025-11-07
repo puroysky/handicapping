@@ -11,67 +11,99 @@
     }
 
     .scorecard-header {
-        background: linear-gradient(135deg, #2F4A3C 0%, #5E7C4C 50%, #8DA66E 100%);
+        background: linear-gradient(135deg, #2F4A3C 0%, #3d5a4a 50%, #4a7054 100%);
         color: #fff;
-        padding: 2rem;
+        padding: 0.75rem 1rem;
         position: relative;
         overflow: hidden;
+        border-bottom: 3px solid #8DA66E;
     }
 
     .scorecard-header::before {
         content: '';
         position: absolute;
-        top: -50%;
-        right: -10%;
-        width: 300px;
-        height: 300px;
-        background: rgba(255, 255, 255, 0.1);
+        top: 0;
+        right: 0;
+        width: 200px;
+        height: 200px;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0) 70%);
         border-radius: 50%;
+        transform: translate(50px, -50px);
+    }
+
+    .scorecard-header::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 150px;
+        height: 150px;
+        background: radial-gradient(circle, rgba(141, 166, 110, 0.2) 0%, rgba(141, 166, 110, 0) 70%);
+        border-radius: 50%;
+        transform: translate(-30px, 30px);
     }
 
     .scorecard-header-content {
         position: relative;
         z-index: 1;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
     }
 
     .scorecard-title {
-        font-size: 2rem;
-        font-weight: 700;
-        margin-bottom: 0.5rem;
+        font-size: 1.25rem;
+        font-weight: 800;
+        margin-bottom: 0;
         letter-spacing: -0.5px;
+        flex: 1;
+    }
+
+    .scorecard-badges-container {
+        display: flex;
+        gap: 0.35rem;
+        flex-wrap: wrap;
+        justify-content: flex-end;
     }
 
     .scorecard-badge {
         display: inline-block;
-        background: rgba(255, 255, 255, 0.2);
-        padding: 0.5rem 1rem;
+        background: rgba(141, 166, 110, 0.9);
+        padding: 0.2rem 0.6rem;
         border-radius: 20px;
-        font-size: 0.85rem;
-        font-weight: 600;
-        margin-right: 0.5rem;
-        margin-bottom: 0.5rem;
+        font-size: 0.65rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
     }
 
     .scorecard-meta {
-        font-size: 0.95rem;
-        opacity: 0.95;
-        margin-top: 0.5rem;
+        font-size: 0.75rem;
+        opacity: 0.9;
+        margin-top: 0.3rem;
+        line-height: 1.4;
+    }
+
+    .scorecard-meta i {
+        color: #8DA66E;
+        margin-right: 0.5rem;
     }
 
     .scorecard-body {
-        padding: 2rem;
+        padding: 1rem;
     }
 
     .details-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 1.5rem;
-        margin-bottom: 2rem;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
     }
 
     .detail-card {
         background: #fff;
-        padding: 1.5rem;
+        padding: 0.75rem;
         border-radius: 12px;
         border-left: 4px solid #8DA66E;
         box-shadow: 0 2px 8px rgba(47, 74, 60, 0.08);
@@ -96,16 +128,16 @@
     }
 
     .detail-label {
-        font-size: 0.75rem;
+        font-size: 0.65rem;
         text-transform: uppercase;
         letter-spacing: 0.5px;
         color: #999;
         font-weight: 600;
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.25rem;
     }
 
     .detail-value {
-        font-size: 1.1rem;
+        font-size: 0.95rem;
         font-weight: 700;
         color: #2F4A3C;
     }
@@ -113,10 +145,10 @@
     .detail-value.formula-code {
         font-family: 'Courier New', monospace;
         background: #f5f5f5;
-        padding: 0.4rem 0.8rem;
+        padding: 0.25rem 0.5rem;
         border-radius: 6px;
         display: inline-block;
-        font-size: 0.95rem;
+        font-size: 0.8rem;
     }
 
     .detail-value.not-set {
@@ -127,19 +159,19 @@
     .ratings-section {
         background: #fff;
         border-radius: 12px;
-        padding: 1.5rem;
-        margin-bottom: 2rem;
+        padding: 0.75rem;
+        margin-bottom: 1rem;
         box-shadow: 0 2px 8px rgba(47, 74, 60, 0.08);
     }
 
     .ratings-header {
-        font-size: 0.85rem;
+        font-size: 0.75rem;
         text-transform: uppercase;
         letter-spacing: 0.5px;
         color: #2F4A3C;
         font-weight: 700;
-        margin-bottom: 1rem;
-        padding-bottom: 0.5rem;
+        margin-bottom: 0.5rem;
+        padding-bottom: 0.25rem;
         border-bottom: 2px solid #8DA66E;
     }
 
@@ -151,26 +183,34 @@
         background: linear-gradient(135deg, #f0f5f0 0%, #e8ebe8 100%);
         color: #2F4A3C;
         font-weight: 600;
-        padding: 1rem;
+        padding: 0.5rem;
         text-align: center;
         border: 1px solid rgba(141, 166, 110, 0.1);
     }
 
     .ratings-table td {
-        padding: 1rem;
+        padding: 0.5rem;
         text-align: center;
         border: 1px solid rgba(141, 166, 110, 0.1);
+        font-size: smaller;
     }
 
     .tee-name {
         color: #2F4A3C;
         font-weight: 600;
+        font-size: 0.85rem;
     }
 
     .course-slope {
         color: #5E7C4C;
-        font-size: 0.9rem;
+        font-size: 0.75rem;
         font-weight: 500;
+    }
+
+    .rating-value {
+        color: #5E7C4C;
+        font-weight: 600;
+        font-size: 0.75rem;
     }
 
     .scorecard-table {
@@ -187,14 +227,15 @@
 
     .scorecard-table th {
         font-weight: 600;
-        padding: 1rem 0.5rem !important;
-        font-size: 0.9rem;
+        padding: 0.5rem 0.25rem !important;
+        font-size: 0.8rem;
         border: none !important;
     }
 
     .scorecard-table td {
-        padding: 0.75rem 0.5rem !important;
+        padding: 0.4rem 0.25rem !important;
         border: 1px solid rgba(141, 166, 110, 0.1) !important;
+        font-size: smaller;
     }
 
     .scorecard-table tbody tr:hover {
@@ -248,28 +289,30 @@
     {{-- Header --}}
     <div class="scorecard-header">
         <div class="scorecard-header-content">
-            <h2 class="scorecard-title mb-2">{{ $scorecard->scorecard_name ?? 'Scorecard' }}</h2>
-            
             <div>
+                <h2 class="scorecard-title">{{ $scorecard->scorecard_name ?? 'Scorecard' }}</h2>
+
+                @if(isset($scorecard->scorecard_desc))
+                <div class="scorecard-meta">{{ $scorecard->scorecard_desc }}</div>
+                @endif
+
+                @if(isset($scorecard->course->course_name))
+                <div class="scorecard-meta">
+                    <i class="fas fa-golf-ball"></i>
+                    <strong>{{ $scorecard->course->course_name }}</strong>
+                </div>
+                @endif
+            </div>
+
+            <div class="scorecard-badges-container">
                 @if(isset($scorecard->scorecard_code))
                 <span class="scorecard-badge">{{ $scorecard->scorecard_code }}</span>
                 @endif
-                
+
                 @if(isset($scorecard->scorecard_type))
                 <span class="scorecard-badge">{{ ucfirst($scorecard->scorecard_type) }}</span>
                 @endif
             </div>
-
-            @if(isset($scorecard->scorecard_desc))
-            <div class="scorecard-meta mt-2">{{ $scorecard->scorecard_desc }}</div>
-            @endif
-
-            @if(isset($scorecard->course->course_name))
-            <div class="scorecard-meta mt-1">
-                <i class="fas fa-map-marker-alt me-1"></i>
-                Course: <strong>{{ $scorecard->course->course_name }}</strong>
-            </div>
-            @endif
         </div>
     </div>
 
@@ -290,9 +333,9 @@
                 <div class="detail-label">Adjusted Gross Formula</div>
                 <div class="detail-value formula-code">
                     @if($scorecard->adjustedGrossScoreFormula)
-                        {{ $scorecard->adjustedGrossScoreFormula->formula_expression ?? 'N/A' }}
+                    {{ $scorecard->adjustedGrossScoreFormula->formula_expression ?? 'N/A' }}
                     @else
-                        <span class="not-set">Not Set</span>
+                    <span class="not-set">Not Set</span>
                     @endif
                 </div>
             </div>
@@ -300,9 +343,9 @@
                 <div class="detail-label">Score Differential Formula</div>
                 <div class="detail-value formula-code">
                     @if($scorecard->scoreDifferentialFormula)
-                        {{ $scorecard->scoreDifferentialFormula->formula_expression ?? 'N/A' }}
+                    {{ $scorecard->scoreDifferentialFormula->formula_expression ?? 'N/A' }}
                     @else
-                        <span class="not-set">Not Set</span>
+                    <span class="not-set">Not Set</span>
                     @endif
                 </div>
             </div>
@@ -310,9 +353,9 @@
                 <div class="detail-label">Course Handicap Formula</div>
                 <div class="detail-value formula-code">
                     @if($scorecard->courseHandicapFormula)
-                        {{ $scorecard->courseHandicapFormula->formula_expression ?? 'N/A' }}
+                    {{ $scorecard->courseHandicapFormula->formula_expression ?? 'N/A' }}
                     @else
-                        <span class="not-set">Not Set</span>
+                    <span class="not-set">Not Set</span>
                     @endif
                 </div>
             </div>
@@ -328,15 +371,41 @@
                 <table class="ratings-table">
                     <thead>
                         <tr>
-                            <th>TEE</th>
+                            <th colspan="3" style="background: #e8ebe8;">Overall Ratings (Course / Slope)</th>
                             @foreach($scorecard->ratings as $rating)
-                            <th>
+                            <th style="border-right: 2px solid #8DA66E;">
                                 <div class="tee-name">{{ $rating->tee->tee_name }}</div>
                                 <div class="course-slope">{{ $rating->course_rating }} / {{ $rating->slope_rating }}</div>
                             </th>
                             @endforeach
                         </tr>
                     </thead>
+                    <tbody>
+                        <tr>
+                            <td colspan="3" style="font-weight: 600; background: #f0fdf4; color: #5E7C4C; border-right: 2px solid #8DA66E;">Front 9 Ratings</td>
+                            @foreach($scorecard->ratings as $rating)
+                            <td style="border-right: 2px solid #8DA66E; background: #f9fdf8;">
+                                @php
+                                $frontCR = $rating->f9_course_rating ?? 'N/A';
+                                $frontSR = $rating->f9_slope_rating ?? 'N/A';
+                                @endphp
+                                <div class="rating-value">{{ $frontCR }} / {{ $frontSR }}</div>
+                            </td>
+                            @endforeach
+                        </tr>
+                        <tr>
+                            <td colspan="3" style="font-weight: 600; background: #fdf8f0; color: #5E7C4C; border-right: 2px solid #8DA66E;">Back 9 Ratings</td>
+                            @foreach($scorecard->ratings as $rating)
+                            <td style="border-right: 2px solid #8DA66E; background: #fdfcf9;">
+                                @php
+                                $backCR = $rating->b9_course_rating ?? 'N/A';
+                                $backSR = $rating->b9_slope_rating ?? 'N/A';
+                                @endphp
+                                <div class="rating-value">{{ $backCR }} / {{ $backSR }}</div>
+                            </td>
+                            @endforeach
+                        </tr>
+                    </tbody>
                 </table>
             </div>
         </div>
@@ -367,23 +436,23 @@
 
                 <tbody>
                     {{-- Tee Rows --}}
-                  
+
                     @foreach($scorecard->course->tees as $tee)
-                    
+
                     <tr>
                         <td class="fw-bold">{{ $tee->tee_name }}</td>
 
-                        @foreach ($yardages[$tee->tee_id] as $hole => $yardage) 
-                            <td style="color: #333;">{{ $yardage }}</td>
-                           @if ($hole == 9)
-                               <td style="">
-                                   {{ array_sum(array_slice($yardages[$tee->tee_id], 0, 9)) }}
-                               </td>
-                           @endif
+                        @foreach ($yardages[$tee->tee_id] as $hole => $yardage)
+                        <td style="color: #333;">{{ $yardage }}</td>
+                        @if ($hole == 9)
+                        <td>
+                            {{ array_sum(array_slice($yardages[$tee->tee_id], 0, 9)) }}
+                        </td>
+                        @endif
 
-                              @if ($hole == 18)
-                               
-                           @endif
+                        @if ($hole == 18)
+
+                        @endif
                         @endforeach
 
                         <td>
@@ -399,50 +468,49 @@
                     <tr class="row-par">
                         <td class="row-handicap-label">PAR</td>
                         @foreach ($scorecard->scorecardHoles as $hole)
-                            <td style="color: #333;">{{ $hole->par }}</td>
-                            @if ($hole->hole == 9)
-                                <td>
-                                    {{ $scorecard->scorecardHoles->pluck('par')->take(9)->sum() }}
-                                </td>
-                            @endif
+                        <td style="color: #333;">{{ $hole->par }}</td>
+                        @if ($hole->hole == 9)
+                        <td>
+                            {{ $scorecard->scorecardHoles->pluck('par')->take(9)->sum() }}
+                        </td>
+                        @endif
                         @endforeach
-                       <td>
+                        <td>
                             {{ $scorecard->scorecardHoles->pluck('par')->skip(9)->sum() }}
                         </td>
-                      <td>
+                        <td>
                             {{ $scorecard->scorecardHoles->pluck('par')->sum() }}
                         </td>
-                     
+
                     </tr>
 
                     {{-- Men's Handicap --}}
                     <tr class="row-handicap">
                         <td class="row-handicap-label">Handicap</td>
-                        @foreach ($scorecard->strokeIndexes as $index)
-                            @if ($index->sex == 'M')
-                                <td style="color: #333;">{{ $index->stroke_index }}</td>
-                                  @if ($index->hole == 9)
-                                        <td></td>
-                                    @endif
-                            @endif
-                          
-                        @endforeach
-                       <td></td>
+                        @foreach ($scorecard->scorecardHoles as $hole)
+
+                        <td style="color: #333;">{{ $hole->men_stroke_index }}</td>
+                        @if ($hole->hole == 9)
                         <td></td>
-                      
+                        @endif
+
+
+                        @endforeach
+                        <td></td>
+                        <td></td>
+
                     </tr>
 
                     {{-- Ladies' Handicap --}}
                     <tr class="row-handicap">
                         <td class="row-handicap-label">Ladies HDC</td>
-                        @foreach ($scorecard->strokeIndexes as $index)
-                            @if ($index->sex == 'F')
-                                <td style="color: #333;">{{ $index->stroke_index }}</td>
-                                  @if ($index->hole == 9)
-                                        <td></td>
-                                    @endif
-                            @endif
-                          
+                        @foreach ($scorecard->scorecardHoles as $hole)
+
+                        <td style="color: #333;">{{ $hole->ladies_stroke_index }}</td>
+                        @if ($hole->hole == 9)
+                        <td></td>
+                        @endif
+
                         @endforeach
                         <td></td>
                         <td></td>

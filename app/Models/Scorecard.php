@@ -52,22 +52,6 @@ class Scorecard extends Model
         return $this->hasMany(ScorecardYardage::class, 'scorecard_id', 'scorecard_id');
     }
 
-    public function strokeIndex()
-    {
-        return $this->hasMany(ScorecardStrokeIndex::class, 'scorecard_id', 'scorecard_id');
-    }
-
-    public function strokeIndexes()
-    {
-        return $this->hasMany(ScorecardStrokeIndex::class, 'scorecard_id', 'scorecard_id');
-    }
-
-    public function handicapHole()
-    {
-        return $this->hasOne(ScorecardStrokeIndex::class, 'scorecard_id', 'scorecard_id');
-    }
-
-
 
     public function courseRatingFormula()
     {

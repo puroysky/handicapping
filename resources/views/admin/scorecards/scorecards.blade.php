@@ -20,9 +20,9 @@
                     <button class="btn btn-outline-secondary btn-modern" onclick="importScorecards()">
                         <i class="fas fa-upload me-1"></i>Import
                     </button>
-                    <a href="{{ route('admin.scorecards.create') }}" class="btn btn-primary btn-modern">
+                    <button class="btn btn-primary btn-modern" onclick="showCourseSelectionModal()">
                         <i class="fas fa-plus me-2"></i>Add New Scorecard
-                    </a>
+                    </button>
                 </div>
             </div>
         </div>
@@ -113,7 +113,7 @@
                                     <span class="fw-semibold">{{ $scorecard->scorecard_name ?? 'N/A' }}</span>
                                 </td>
                                 <td class="scorecard-desc-cell">
-                                    <span class="text-muted" style="font-size: 0.9rem;">{{ Str::limit($scorecard->scorecard_desc ?? 'No description', 50) }}</span>
+                                    <span class="text-muted" style="font-size: 0.9rem;">{{ $scorecard->scorecard_desc ?? 'No description' }}</span>
                                 </td>
                                 <td class="scorecard-type-cell">
                                     <span class="text-muted">{{ ucfirst($scorecard->scorecard_type ?? 'N/A') }}</span>
@@ -154,6 +154,31 @@
                         </tbody>
                     </table>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Course Selection Modal -->
+<div class="modal fade" id="courseSelectionModal" tabindex="-1" aria-labelledby="courseSelectionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title" id="courseSelectionModalLabel">
+                    <i class="fas fa-golf-ball me-2"></i>Select Course
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted mb-3">Please select a course to create a scorecard for:</p>
+                <div id="coursesList" class="course-selection-list">
+                    <!-- Courses will be loaded here via JavaScript -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i>Cancel
+                </button>
             </div>
         </div>
     </div>
@@ -434,6 +459,66 @@
             document.body.appendChild(form);
             form.submit();
         }
+    }
+
+    // Course Selection Modal Functions
+    function showCourseSelectionModal() {
+        const modal = new bootstrap.Modal(document.getElementById('courseSelectionModal'));
+        loadCourses();
+        modal.show();
+    }
+
+    function loadCourses() {
+        const coursesList = document.getElementById('coursesList');
+        coursesList.innerHTML = '<div class="text-center"><span class="spinner-border spinner-border-sm me-2"></span>Loading courses...</div>';
+
+        fetch(BASE_URL + '/api/courses', {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.courses && data.courses.length > 0) {
+                    displayCourses(data.courses);
+                } else {
+                    coursesList.innerHTML = '<div class="alert alert-warning"><i class="fas fa-exclamation-triangle me-1"></i>No courses available.</div>';
+                }
+            })
+            .catch(error => {
+                console.error('Error loading courses:', error);
+                coursesList.innerHTML = '<div class="alert alert-danger"><i class="fas fa-exclamation-circle me-1"></i>Error loading courses. Please try again.</div>';
+            });
+    }
+
+    function displayCourses(courses) {
+        const coursesList = document.getElementById('coursesList');
+        coursesList.innerHTML = courses.map(course => `
+            <div class="course-selection-item" onclick="selectCourse(${course.course_id}, '${course.course_name}')">
+                <div class="course-selection-content">
+                    <div class="course-selection-name">
+                        <i class="fas fa-golf-ball me-2"></i>${course.course_name}
+                    </div>
+                    ${course.course_desc ? `<div class="course-selection-desc">${course.course_desc}</div>` : ''}
+                </div>
+                <div class="course-selection-arrow">
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function selectCourse(courseId, courseName) {
+        // Close modal
+        const modal = bootstrap.Modal.getInstance(document.getElementById('courseSelectionModal'));
+        if (modal) {
+            modal.hide();
+        }
+
+        // Redirect to create scorecard form with course_id parameter
+        window.location.href = `${BASE_URL}/admin/scorecards/create?course_id=${courseId}`;
     }
 
     function exportScorecards() {
@@ -809,5 +894,59 @@
 
 <style>
     /* Modern Header Card */
+
+    /* Course Selection Modal Styles */
+    .course-selection-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .course-selection-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.875rem 1rem;
+        border: 1px solid #e0e0e0;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background-color: #f8f9fa;
+    }
+
+    .course-selection-item:hover {
+        border-color: #2F4A3C;
+        background-color: #f0f5f3;
+        box-shadow: 0 2px 8px rgba(47, 74, 60, 0.1);
+        transform: translateX(4px);
+    }
+
+    .course-selection-content {
+        flex: 1;
+    }
+
+    .course-selection-name {
+        font-weight: 600;
+        color: #2F4A3C;
+        font-size: 0.95rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .course-selection-desc {
+        font-size: 0.85rem;
+        color: #666;
+        line-height: 1.4;
+    }
+
+    .course-selection-arrow {
+        color: #ccc;
+        margin-left: 1rem;
+        font-size: 0.9rem;
+        transition: color 0.3s ease;
+    }
+
+    .course-selection-item:hover .course-selection-arrow {
+        color: #2F4A3C;
+    }
 </style>
 @endsection

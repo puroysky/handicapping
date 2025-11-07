@@ -2,9 +2,10 @@
 
 namespace Database\Seeders;
 
-use App\Models\Tournament;
+use App\Models\Scorecard;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class TournamentSeeder extends Seeder
 {
@@ -13,60 +14,51 @@ class TournamentSeeder extends Seeder
      */
     public function run(): void
     {
-        Tournament::insert([
-            [
-                'tournament_id' => 1,
-                'tournament_name' => 'All Seniors 2025',
-                'tournament_desc' => 'Tournament for All Senior 2025',
-                'tournament_start' => '2025-08-30',
-                'tournament_end' => '2025-08-30',
-                'handicap_formula_expression' => 'AVG(SELECTED_DIFFERENTIALS) * 0.96',
-                'score_diff_start_date' => '2023-01-01',
-                'score_diff_end_date' => '2025-07-31',
-                'recent_scores_count' => 20,
-                'score_selection_type' => 'LOWEST',
-                'created_by' => 1
-            ],
-            [
-                'tournament_id' => 2,
-                'tournament_name' => 'Summer Open',
-                'tournament_desc' => 'Open Tournament for All Members',
-                'tournament_start' => '2024-06-20',
-                'tournament_end' => '2024-06-22',
-                'handicap_formula_expression' => 'AVG(SELECTED_DIFFERENTIALS) * 0.96',
-                'score_diff_start_date' => '2024-04-01',
-                'score_diff_end_date' => '2024-06-19',
-                'recent_scores_count' => 20,
-                'score_selection_type' => 'LOWEST',
-                'created_by' => 1
-            ],
-            [
-                'tournament_id' => 3,
-                'tournament_name' => 'Fall Classic',
-                'tournament_desc' => 'Classic Tournament to End the Season',
-                'tournament_start' => '2024-09-10',
-                'tournament_end' => '2024-09-12',
-                'handicap_formula_expression' => 'AVG(SELECTED_DIFFERENTIALS) * 0.96',
-                'score_diff_start_date' => '2024-07-01',
-                'score_diff_end_date' => '2024-09-09',
-                'recent_scores_count' => 5,
-                'score_selection_type' => 'HIGHEST',
-                'created_by' => 1
-            ],
-            [
-                'tournament_id' => 4,
-                'tournament_name' => 'Winter Championship',
-                'tournament_desc' => 'Championship Tournament in Winter',
-                'tournament_start' => '2024-12-05',
-                'tournament_end' => '2024-12-07',
-                'handicap_formula_expression' => 'AVG(SELECTED_DIFFERENTIALS) * 0.96',
-                'score_diff_start_date' => '2024-10-01',
-                'score_diff_end_date' => '2024-12-04',
-                'recent_scores_count' => 20,
-                'score_selection_type' => 'LOWEST',
-                'created_by' => 1
-            ],
+        DB::unprepared("
+            INSERT INTO `tournaments` (`tournament_id`,`tournament_name`,`tournament_desc`,`tournament_start`,`tournament_end`,`score_diff_start_date`,`score_diff_end_date`,`recent_scores_count`,`score_selection_type`,`scores_to_average`,`handicap_formula_expression`,`cancelled_at`,`cancelled_by`,`cancel_reason`,`remarks`,`active`,`scorecard_id`,`created_by`,`updated_by`,`created_at`,`updated_at`) VALUES (1,'ALL SENIORS 2025',NULL,'2025-08-30','2025-08-30',NULL,NULL,20,'LOWEST',8,'AVG(SELECTED_DIFFERENTIALS) * 0.96',NULL,NULL,NULL,NULL,'active',NULL,1,NULL,'2025-11-07 12:54:43','2025-11-07 12:54:43');
+            INSERT INTO `tournaments` (`tournament_id`,`tournament_name`,`tournament_desc`,`tournament_start`,`tournament_end`,`score_diff_start_date`,`score_diff_end_date`,`recent_scores_count`,`score_selection_type`,`scores_to_average`,`handicap_formula_expression`,`cancelled_at`,`cancelled_by`,`cancel_reason`,`remarks`,`active`,`scorecard_id`,`created_by`,`updated_by`,`created_at`,`updated_at`) VALUES (2,'BARKADAHAN 2024 - JUNE',NULL,'2024-06-21','2024-06-29',NULL,NULL,20,'LOWEST',8,'AVG(SELECTED_DIFFERENTIALS) * 0.96',NULL,NULL,NULL,NULL,'active',NULL,1,NULL,'2025-11-07 13:52:22','2025-11-07 13:52:22');
+            INSERT INTO `tournaments` (`tournament_id`,`tournament_name`,`tournament_desc`,`tournament_start`,`tournament_end`,`score_diff_start_date`,`score_diff_end_date`,`recent_scores_count`,`score_selection_type`,`scores_to_average`,`handicap_formula_expression`,`cancelled_at`,`cancelled_by`,`cancel_reason`,`remarks`,`active`,`scorecard_id`,`created_by`,`updated_by`,`created_at`,`updated_at`) VALUES (3,'BARKADAHAN 2024 - JULY',NULL,'2024-07-06','2024-07-22',NULL,NULL,20,'HIGHEST',8,'AVG(SELECTED_DIFFERENTIALS) * 0.96',NULL,NULL,NULL,NULL,'active',NULL,1,NULL,'2025-11-07 13:56:56','2025-11-07 13:56:56');
+            INSERT INTO `tournaments` (`tournament_id`,`tournament_name`,`tournament_desc`,`tournament_start`,`tournament_end`,`score_diff_start_date`,`score_diff_end_date`,`recent_scores_count`,`score_selection_type`,`scores_to_average`,`handicap_formula_expression`,`cancelled_at`,`cancelled_by`,`cancel_reason`,`remarks`,`active`,`scorecard_id`,`created_by`,`updated_by`,`created_at`,`updated_at`) VALUES (4,'BARKADAHAN 2024 - AUGUST',NULL,'2024-08-03','2024-08-04',NULL,NULL,20,'LOWEST',8,'AVG(SELECTED_DIFFERENTIALS) * 0.96',NULL,NULL,NULL,NULL,'active',NULL,1,NULL,'2025-11-07 13:59:04','2025-11-07 13:59:04');
+            INSERT INTO `tournaments` (`tournament_id`,`tournament_name`,`tournament_desc`,`tournament_start`,`tournament_end`,`score_diff_start_date`,`score_diff_end_date`,`recent_scores_count`,`score_selection_type`,`scores_to_average`,`handicap_formula_expression`,`cancelled_at`,`cancelled_by`,`cancel_reason`,`remarks`,`active`,`scorecard_id`,`created_by`,`updated_by`,`created_at`,`updated_at`) VALUES (5,'BARKADAHAN 2025',NULL,'2025-05-25','2025-08-09',NULL,NULL,20,'LOWEST',8,'AVG(SELECTED_DIFFERENTIALS) * 0.96',NULL,NULL,NULL,NULL,'active',NULL,1,NULL,'2025-11-07 14:00:56','2025-11-07 14:00:56');
+            INSERT INTO `tournaments` (`tournament_id`,`tournament_name`,`tournament_desc`,`tournament_start`,`tournament_end`,`score_diff_start_date`,`score_diff_end_date`,`recent_scores_count`,`score_selection_type`,`scores_to_average`,`handicap_formula_expression`,`cancelled_at`,`cancelled_by`,`cancel_reason`,`remarks`,`active`,`scorecard_id`,`created_by`,`updated_by`,`created_at`,`updated_at`) VALUES (6,'CLUB CHAMP Q1 2024',NULL,'2024-01-06','2024-01-13',NULL,NULL,20,'LOWEST',8,'AVG(SELECTED_DIFFERENTIALS) * 0.96',NULL,NULL,NULL,NULL,'active',NULL,1,NULL,'2025-11-07 14:02:39','2025-11-07 14:02:39');
+            INSERT INTO `tournaments` (`tournament_id`,`tournament_name`,`tournament_desc`,`tournament_start`,`tournament_end`,`score_diff_start_date`,`score_diff_end_date`,`recent_scores_count`,`score_selection_type`,`scores_to_average`,`handicap_formula_expression`,`cancelled_at`,`cancelled_by`,`cancel_reason`,`remarks`,`active`,`scorecard_id`,`created_by`,`updated_by`,`created_at`,`updated_at`) VALUES (7,'CLUB CHAMP Q1 2025',NULL,'2024-10-05','2024-10-16',NULL,NULL,20,'LOWEST',8,'AVG(SELECTED_DIFFERENTIALS) * 0.96',NULL,NULL,NULL,NULL,'active',NULL,1,NULL,'2025-11-07 14:07:15','2025-11-07 14:07:15');
+            INSERT INTO `tournaments` (`tournament_id`,`tournament_name`,`tournament_desc`,`tournament_start`,`tournament_end`,`score_diff_start_date`,`score_diff_end_date`,`recent_scores_count`,`score_selection_type`,`scores_to_average`,`handicap_formula_expression`,`cancelled_at`,`cancelled_by`,`cancel_reason`,`remarks`,`active`,`scorecard_id`,`created_by`,`updated_by`,`created_at`,`updated_at`) VALUES (8,'DCT 2024',NULL,'2024-03-21','2024-03-24',NULL,NULL,20,'LOWEST',8,'AVG(SELECTED_DIFFERENTIALS) * 0.96',NULL,NULL,NULL,NULL,'active',NULL,1,NULL,'2025-11-07 14:09:08','2025-11-07 14:09:08');
+            INSERT INTO `tournaments` (`tournament_id`,`tournament_name`,`tournament_desc`,`tournament_start`,`tournament_end`,`score_diff_start_date`,`score_diff_end_date`,`recent_scores_count`,`score_selection_type`,`scores_to_average`,`handicap_formula_expression`,`cancelled_at`,`cancelled_by`,`cancel_reason`,`remarks`,`active`,`scorecard_id`,`created_by`,`updated_by`,`created_at`,`updated_at`) VALUES (9,'DCT 2025',NULL,'2025-02-19','2025-02-22',NULL,NULL,20,'LOWEST',8,'AVG(SELECTED_DIFFERENTIALS) * 0.96',NULL,NULL,NULL,NULL,'active',NULL,1,NULL,'2025-11-07 14:10:16','2025-11-07 14:10:16');
+            INSERT INTO `tournaments` (`tournament_id`,`tournament_name`,`tournament_desc`,`tournament_start`,`tournament_end`,`score_diff_start_date`,`score_diff_end_date`,`recent_scores_count`,`score_selection_type`,`scores_to_average`,`handicap_formula_expression`,`cancelled_at`,`cancelled_by`,`cancel_reason`,`remarks`,`active`,`scorecard_id`,`created_by`,`updated_by`,`created_at`,`updated_at`) VALUES (10,'DCT 2025 - SP',NULL,'2025-02-19','2025-02-22',NULL,NULL,20,'LOWEST',8,'AVG(SELECTED_DIFFERENTIALS) * 0.96',NULL,NULL,NULL,NULL,'active',NULL,1,NULL,'2025-11-07 14:11:18','2025-11-07 14:11:18');
+            INSERT INTO `tournaments` (`tournament_id`,`tournament_name`,`tournament_desc`,`tournament_start`,`tournament_end`,`score_diff_start_date`,`score_diff_end_date`,`recent_scores_count`,`score_selection_type`,`scores_to_average`,`handicap_formula_expression`,`cancelled_at`,`cancelled_by`,`cancel_reason`,`remarks`,`active`,`scorecard_id`,`created_by`,`updated_by`,`created_at`,`updated_at`) VALUES (11,'INTRA 2024',NULL,'2024-11-23','2024-11-23',NULL,NULL,20,'LOWEST',8,'AVG(SELECTED_DIFFERENTIALS) * 0.96',NULL,NULL,NULL,NULL,'active',NULL,1,NULL,'2025-11-07 14:14:42','2025-11-07 14:14:42');
+            INSERT INTO `tournaments` (`tournament_id`,`tournament_name`,`tournament_desc`,`tournament_start`,`tournament_end`,`score_diff_start_date`,`score_diff_end_date`,`recent_scores_count`,`score_selection_type`,`scores_to_average`,`handicap_formula_expression`,`cancelled_at`,`cancelled_by`,`cancel_reason`,`remarks`,`active`,`scorecard_id`,`created_by`,`updated_by`,`created_at`,`updated_at`) VALUES (12,'INTRA 2025',NULL,'2025-04-26','2025-04-27',NULL,NULL,20,'LOWEST',8,'AVG(SELECTED_DIFFERENTIALS) * 0.96',NULL,NULL,NULL,NULL,'active',NULL,1,NULL,'2025-11-07 14:16:04','2025-11-07 14:16:04');
+            INSERT INTO `tournaments` (`tournament_id`,`tournament_name`,`tournament_desc`,`tournament_start`,`tournament_end`,`score_diff_start_date`,`score_diff_end_date`,`recent_scores_count`,`score_selection_type`,`scores_to_average`,`handicap_formula_expression`,`cancelled_at`,`cancelled_by`,`cancel_reason`,`remarks`,`active`,`scorecard_id`,`created_by`,`updated_by`,`created_at`,`updated_at`) VALUES (13,'PRESCUP 2024',NULL,'2024-09-15','2024-09-15',NULL,NULL,20,'LOWEST',8,'AVG(SELECTED_DIFFERENTIALS) * 0.96',NULL,NULL,NULL,NULL,'active',NULL,1,NULL,'2025-11-07 14:17:04','2025-11-07 14:17:04');
+            INSERT INTO `tournaments` (`tournament_id`,`tournament_name`,`tournament_desc`,`tournament_start`,`tournament_end`,`score_diff_start_date`,`score_diff_end_date`,`recent_scores_count`,`score_selection_type`,`scores_to_average`,`handicap_formula_expression`,`cancelled_at`,`cancelled_by`,`cancel_reason`,`remarks`,`active`,`scorecard_id`,`created_by`,`updated_by`,`created_at`,`updated_at`) VALUES (14,'PRESCUP 2025',NULL,'2025-09-14','2025-09-14',NULL,NULL,20,'LOWEST',8,'AVG(SELECTED_DIFFERENTIALS) * 0.96',NULL,NULL,NULL,NULL,'active',NULL,1,NULL,'2025-11-07 14:17:59','2025-11-07 14:17:59');
 
-        ]);
+            INSERT INTO `tournament_courses` (`tournament_course_id`,`tournament_id`,`course_id`,`scorecard_id`,`active`,`created_by`,`updated_by`,`created_at`,`updated_at`) VALUES (1,1,1,5,1,1,NULL,'2025-11-07 12:54:43','2025-11-07 12:54:43');
+            INSERT INTO `tournament_courses` (`tournament_course_id`,`tournament_id`,`course_id`,`scorecard_id`,`active`,`created_by`,`updated_by`,`created_at`,`updated_at`) VALUES (2,1,2,4,1,1,NULL,'2025-11-07 12:54:43','2025-11-07 12:54:43');
+            INSERT INTO `tournament_courses` (`tournament_course_id`,`tournament_id`,`course_id`,`scorecard_id`,`active`,`created_by`,`updated_by`,`created_at`,`updated_at`) VALUES (3,2,1,1,1,1,NULL,'2025-11-07 13:52:22','2025-11-07 13:52:22');
+            INSERT INTO `tournament_courses` (`tournament_course_id`,`tournament_id`,`course_id`,`scorecard_id`,`active`,`created_by`,`updated_by`,`created_at`,`updated_at`) VALUES (4,2,2,2,1,1,NULL,'2025-11-07 13:52:22','2025-11-07 13:52:22');
+            INSERT INTO `tournament_courses` (`tournament_course_id`,`tournament_id`,`course_id`,`scorecard_id`,`active`,`created_by`,`updated_by`,`created_at`,`updated_at`) VALUES (5,3,1,3,1,1,NULL,'2025-11-07 13:56:56','2025-11-07 13:56:56');
+            INSERT INTO `tournament_courses` (`tournament_course_id`,`tournament_id`,`course_id`,`scorecard_id`,`active`,`created_by`,`updated_by`,`created_at`,`updated_at`) VALUES (6,3,2,4,1,1,NULL,'2025-11-07 13:56:56','2025-11-07 13:56:56');
+            INSERT INTO `tournament_courses` (`tournament_course_id`,`tournament_id`,`course_id`,`scorecard_id`,`active`,`created_by`,`updated_by`,`created_at`,`updated_at`) VALUES (7,4,1,3,1,1,NULL,'2025-11-07 13:59:04','2025-11-07 13:59:04');
+            INSERT INTO `tournament_courses` (`tournament_course_id`,`tournament_id`,`course_id`,`scorecard_id`,`active`,`created_by`,`updated_by`,`created_at`,`updated_at`) VALUES (8,5,1,3,1,1,NULL,'2025-11-07 14:00:56','2025-11-07 14:00:56');
+            INSERT INTO `tournament_courses` (`tournament_course_id`,`tournament_id`,`course_id`,`scorecard_id`,`active`,`created_by`,`updated_by`,`created_at`,`updated_at`) VALUES (9,5,2,4,1,1,NULL,'2025-11-07 14:00:56','2025-11-07 14:00:56');
+            INSERT INTO `tournament_courses` (`tournament_course_id`,`tournament_id`,`course_id`,`scorecard_id`,`active`,`created_by`,`updated_by`,`created_at`,`updated_at`) VALUES (10,6,1,1,1,1,NULL,'2025-11-07 14:02:39','2025-11-07 14:02:39');
+            INSERT INTO `tournament_courses` (`tournament_course_id`,`tournament_id`,`course_id`,`scorecard_id`,`active`,`created_by`,`updated_by`,`created_at`,`updated_at`) VALUES (11,6,2,2,1,1,NULL,'2025-11-07 14:02:39','2025-11-07 14:02:39');
+            INSERT INTO `tournament_courses` (`tournament_course_id`,`tournament_id`,`course_id`,`scorecard_id`,`active`,`created_by`,`updated_by`,`created_at`,`updated_at`) VALUES (12,7,1,3,1,1,NULL,'2025-11-07 14:07:15','2025-11-07 14:07:15');
+            INSERT INTO `tournament_courses` (`tournament_course_id`,`tournament_id`,`course_id`,`scorecard_id`,`active`,`created_by`,`updated_by`,`created_at`,`updated_at`) VALUES (13,7,2,4,1,1,NULL,'2025-11-07 14:07:15','2025-11-07 14:07:15');
+            INSERT INTO `tournament_courses` (`tournament_course_id`,`tournament_id`,`course_id`,`scorecard_id`,`active`,`created_by`,`updated_by`,`created_at`,`updated_at`) VALUES (14,8,1,1,1,1,NULL,'2025-11-07 14:09:08','2025-11-07 14:09:08');
+            INSERT INTO `tournament_courses` (`tournament_course_id`,`tournament_id`,`course_id`,`scorecard_id`,`active`,`created_by`,`updated_by`,`created_at`,`updated_at`) VALUES (15,8,2,2,1,1,NULL,'2025-11-07 14:09:08','2025-11-07 14:09:08');
+            INSERT INTO `tournament_courses` (`tournament_course_id`,`tournament_id`,`course_id`,`scorecard_id`,`active`,`created_by`,`updated_by`,`created_at`,`updated_at`) VALUES (16,9,1,3,1,1,NULL,'2025-11-07 14:10:16','2025-11-07 14:10:16');
+            INSERT INTO `tournament_courses` (`tournament_course_id`,`tournament_id`,`course_id`,`scorecard_id`,`active`,`created_by`,`updated_by`,`created_at`,`updated_at`) VALUES (17,9,2,4,1,1,NULL,'2025-11-07 14:10:16','2025-11-07 14:10:16');
+            INSERT INTO `tournament_courses` (`tournament_course_id`,`tournament_id`,`course_id`,`scorecard_id`,`active`,`created_by`,`updated_by`,`created_at`,`updated_at`) VALUES (18,10,1,3,1,1,NULL,'2025-11-07 14:11:18','2025-11-07 14:11:18');
+            INSERT INTO `tournament_courses` (`tournament_course_id`,`tournament_id`,`course_id`,`scorecard_id`,`active`,`created_by`,`updated_by`,`created_at`,`updated_at`) VALUES (19,10,2,4,1,1,NULL,'2025-11-07 14:11:18','2025-11-07 14:11:18');
+            INSERT INTO `tournament_courses` (`tournament_course_id`,`tournament_id`,`course_id`,`scorecard_id`,`active`,`created_by`,`updated_by`,`created_at`,`updated_at`) VALUES (20,11,1,3,1,1,NULL,'2025-11-07 14:14:42','2025-11-07 14:14:42');
+            INSERT INTO `tournament_courses` (`tournament_course_id`,`tournament_id`,`course_id`,`scorecard_id`,`active`,`created_by`,`updated_by`,`created_at`,`updated_at`) VALUES (21,11,2,4,1,1,NULL,'2025-11-07 14:14:42','2025-11-07 14:14:42');
+            INSERT INTO `tournament_courses` (`tournament_course_id`,`tournament_id`,`course_id`,`scorecard_id`,`active`,`created_by`,`updated_by`,`created_at`,`updated_at`) VALUES (22,12,1,3,1,1,NULL,'2025-11-07 14:16:04','2025-11-07 14:16:04');
+            INSERT INTO `tournament_courses` (`tournament_course_id`,`tournament_id`,`course_id`,`scorecard_id`,`active`,`created_by`,`updated_by`,`created_at`,`updated_at`) VALUES (23,12,2,4,1,1,NULL,'2025-11-07 14:16:04','2025-11-07 14:16:04');
+            INSERT INTO `tournament_courses` (`tournament_course_id`,`tournament_id`,`course_id`,`scorecard_id`,`active`,`created_by`,`updated_by`,`created_at`,`updated_at`) VALUES (24,13,1,3,1,1,NULL,'2025-11-07 14:17:04','2025-11-07 14:17:04');
+            INSERT INTO `tournament_courses` (`tournament_course_id`,`tournament_id`,`course_id`,`scorecard_id`,`active`,`created_by`,`updated_by`,`created_at`,`updated_at`) VALUES (25,13,2,4,1,1,NULL,'2025-11-07 14:17:04','2025-11-07 14:17:04');
+            INSERT INTO `tournament_courses` (`tournament_course_id`,`tournament_id`,`course_id`,`scorecard_id`,`active`,`created_by`,`updated_by`,`created_at`,`updated_at`) VALUES (26,14,1,5,1,1,NULL,'2025-11-07 14:17:59','2025-11-07 14:17:59');
+            INSERT INTO `tournament_courses` (`tournament_course_id`,`tournament_id`,`course_id`,`scorecard_id`,`active`,`created_by`,`updated_by`,`created_at`,`updated_at`) VALUES (27,14,2,4,1,1,NULL,'2025-11-07 14:17:59','2025-11-07 14:17:59');
+
+
+        ");
     }
 }

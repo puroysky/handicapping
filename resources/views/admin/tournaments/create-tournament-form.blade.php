@@ -464,10 +464,29 @@
             scorecardContainer.style.display = 'block';
             scorecardInfo.style.display = 'none';
 
+            // Store all available scorecards data from server
+            const allScorecards = @json(isset($scorecards) ? $scorecards : []);
+
             // Create scorecard selection for each selected course
             selectedCourses.forEach(courseCheckbox => {
                 const courseId = courseCheckbox.value;
                 const courseName = courseCheckbox.closest('.course-option').querySelector('strong').textContent;
+
+                // Filter scorecards to only those matching the current courseId
+                const matchingScorecards = allScorecards.filter(scorecard =>
+                    scorecard.course_id == courseId
+                );
+
+                // Build options HTML with filtered scorecards
+                let optionsHtml = '<option value="">Select Scorecard for ' + courseName + '</option>';
+
+                if (matchingScorecards.length > 0) {
+                    matchingScorecards.forEach(scorecard => {
+                        optionsHtml += `<option value="${scorecard.scorecard_id}">${scorecard.scorecard_code} - ${scorecard.scorecard_name}</option>`;
+                    });
+                } else {
+                    optionsHtml += '<option value="" disabled>No scorecards available for this course</option>';
+                }
 
                 const scorecardHtml = `
                     <div class="col-md-6 course-scorecard-selection" data-course-id="${courseId}">
@@ -484,17 +503,7 @@
                                             name="course_scorecards[${courseId}]" 
                                             id="scorecard_${courseId}" 
                                             required>
-                                        <option value="">Select Scorecard for ${courseName}</option>
-                                        @if(isset($scorecards))
-                                            @foreach($scorecards as $scorecard)
-                                                <option value="{{ $scorecard->scorecard_id }}">{{ $scorecard->scorecard_name }}</option>
-                                            @endforeach
-                                        @else
-                                            <option value="1">Standard Scorecard</option>
-                                            <option value="2">Tournament Scorecard</option>
-                                            <option value="3">Championship Scorecard</option>
-                                            <option value="4">Executive Scorecard</option>
-                                        @endif
+                                        ${optionsHtml}
                                     </select>
                                     <label for="scorecard_${courseId}">Scorecard Template *</label>
                                     <div class="invalid-feedback">

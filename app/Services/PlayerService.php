@@ -45,7 +45,7 @@ class PlayerService
     public function searchPlayers($searchTerm)
     {
         $players = User::with('player', 'profile')
-            ->whereIn('role', ['player', 'member'])
+            ->whereIn('role', ['player', 'member', 'user'])
             ->where('active', true)
             ->where(function ($query) use ($searchTerm) {
                 $query->where('email', 'LIKE', "%{$searchTerm}%")

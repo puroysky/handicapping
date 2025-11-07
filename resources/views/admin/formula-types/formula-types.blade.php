@@ -107,23 +107,23 @@
                                     <span class="fw-semibold">{{ $formulaType->formula_type_name ?? 'N/A' }}</span>
                                 </td>
                                 <td class="type-desc-cell">
-                                    <span class="text-muted" style="font-size: 0.9rem;">{{ Str::limit($formulaType->formula_type_desc ?? 'No description', 50) }}</span>
+                                    <span class="text-muted" style="font-size: 0.9rem;">{{ $formulaType->formula_type_desc ?? 'No description' }}</span>
                                 </td>
                                 <td class="fields-cell">
                                     @php
-                                        $fields = [];
-                                        if ($formulaType->formula_type_fields) {
-                                            try {
-                                                $fields = json_decode($formulaType->formula_type_fields, true) ?? [];
-                                            } catch (\Exception $e) {
-                                                $fields = [];
-                                            }
-                                        }
+                                    $fields = [];
+                                    if ($formulaType->formula_type_fields) {
+                                    try {
+                                    $fields = json_decode($formulaType->formula_type_fields, true) ?? [];
+                                    } catch (\Exception $e) {
+                                    $fields = [];
+                                    }
+                                    }
                                     @endphp
                                     @forelse ($fields as $field)
-                                        <span class="badge bg-info text-dark me-1 mb-1" style="font-size: 0.75rem;">{{ $field }}</span>
+                                    <span class="badge bg-info text-dark me-1 mb-1" style="font-size: 0.75rem;">{{ $field }}</span>
                                     @empty
-                                        <span class="text-muted">No fields</span>
+                                    <span class="text-muted">No fields</span>
                                     @endforelse
                                 </td>
                                 <td class="status-cell">

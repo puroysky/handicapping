@@ -19,13 +19,13 @@ return new class extends Migration
             $table->unsignedBigInteger('tee_id');
 
             $table->decimal('slope_rating', 5, 2)->unsigned();
-            $table->decimal('f9_slope_rating', 5, 2)->unsigned();
-            $table->decimal('b9_slope_rating', 5, 2)->unsigned();
+            $table->decimal('f9_slope_rating', 5, 2)->unsigned()->nullable()->default(null);
+            $table->decimal('b9_slope_rating', 5, 2)->unsigned()->nullable()->default(null);
 
 
             $table->decimal('course_rating', 5, 2)->unsigned();
-            $table->decimal('f9_course_rating', 5, 2)->unsigned();
-            $table->decimal('b9_course_rating', 5, 2)->unsigned();
+            $table->decimal('f9_course_rating', 5, 2)->unsigned()->nullable()->default(null);
+            $table->decimal('b9_course_rating', 5, 2)->unsigned()->nullable()->default(null);
 
 
             $table->unique(['scorecard_id', 'tee_id'], 'scorecard_slope_rating_key');

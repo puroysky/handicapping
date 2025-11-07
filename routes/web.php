@@ -30,9 +30,8 @@ Route::get('test', function () {
 
 
 
-    $course = Tee::where('course_id', 1)->pluck('tee_id')->toArray();
 
-    return;
+
 
     $testService = new \App\Services\ImportCheckerService();
     $testService->test('Tournament.xlsx');
@@ -140,6 +139,17 @@ Route::get('test-2', function () {
     echo '<pre>';
     return;
 })->name('test-2');
+
+Route::prefix('api')->group(function () {
+    // API endpoints
+    Route::get('courses', function () {
+        $courses = Course::select('course_id', 'course_name', 'course_desc')->where('active', true)->get();
+        return response()->json([
+            'success' => true,
+            'courses' => $courses
+        ]);
+    });
+});
 
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::resource('users', App\Http\Controllers\Admin\UserController::class);

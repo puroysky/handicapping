@@ -35,48 +35,58 @@ class ScorecardService
 
     public function store($validatedData)
     {
-        DB::beginTransaction();
         try {
-            // Create Scorecard
+            DB::beginTransaction();
+
             $scorecard = $this->createScorecard($validatedData);
+            $nextHoleId = $this->getNextScorecardHoleId();
 
-            $lastScorecardHoleId = $this->getLastScorecardHoleId();
+            $this->insertScorecardData($scorecard->scorecard_id, $validatedData, $nextHoleId);
 
-            // Prepare Scorecard Holes Data
-            $scorecardHolesData = $this->prepareScorecardHoles($scorecard->scorecard_id, $validatedData, $lastScorecardHoleId);
-
-            // Insert Scorecard Holes
-            ScorecardHole::insert($scorecardHolesData);
-
-
-            //prepare and insert yardages
-            $scorecardYardagesData = $this->prepareScorecardYardages($scorecard->scorecard_id, $validatedData, $lastScorecardHoleId);
-
-            ScorecardYardage::insert($scorecardYardagesData);
-
-
-            $scorecardRatingsData = $this->prepareScorecardRatings($scorecard->scorecard_id, $validatedData);
-
-            Rating::insert($scorecardRatingsData);
-
-            // echo '<pre>';
-            // print_r($scorecardYardagesData);
-            // echo '</pre>';
             DB::commit();
 
-            return response()->json(['success' => false, 'message' => 'Scorecard created successfully.'], 500);
+            Log::info('Scorecard created successfully', [
+                'scorecard_id' => $scorecard->scorecard_id,
+                'scorecard_code' => $scorecard->scorecard_code,
+                'created_by' => Auth::id()
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Scorecard created successfully.',
+                'data' => $scorecard,
+                'redirect' => route('admin.scorecards.show', $scorecard->scorecard_id)
+            ], 201);
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error('Error creating scorecard: ' . $e->getMessage());
-            return response()->json(['success' => false, 'message' => 'Failed to create scorecard. ' . $e->getMessage()], 500);
+            Log::error('Error creating scorecard: ' . $e->getMessage(), [
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to create scorecard. ' . $e->getMessage()
+            ], 500);
         }
     }
 
 
-    private function getLastScorecardHoleId(): int
+    private function getNextScorecardHoleId(): int
     {
-        $maxHoleId = ScorecardHole::max('scorecard_hole_id') ?? 0;
-        return $maxHoleId;
+        return ScorecardHole::max('scorecard_hole_id') ?? 0;
+    }
+
+    private function insertScorecardData(int $scorecardId, $validatedData, int $nextHoleId): void
+    {
+        $holesData = $this->prepareScorecardHoles($scorecardId, $validatedData, $nextHoleId);
+        $yardagesData = $this->prepareScorecardYardages($scorecardId, $validatedData, $nextHoleId);
+        $ratingsData = $this->prepareScorecardRatings($scorecardId, $validatedData);
+
+        ScorecardHole::insert($holesData);
+        ScorecardYardage::insert($yardagesData);
+        Rating::insert($ratingsData);
     }
     private function createScorecard($validatedData): Scorecard
     {
@@ -96,23 +106,22 @@ class ScorecardService
         return $scorecard;
     }
 
-    private function prepareScorecardYardages(?int $scorecardId, $validatedData, int $lastScorecardHoleId = 0): array
+    private function prepareScorecardYardages(int $scorecardId, $validatedData, int $nextHoleId): array
     {
-        $scorecardYardagesData = [];
-
+        $yardagesData = [];
+        $currentHoleId = $nextHoleId;
         $userId = Auth::id();
 
         foreach ($validatedData['yardages'] as $teeId => $holes) {
 
-            $scorecardHoleIdCounter = $lastScorecardHoleId;
+            $currentHoleId = $nextHoleId;
 
             foreach ($holes as $hole => $yardage) {
-                $scorecardHoleIdCounter++;
+                $currentHoleId++;
 
-                $scorecardYardagesData[] = [
-
+                $yardagesData[] = [
                     'scorecard_id' => $scorecardId,
-                    'scorecard_hole_id' => $scorecardHoleIdCounter,
+                    'scorecard_hole_id' => $currentHoleId,
                     'tee_id' => $teeId,
                     'yardage' => $yardage,
                     'created_by' => $userId,
@@ -120,28 +129,23 @@ class ScorecardService
             }
         }
 
-        return $scorecardYardagesData;
+        return $yardagesData;
     }
 
     /**
      * Prepare scorecard holes data for bulk insertion.
-     *
-     * @param int|null $scorecardId The scorecard ID
-     * @param array $validatedData Form data containing par, male_handicap, and ladies_handicap
-     * @param int $lastScorecardHoleId The last scorecard hole ID for sequential generation
-     * @return array Array of prepared scorecard hole records
      */
-    private function prepareScorecardHoles(?int $scorecardId, $validatedData, int $lastScorecardHoleId = 0): array
+    private function prepareScorecardHoles(int $scorecardId, $validatedData, int $nextHoleId): array
     {
-        $scorecardHolesData = [];
-        $holeIdCounter = $lastScorecardHoleId;
+        $holesData = [];
+        $currentHoleId = $nextHoleId;
         $userId = Auth::id();
 
         foreach ($validatedData['par'] as $hole => $par) {
-            $holeIdCounter++;
+            $currentHoleId++;
 
-            $scorecardHolesData[] = [
-                'scorecard_hole_id' => $holeIdCounter,
+            $holesData[] = [
+                'scorecard_hole_id' => $currentHoleId,
                 'scorecard_id' => $scorecardId,
                 'hole' => $hole,
                 'par' => $par,
@@ -151,20 +155,20 @@ class ScorecardService
             ];
         }
 
-        return $scorecardHolesData;
+        return $holesData;
     }
 
-    private function prepareScorecardRatings($scorecardId, $validatedData)
+    private function prepareScorecardRatings(int $scorecardId, $validatedData): array
     {
+        $teeIds = Tee::where('course_id', $validatedData['course_id'])
+            ->pluck('tee_id')
+            ->toArray();
 
-        $tees = Tee::where('course_id', $validatedData['course_id'])->pluck('tee_id')->toArray();
-
-
-        $scorecardRatingsData = [];
+        $ratingsData = [];
         $userId = Auth::id();
 
-        foreach ($tees as $teeId) {
-            $scorecardRatingsData[] = [
+        foreach ($teeIds as $teeId) {
+            $ratingsData[] = [
                 'scorecard_id' => $scorecardId,
                 'tee_id' => $teeId,
                 'slope_rating' => $validatedData['slope_rating'][$teeId],
@@ -177,6 +181,6 @@ class ScorecardService
             ];
         }
 
-        return $scorecardRatingsData;
+        return $ratingsData;
     }
 }

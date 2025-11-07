@@ -30,44 +30,25 @@ class ScorecardController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(Request $request)
     {
 
-        $scorecard = Scorecard::with(
-            'strokeIndexes',
-            'scorecardHoles',
-            'ratings.tee',
-            'course.tees'
 
 
-
-        )->findOrFail(1);
-
-        $courses = Course::get();
-        // return;
-
-        $yardages = [];
-
-        foreach ($scorecard->yardages as $yardage) {
-            $yardages[$yardage->tee_id][$yardage->hole->hole] = $yardage->yardage;
-        }
+        $courseId = $request->input('course_id');
 
 
-        // echo '<pre>';
-        // print_r($scorecard->scorecardHoles->pluck('par')->sum());
-        // echo '</pre>';
-        // return;
+        $course = Course::with('tees')->where('course_id', $courseId)->firstOrFail();
 
-        // echo '<pre>';
-        // print_r($yardages);
-        // echo '</pre>';
-        // return;
+
 
 
 
         // Load available formulas for select fields (id,name)
         $formulas = Formula::leftJoin('formula_types', 'formula_types.formula_type_id', '=', 'formulas.formula_type_id')
             ->select('formulas.formula_id as id', 'formulas.formula_name as name', 'formula_types.formula_type_code as code')
+            ->where('course_id', $courseId)
+            ->where('formulas.active', true)
             ->get();
 
 
@@ -76,7 +57,7 @@ class ScorecardController extends Controller
         // echo '</pre>';
         // return;
 
-        return view('admin.scorecards.create-scorecard-form', compact('scorecard', 'yardages', 'formulas', 'courses'));
+        return view('admin.scorecards.create-scorecard-form', compact('formulas', 'course'));
     }
 
     /**
@@ -101,17 +82,17 @@ class ScorecardController extends Controller
 
             'course_rating' => 'required|array',
             'course_rating.*' => 'required|numeric|min:0',
-            'front_nine_course_rating' => 'required|array',
-            'front_nine_course_rating.*' => 'required|numeric|min:0',
+            'front_nine_course_rating' => 'nullable|array',
+            'front_nine_course_rating.*' => 'nullable|numeric|min:0',
 
             'slope_rating' => 'required|array',
             'slope_rating.*' => 'required|numeric|min:55|max:155',
-            'front_nine_slope_rating' => 'required|array',
-            'front_nine_slope_rating.*' => 'required|numeric|min:55|max:155',
+            'front_nine_slope_rating' => 'nullable|array',
+            'front_nine_slope_rating.*' => 'nullable|numeric|min:55|max:155',
 
             'yardages' => 'required|array',
             'yardages.*' => 'required|array',
-            'yardages.*.*' => 'required|integer|min:50|max:800',
+            'yardages.*.*' => 'required|integer|min:1|max:800',
 
             'par' => 'required|array',
             'par.*' => 'required|integer|min:1|max:50',
@@ -145,7 +126,6 @@ class ScorecardController extends Controller
             'adjustedGrossScoreFormula',
             'scoreDifferentialFormula',
             'courseHandicapFormula',
-            'strokeIndexes',
             'scorecardHoles',
             'ratings.tee',
             'course.tees'

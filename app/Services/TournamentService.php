@@ -13,7 +13,12 @@ class TournamentService
 
     public function index()
     {
-        $tournaments = \App\Models\Tournament::with('tournamentCourses.course')->get();
+        $tournaments = \App\Models\Tournament::with('tournamentCourses.course', 'tournamentCourses.scorecard')->get();
+
+        // echo '<pre>';
+        // print_r($tournaments->toArray());
+        // echo '</pre>';
+        // return;
         $title = 'Tournaments';
         return view('admin.tournaments.tournaments', compact('tournaments', 'title'));
     }

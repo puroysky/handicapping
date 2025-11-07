@@ -113,7 +113,7 @@
                                     <span class="fw-semibold">{{ $formula->formula_name }}</span>
                                 </td>
                                 <td class="formula-desc-cell">
-                                    <span class="text-muted" style="font-size: 0.9rem;">{{ Str::limit($formula->formula_desc ?? 'No description', 50) }}</span>
+                                    <span class="text-muted" style="font-size: 0.9rem;">{{ $formula->formula_desc ?? 'No description' }}</span>
                                 </td>
                                 <td class="course-cell">
                                     <span class="text-muted">{{ $formula->course->course_name ?? 'N/A' }}</span>

@@ -146,17 +146,13 @@ class DatabaseSeeder extends Seeder
             FormulaTypeSeeder::class,
             FormulaSeeder::class,
             ScorecardSeeder::class,
-            ScorecardHoleSeeder::class,
-            ScorecardYardSeeder::class,
-            ScorecardStokeIndexSeeder::class,
-            RatingSeeder::class,
 
 
             TournamentSeeder::class,
-            TournamentCourseSeeder::class,
-            ParticipantSeeder::class,
-            ParticipantCourseHandicapSeeder::class,
-            ScoreSeeder::class,
+
+            // ParticipantSeeder::class,
+            // ParticipantCourseHandicapSeeder::class,
+            // ScoreSeeder::class,
 
         ]);
     }

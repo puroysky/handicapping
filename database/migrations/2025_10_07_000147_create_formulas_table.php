@@ -19,11 +19,11 @@ return new class extends Migration
             $table->unsignedBigInteger('course_id')->comment('Reference to courses table');
 
             $table->string('formula_name', 100)->comment('Name of the formula, e.g., Adjusted Gross Score, Handicap Index');
-            $table->string('formula_code', 20)->comment('Version of the formula, e.g., v1.0, v2.1')->unique();
+            $table->string('formula_code', 20)->unique()->comment('Version of the formula, e.g., v1.0, v2.1')->unique();
             $table->string('formula_desc', 255)->nullable()->default(null);
 
             $table->string('formula_expression', 255)->comment('The mathematical expression of the formula');
-            $table->json('formula_variables')->nullable()->default(null)->comment('List of components and its values used in the formula');
+            $table->json('system_variables')->nullable()->default(null)->comment('List of components and its values used in the formula');
 
             $table->text('remarks')->nullable()->default(null);
             $table->boolean('active')->default(true);

@@ -73,11 +73,17 @@
                                 </th>
                                 <th class="sortable" data-column="2">
                                     <div class="d-flex align-items-center justify-content-between">
-                                        <span>Start Date</span>
+                                        <span>Scorecards</span>
                                         <i class="fas fa-sort sort-icon"></i>
                                     </div>
                                 </th>
                                 <th class="sortable" data-column="3">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <span>Start Date</span>
+                                        <i class="fas fa-sort sort-icon"></i>
+                                    </div>
+                                </th>
+                                <th class="sortable" data-column="4">
                                     <div class="d-flex align-items-center justify-content-between">
                                         <span>End Date</span>
                                         <i class="fas fa-sort sort-icon"></i>
@@ -113,7 +119,12 @@
                                 </td>
                                 <td>
                                     @foreach ($tournament->tournamentCourses as $course)
-                                    <span class="badge bg-secondary me-1 mb-1">{{ $course->course_name }}</span>
+                                    <span class="badge bg-secondary me-1 mb-1">{{ $course->course->course_name }}</span>
+                                    @endforeach
+                                </td>
+                                <td>
+                                    @foreach ($tournament->tournamentCourses as $course)
+                                    <span class="badge bg-info me-1 mb-1">{{ $course->scorecard->scorecard_code }}</span>
                                     @endforeach
                                 </td>
                                 <td class="">
@@ -429,21 +440,21 @@
 
         // Fetch tournament details from backend and show modal
         fetch(`${BASE_URL}/admin/participants/${id}?preview=1`, {
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'Accept': 'application/json'
-            }
-        })
-        .then(response => {
-            if (!response.ok) throw new Error('Failed to fetch tournament details');
-            return response.json();
-        })
-        .then(data => {
-            showTournamentPreview(data);
-        })
-        .catch(err => {
-            alert('Could not load tournament details.');
-        });
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('Failed to fetch tournament details');
+                return response.json();
+            })
+            .then(data => {
+                showTournamentPreview(data);
+            })
+            .catch(err => {
+                alert('Could not load tournament details.');
+            });
 
 
         // window.location.href = `/admin/tournaments/${id}`;
@@ -574,7 +585,7 @@
         // Find tournament name from the table
         const tournamentRow = document.querySelector(`[onclick*="showUserContextMenu(${tournamentId}"]`);
         const tournamentName = tournamentRow ? tournamentRow.closest('tr').querySelector('.name-cell .user-name').textContent.trim() : 'Selected Tournament';
-        
+
         // Update modal title to show which tournament
         document.getElementById('importTournamentsModalLabel').innerHTML = `
             <i class="fas fa-upload me-2"></i>Migrate Scores from Excel

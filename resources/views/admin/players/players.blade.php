@@ -705,7 +705,7 @@
 
             // Refresh page after delay to show new players
             setTimeout(() => {
-                window.location.reload();
+                // window.location.reload();
             }, 2000);
 
         } else {

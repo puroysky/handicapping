@@ -23,7 +23,7 @@
                     <button class="btn btn-outline-secondary btn-modern" onclick="importCourses()">
                         <i class="fas fa-upload me-1"></i>Import
                     </button>
-                    <a href="{{ route('admin.courses.create') }}" class="btn btn-primary btn-modern">
+                    <a href="{{ route('admin.scores.create') }}" class="btn btn-primary btn-modern">
                         <i class="fas fa-plus me-2"></i>Add New Course
                     </a>
                 </div>
@@ -141,7 +141,7 @@
                             <tr class="table-row">
                                 <td class="player-name-cell">
                                     <span class="fw-bold" style="color: #2F4A3C;">
-                                        {{ $score->playerProfile->userProfile->first_name ?? '' }} 
+                                        {{ $score->playerProfile->userProfile->first_name ?? '' }}
                                         {{ $score->playerProfile->userProfile->last_name ?? 'N/A' }}
                                     </span>
                                 </td>
@@ -173,16 +173,16 @@
                                 </td>
                                 <td class="entry-type-cell">
                                     @php
-                                        $entryTypeColors = [
-                                            'form' => 'bg-primary',
-                                            'import' => 'bg-success',
-                                            'migrate' => 'bg-warning'
-                                        ];
-                                        $entryTypeLabels = [
-                                            'form' => 'Form Entry',
-                                            'import' => 'Import',
-                                            'migrate' => 'Migrate'
-                                        ];
+                                    $entryTypeColors = [
+                                    'form' => 'bg-primary',
+                                    'import' => 'bg-success',
+                                    'migrate' => 'bg-warning'
+                                    ];
+                                    $entryTypeLabels = [
+                                    'form' => 'Form Entry',
+                                    'import' => 'Import',
+                                    'migrate' => 'Migrate'
+                                    ];
                                     @endphp
                                     <span class="badge {{ $entryTypeColors[$score->entry_type] ?? 'bg-secondary' }}">
                                         {{ $entryTypeLabels[$score->entry_type] ?? 'N/A' }}
@@ -190,16 +190,16 @@
                                 </td>
                                 <td class="holes-played-cell">
                                     @php
-                                        $holesPlayedColors = [
-                                            'F9' => 'bg-info',
-                                            'B9' => 'bg-info',
-                                            '18' => 'bg-success'
-                                        ];
-                                        $holesPlayedLabels = [
-                                            'F9' => 'Front 9',
-                                            'B9' => 'Back 9',
-                                            '18' => '18 Holes'
-                                        ];
+                                    $holesPlayedColors = [
+                                    'F9' => 'bg-info',
+                                    'B9' => 'bg-info',
+                                    '18' => 'bg-success'
+                                    ];
+                                    $holesPlayedLabels = [
+                                    'F9' => 'Front 9',
+                                    'B9' => 'Back 9',
+                                    '18' => '18 Holes'
+                                    ];
                                     @endphp
                                     <span class="badge {{ $holesPlayedColors[$score->holes_played] ?? 'bg-secondary' }}">
                                         {{ $holesPlayedLabels[$score->holes_played] ?? 'N/A' }}
@@ -892,17 +892,66 @@
             showingCountId: 'showing-count',
             totalCountId: 'total-count',
             modalId: 'filterModal',
-            fields: [
-                { value: 'player_name', label: 'Player Name', type: 'text', selector: '.player-name-cell span' },
-                { value: 'whs_no', label: 'WHS Number', type: 'text', selector: '.whs-no-cell span' },
-                { value: 'account_no', label: 'Account Number', type: 'text', selector: '.account-no-cell span' },
-                { value: 'tournament', label: 'Tournament', type: 'select', selector: '.tournament-cell span' },
-                { value: 'course', label: 'Course', type: 'select', selector: '.course-tee-cell .badge.bg-secondary' },
-                { value: 'tee', label: 'Tee', type: 'select', selector: '.course-tee-cell .badge.bg-info' },
-                { value: 'adjusted_score', label: 'Adjusted Score', type: 'number', selector: '.adjusted-score-cell span' },
-                { value: 'date_played', label: 'Date Played', type: 'date', selector: '.date-cell .cell-text-date' },
-                { value: 'entry_type', label: 'Entry Type', type: 'select', selector: '.entry-type-cell .badge' },
-                { value: 'holes_played', label: 'Holes Played', type: 'select', selector: '.holes-played-cell .badge' }
+            fields: [{
+                    value: 'player_name',
+                    label: 'Player Name',
+                    type: 'text',
+                    selector: '.player-name-cell span'
+                },
+                {
+                    value: 'whs_no',
+                    label: 'WHS Number',
+                    type: 'text',
+                    selector: '.whs-no-cell span'
+                },
+                {
+                    value: 'account_no',
+                    label: 'Account Number',
+                    type: 'text',
+                    selector: '.account-no-cell span'
+                },
+                {
+                    value: 'tournament',
+                    label: 'Tournament',
+                    type: 'select',
+                    selector: '.tournament-cell span'
+                },
+                {
+                    value: 'course',
+                    label: 'Course',
+                    type: 'select',
+                    selector: '.course-tee-cell .badge.bg-secondary'
+                },
+                {
+                    value: 'tee',
+                    label: 'Tee',
+                    type: 'select',
+                    selector: '.course-tee-cell .badge.bg-info'
+                },
+                {
+                    value: 'adjusted_score',
+                    label: 'Adjusted Score',
+                    type: 'number',
+                    selector: '.adjusted-score-cell span'
+                },
+                {
+                    value: 'date_played',
+                    label: 'Date Played',
+                    type: 'date',
+                    selector: '.date-cell .cell-text-date'
+                },
+                {
+                    value: 'entry_type',
+                    label: 'Entry Type',
+                    type: 'select',
+                    selector: '.entry-type-cell .badge'
+                },
+                {
+                    value: 'holes_played',
+                    label: 'Holes Played',
+                    type: 'select',
+                    selector: '.holes-played-cell .badge'
+                }
             ]
         });
     });
