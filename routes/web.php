@@ -149,6 +149,9 @@ Route::prefix('api')->group(function () {
             'courses' => $courses
         ]);
     });
+
+    // Formula validation endpoint
+    Route::post('tournaments/validate-formula', [App\Http\Controllers\Admin\TournamentController::class, 'validateFormula'])->name('tournaments.validate-formula');
 });
 
 Route::prefix('admin')->name('admin.')->group(function () {

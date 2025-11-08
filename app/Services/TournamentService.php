@@ -59,7 +59,7 @@ class TournamentService
             $tournament->score_diff_start_date = $request['score_diff_start_date'] ?? null;
             $tournament->score_diff_end_date = $request['score_diff_end_date'] ?? null;
             $tournament->recent_scores_count = $request['recent_scores_count'] ?? null;
-            $tournament->score_selection_type = $request['score_selection_type'];
+
             $tournament->scores_to_average = $request['scores_to_average'] ?? null;
             $tournament->handicap_formula_expression = $request['handicap_formula_expression'] ?? null;
             $tournament->created_by = Auth::id();
