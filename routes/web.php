@@ -21,6 +21,7 @@ use App\Services\ScoreMigrateService;
 use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
 use NXP\MathExecutor;
+use App\Http\Controllers\WhsHandicapIndexController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -158,6 +159,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::resource('users', App\Http\Controllers\Admin\UserController::class);
 
     // Player search route must come before resource routes to avoid conflicts
+    Route::get('players/available', [PlayerController::class, 'getAvailablePlayers'])->name('players.available');
     Route::get('players/search', [PlayerController::class, 'search'])->name('players.search');
     Route::get('players/{player_id}/recent-scores', [PlayerController::class, 'getRecentScores'])->name('players.recent-scores');
     Route::post('players/import', [PlayerController::class, 'import'])->name('players.import');
@@ -181,10 +183,18 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('tees/{tee_id}/yardages', [App\Http\Controllers\Admin\TeeController::class, 'getYardages'])->name('tees.yardages');
 
 
+    Route::resource('whs-handicap-indexes', App\Http\Controllers\WhsHandicapIndexController::class);
+
+    Route::post('whs-handicap-imports/import', [WhsHandicapIndexController::class, 'import']);
+    Route::resource('whs-handicap-imports', App\Http\Controllers\WhsHandicapImportController::class);
 
     Route::resource('tournaments', App\Http\Controllers\Admin\TournamentController::class);
     Route::get('tournaments/{tournament_id}/courses', [App\Http\Controllers\Admin\TournamentController::class, 'getCourses'])->name('tournaments.courses');
 
+
+    Route::post('participant/calculate-local-handicap', [ParticipantController::class, 'calculateLocalHandicap'])->name('participants.calculate-handicap');
     Route::post('participants/import', [ParticipantController::class, 'import'])->name('participants.import');
+    Route::get('participants/available', [ParticipantController::class, 'available'])->name('participants.available');
+    Route::post('participants/add-bulk', [ParticipantController::class, 'addBulk'])->name('participants.add-bulk');
     Route::resource('participants', ParticipantController::class);
 });

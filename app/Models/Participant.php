@@ -10,6 +10,21 @@ class Participant extends Model
     protected $table = 'participants';
     protected $primaryKey = 'participant_id';
 
+
+    protected $fillable = [
+        'tournament_id',
+        'user_id',
+        'player_profile_id',
+        'local_handicap_index',
+        'final_local_handicap_index',
+        'tournament_handicap_index',
+        'remarks',
+        'active',
+        'is_adjusted',
+        'created_by',
+        'updated_by',
+    ];
+
     public function tournament()
     {
         return $this->belongsTo(Tournament::class, 'tournament_id', 'tournament_id');

@@ -14,14 +14,22 @@ return new class extends Migration
         Schema::create('whs_handicap_indexes', function (Blueprint $table) {
             $table->id('whs_handicap_index_id');
             $table->unsignedBigInteger('tournament_id');
-            $table->unsignedBigInteger('user_id');
+            $table->unsignedBigInteger('whs_handicap_import_id');
+
             $table->unsignedBigInteger('whs_no')->comment('Identifies a player within the World Handicap System and serves as a foreign key reference to link tournament participants with their maintained player profiles in the system');
             $table->unsignedTinyInteger('whs_handicap_index')->comment('The WHS handicap index imported from the WHS system for the player');
             $table->unsignedTinyInteger('final_whs_handicap_index')->comment("Manual correction of WHS index imported from WHS. This will store the manual correction before it will be used in the handicap configuration and formula.");
-            $table->unique(['tournament_id', 'whs_no'], 'tournament_whs_no_unique');
+
+            //name and sex
+            $table->string('name')->comment('Name of the player');
+            $table->enum('sex', ['M', 'F'])->comment('Sex of the player');
+
+            $table->enum('handicap_type', ['reg', 'plus', 'none'])->default('reg')->comment('Indicates if the WHS handicap index is a regular or plus handicap');
+            $table->unique(['tournament_id', 'whs_handicap_import_id', 'whs_no'], 'tournament_whs_handicap_unique');
 
 
             $table->boolean('is_adjusted')->default(false)->comment('Indicates if the WHS handicap index has been manually adjusted for the tournament');
+            $table->boolean('active')->default(true);
             $table->text('remarks')->nullable()->default(null);
             $table->unsignedBigInteger('created_by');
             $table->unsignedBigInteger('updated_by')->nullable()->default(null);
@@ -32,8 +40,7 @@ return new class extends Migration
 
 
             $table->foreign('tournament_id')->references('tournament_id')->on('tournaments')->onDelete('restrict');
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('restrict');
-            $table->foreign('whs_no')->references('whs_no')->on('player_profiles')->onDelete('restrict');
+            $table->foreign('whs_handicap_import_id')->references('whs_handicap_import_id')->on('whs_handicap_imports')->onDelete('restrict');
         });
     }
 

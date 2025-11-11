@@ -87,4 +87,40 @@ class PlayerService
             'players' => $players
         ]);
     }
+
+
+    public function getAvailablePlayers(Request $request)
+    {
+        $tournamentId = $request->query('tournament_id');
+
+        // Get all players not already in tournament
+        $query = PlayerProfile::with('user.profile')
+            ->whereHas('user', function ($q) {
+                $q->where('active', true);
+            });
+
+        if ($tournamentId) {
+            $query->whereNotIn('player_profile_id', function ($q) use ($tournamentId) {
+                $q->select('player_profile_id')
+                    ->from('participants')
+                    ->where('tournament_id', $tournamentId);
+            });
+        }
+
+        $players = $query->get()->map(function ($player) {
+            return [
+                'player_profile_id' => $player->player_profile_id,
+                'first_name' => $player->user->profile->first_name ?? '',
+                'last_name' => $player->user->profile->last_name ?? '',
+                'whs_no' => $player->whs_no ?? 'N/A',
+                'account_no' => $player->account_no ?? 'N/A'
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Available players retrieved successfully',
+            'players' => $players
+        ]);
+    }
 }

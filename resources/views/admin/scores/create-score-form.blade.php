@@ -2077,45 +2077,34 @@
 
 
 
-                                        // Store handicap data for both genders
-                                        const handicapData = {};
+                             
 
                                         data.holes.forEach(holeData => {
                                             const hole = holeData.hole;
                                             const par = holeData.par;
+                                            const strokeIndexMen = holeData.men_stroke_index;
+                                            const strokeIndexLadies = holeData.ladies_stroke_index;
 
-                                            // Store handicap data by gender
-                                            // API may return single stroke_index object or array of stroke indices
-                                            if (holeData.stroke_index) {
-                                                if (Array.isArray(holeData.stroke_index)) {
-                                                    // Handle array of stroke indices (one per gender)
-                                                    holeData.stroke_index.forEach(strokeIndexData => {
-                                                        const gender = strokeIndexData.gender || 'M';
-                                                        const handicapValue = strokeIndexData.stroke_index || '-';
-
-                                                        if (!handicapData[hole]) {
-                                                            handicapData[hole] = {};
-                                                        }
-                                                        handicapData[hole][gender] = handicapValue;
-                                                    });
-                                                } else {
-                                                    // Handle single stroke_index object
-                                                    const gender = holeData.stroke_index.gender || 'M';
-                                                    const handicapValue = holeData.stroke_index.stroke_index || '-';
-
-                                                    if (!handicapData[hole]) {
-                                                        handicapData[hole] = {};
-                                                    }
-                                                    handicapData[hole][gender] = handicapValue;
-                                                }
-                                            }
+                       
 
                                             // Find the par span for this hole
                                             const parSpan = document.querySelector(`.par-span[data-hole="${hole}"]`);
+
+
+                                              // Find the handicap span for this hole
+                                            const handicapSpan = document.querySelector(`.handicap-span[data-hole="${hole}"]`);
+
+
                                             if (parSpan) {
                                                 parSpan.textContent = par;
                                                 parSpan.setAttribute('data-par', par);
                                                 console.log(`Updated hole ${hole} par to ${par}`);
+                                            }
+
+                                             if (handicapSpan) {
+                                                handicapSpan.textContent = strokeIndexMen;
+                                                handicapSpan.setAttribute('data-handicap', strokeIndexMen);
+                                                console.log(`Updated hole ${hole} handicap to ${strokeIndexMen}`);
                                             }
                                         });
 

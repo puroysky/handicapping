@@ -98,6 +98,19 @@
                             <li><a class="dropdown-item" href="#">Tournament Results</a></li>
                         </ul>
                     </li>
+                         <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            Imports
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ route('admin.whs-handicap-imports.index') }}">WHS Handicaps</a></li>
+                            <li><a class="dropdown-item" href="#">Tournament Participants</a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item" href="#">Tournament Migrations</a></li>
+                        </ul>
+                    </li>
                 </ul>
                 <ul class="navbar-nav">
                     <li class="nav-item dropdown">

@@ -7,7 +7,7 @@
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
-                    <h6 class="header-title">Players Management</h6>
+                    <h6 class="header-title">Tournaments Management</h6>
                     <p class="header-subtitle">
                         <i class="fas fa-users me-2"></i>
                         Manage system tournaments and their golf profiles
@@ -265,6 +265,98 @@
 </div>
 
 @include('admin.tournaments.tournament-preview-modal')
+
+<!-- Import WHS Handicap Indexes Modal -->
+<div class="modal fade" id="importWhsHandicapIndexesModal" tabindex="-1" aria-labelledby="importWhsHandicapIndexesModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="importWhsHandicapIndexesModalLabel">
+                    <i class="fas fa-download me-2"></i>Import WHS Handicap Indexes
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="importWhsHandicapIndexesForm" enctype="multipart/form-data">
+                    @csrf
+                    <!-- File Upload Section -->
+                    <div class="mb-4">
+                        <label for="whs_import_file" class="form-label fw-bold">
+                            <i class="fas fa-file-excel me-1"></i>Select Excel File
+                        </label>
+                        <input type="file"
+                            class="form-control"
+                            id="whs_import_file"
+                            name="whs_import_file"
+                            accept=".xlsx,.xls,.csv"
+                            required>
+                        <div class="form-text">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Supported formats: Excel (.xlsx, .xls) or CSV files. Maximum size: 2MB
+                        </div>
+                    </div>
+
+                    <!-- File Requirements -->
+                    <div class="alert alert-info">
+                        <h6 class="alert-heading">
+                            <i class="fas fa-list me-1"></i>Required & Optional Column Headers
+                        </h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <strong class="d-block mb-2 text-success">Required Fields:</strong>
+                                <ul class="mb-3 small">
+                                    <li><strong>whs_no</strong> - WHS Number (numeric)</li>
+                                    <li><strong>whs_handicap_index</strong> - WHS Handicap Index (numeric)</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <strong class="d-block mb-2 text-warning">Optional Fields:</strong>
+                                <ul class="mb-0 small">
+                                    <li><strong>name</strong> - Player Name (string)</li>
+                                    <li><strong>sex</strong> - Sex (M or F)</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sample Format -->
+                    <div class="mb-3">
+                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="downloadWhsHandicapSampleFile()">
+                            <i class="fas fa-download me-1"></i>Download Sample Format
+                        </button>
+                    </div>
+
+                    <!-- Progress Bar (hidden initially) -->
+                    <div id="whsImportProgress" class="mb-3" style="display: none;">
+                        <div class="d-flex justify-content-between mb-1">
+                            <small class="text-muted">Importing WHS handicap indexes...</small>
+                            <small class="text-muted" id="whsImportProgressText">0%</small>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated"
+                                role="progressbar"
+                                style="width: 0%"
+                                id="whsImportProgressBar"></div>
+                        </div>
+                    </div>
+
+                    <!-- Results Section (hidden initially) -->
+                    <div id="whsImportResults" style="display: none;"></div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i>Cancel
+                </button>
+                <button type="button" class="btn btn-primary" onclick="startWhsHandicapImport()" id="whsImportBtn">
+                    <i class="fas fa-download me-1"></i>Import Handicaps
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@include('admin.tournaments.tournament-preview-modal')
 {{-- Custom Action Functions --}}
 <script>
     // Modern Context Menu Implementation
@@ -404,11 +496,27 @@
                     }
                 },
                 {
-                    "label": "View Players",
-                    "description": "View and manage tournament players",
+                    "label": "View Participants",
+                    "description": "View and manage tournament participants",
                     "icon": "users",
                     "action": function(id) {
                         window.open(`${BASE_URL}/admin/participants/${id}`, '_blank');
+                    }
+                },
+                {
+                    "label": "View WHS Handicap Index",
+                    "description": "View WHS handicap indexes for this tournament",
+                    "icon": "eye",
+                    "action": function(id) {
+                        viewWhsHandicapIndexForTournament(id);
+                    }
+                },
+                {
+                    "label": "Import WHS Handicap Indexes",
+                    "description": "Import WHS handicap index for this tournament",
+                    "icon": "download",
+                    "action": function(id) {
+                        importWhsHandicapIndexes(id);
                     }
                 },
                 {
@@ -462,6 +570,11 @@
 
     function editRecord(id) {
         window.location.href = `/admin/tournaments/${id}/edit`;
+    }
+
+    function viewWhsHandicapIndexForTournament(id) {
+        // Navigate to WHS handicap indexes view, optionally filtered by tournament
+        window.location.href = BASE_URL + `/admin/whs-handicap-indexes?tournament_id=${id}`;
     }
 
     function deleteRecord(id) {
@@ -573,6 +686,47 @@
             rows.forEach(row => tbody.appendChild(row));
         });
     });
+
+    // Import WHS Handicap Indexes Functionality
+    function importWhsHandicapIndexes(tournamentId) {
+        const modalElement = document.getElementById('importWhsHandicapIndexesModal');
+        
+        // Store tournament ID in modal for later use
+        modalElement.dataset.tournamentId = tournamentId;
+
+        // Find tournament name from the table
+        const tournamentRow = document.querySelector(`[onclick*="showUserContextMenu(${tournamentId}"]`);
+        const tournamentName = tournamentRow ? tournamentRow.closest('tr').querySelector('.name-cell .user-name').textContent.trim() : 'Selected Tournament';
+
+        // Update modal title to show which tournament
+        document.getElementById('importWhsHandicapIndexesModalLabel').innerHTML = `
+            <i class="fas fa-download me-2"></i>Import WHS Handicap Indexes
+            <br><small class="text-muted" style="font-size: 0.85rem;">Tournament: ${tournamentName}</small>
+        `;
+
+        if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+            // Bootstrap 5
+            const modal = new bootstrap.Modal(modalElement);
+            modal.show();
+        } else if (typeof $ !== 'undefined' && $.fn.modal) {
+            // jQuery/Bootstrap 4
+            $('#importWhsHandicapIndexesModal').modal('show');
+        } else {
+            // Fallback - manual modal display
+            modalElement.style.display = 'block';
+            modalElement.classList.add('show');
+            document.body.classList.add('modal-open');
+
+            // Add backdrop
+            const backdrop = document.createElement('div');
+            backdrop.className = 'modal-backdrop fade show';
+            backdrop.id = 'whs-modal-backdrop';
+            document.body.appendChild(backdrop);
+        }
+
+        // Reset form when modal opens
+        resetWhsImportModal();
+    }
 
     // Import Tournaments Functionality
     function importTournaments(tournamentId) {
@@ -805,6 +959,202 @@
         const a = document.createElement('a');
         a.href = url;
         a.download = 'scores_import_sample.csv';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+    }
+
+    // WHS Handicap Indexes Import Functions
+    function resetWhsImportModal() {
+        document.getElementById('importWhsHandicapIndexesForm').reset();
+        document.getElementById('whsImportProgress').style.display = 'none';
+        document.getElementById('whsImportResults').style.display = 'none';
+        document.getElementById('whsImportBtn').disabled = false;
+        document.getElementById('whsImportBtn').innerHTML = '<i class="fas fa-download me-1"></i>Import Handicaps';
+    }
+
+    function startWhsHandicapImport() {
+        const form = document.getElementById('importWhsHandicapIndexesForm');
+        const fileInput = document.getElementById('whs_import_file');
+        const importBtn = document.getElementById('whsImportBtn');
+        const progressSection = document.getElementById('whsImportProgress');
+        const resultsSection = document.getElementById('whsImportResults');
+        const modalElement = document.getElementById('importWhsHandicapIndexesModal');
+        const tournamentId = modalElement.dataset.tournamentId;
+
+        // Validate file selection
+        if (!fileInput.files[0]) {
+            alert('Please select a file to import.');
+            return;
+        }
+
+        // Prepare form data
+        const formData = new FormData();
+        formData.append('whs_import_file', fileInput.files[0]);
+        formData.append('tournament_id', tournamentId);
+        formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
+
+        // Update UI to show progress
+        importBtn.disabled = true;
+        importBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Importing...';
+        progressSection.style.display = 'block';
+        resultsSection.style.display = 'none';
+
+        // Simulate progress (since we don't have real-time progress from backend)
+        simulateWhsProgress();
+
+        // Make the import request
+        fetch(BASE_URL + '/admin/whs-handicap-imports/import', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                handleWhsHandicapImportResponse(data);
+            })
+            .catch(error => {
+                console.error('WHS Import error:', error);
+                handleWhsHandicapImportError(error);
+            });
+    }
+
+    function simulateWhsProgress() {
+        const progressBar = document.getElementById('whsImportProgressBar');
+        const progressText = document.getElementById('whsImportProgressText');
+        let progress = 0;
+
+        const interval = setInterval(() => {
+            progress += Math.random() * 15;
+            if (progress > 90) progress = 90; // Cap at 90% until real response
+
+            progressBar.style.width = progress + '%';
+            progressText.textContent = Math.round(progress) + '%';
+        }, 200);
+
+        // Store interval ID to clear it later
+        window.whsImportProgressInterval = interval;
+    }
+
+    function handleWhsHandicapImportResponse(data) {
+        // Clear progress simulation
+        if (window.whsImportProgressInterval) {
+            clearInterval(window.whsImportProgressInterval);
+        }
+
+        // Complete progress bar
+        const progressBar = document.getElementById('whsImportProgressBar');
+        const progressText = document.getElementById('whsImportProgressText');
+        progressBar.style.width = '100%';
+        progressText.textContent = '100%';
+
+        // Show results
+        const resultsSection = document.getElementById('whsImportResults');
+        const importBtn = document.getElementById('whsImportBtn');
+
+        if (data.success) {
+            resultsSection.innerHTML = `
+                <div class="alert alert-success">
+                    <h6 class="alert-heading">
+                        <i class="fas fa-check-circle me-1"></i>Import Successful!
+                    </h6>
+                    <p class="mb-1">${data.message}</p>
+                    <small>Successfully imported ${data.imported} WHS handicap indexes.</small>
+                    ${data.errors && data.errors.length > 0 ? 
+                        `<div class="mt-2">
+                            <strong>Warnings/Skipped rows:</strong>
+                            <ul class="mb-0 small mt-1">
+                                ${data.errors.slice(0, 5).map(error => `<li>${error}</li>`).join('')}
+                                ${data.errors.length > 5 ? `<li><em>... and ${data.errors.length - 5} more</em></li>` : ''}
+                            </ul>
+                        </div>` : ''
+                    }
+                </div>
+            `;
+
+            // Update button
+            importBtn.innerHTML = '<i class="fas fa-check me-1"></i>Import Complete';
+            importBtn.classList.remove('btn-primary');
+            importBtn.classList.add('btn-success');
+
+            // Refresh page after delay to show new data
+            setTimeout(() => {
+                window.location.reload();
+            }, 2000);
+
+        } else {
+            resultsSection.innerHTML = `
+                <div class="alert alert-danger">
+                    <h6 class="alert-heading">
+                        <i class="fas fa-exclamation-triangle me-1"></i>Import Failed
+                    </h6>
+                    <p class="mb-1">${data.message}</p>
+                    ${data.errors && data.errors.length > 0 ? 
+                        `<div class="mt-2">
+                            <strong>Errors found:</strong>
+                            <ul class="mb-0 small mt-1">
+                                ${data.errors.slice(0, 10).map(error => `<li>${error}</li>`).join('')}
+                                ${data.errors.length > 10 ? `<li><em>... and ${data.errors.length - 10} more</em></li>` : ''}
+                            </ul>
+                        </div>` : ''
+                    }
+                </div>
+            `;
+
+            // Reset button
+            importBtn.disabled = false;
+            importBtn.innerHTML = '<i class="fas fa-download me-1"></i>Try Again';
+        }
+
+        resultsSection.style.display = 'block';
+    }
+
+    function handleWhsHandicapImportError(error) {
+        // Clear progress simulation
+        if (window.whsImportProgressInterval) {
+            clearInterval(window.whsImportProgressInterval);
+        }
+
+        const resultsSection = document.getElementById('whsImportResults');
+        const importBtn = document.getElementById('whsImportBtn');
+
+        resultsSection.innerHTML = `
+            <div class="alert alert-danger">
+                <h6 class="alert-heading">
+                    <i class="fas fa-exclamation-triangle me-1"></i>Import Error
+                </h6>
+                <p class="mb-0">An unexpected error occurred during import. Please try again.</p>
+            </div>
+        `;
+
+        resultsSection.style.display = 'block';
+        importBtn.disabled = false;
+        importBtn.innerHTML = '<i class="fas fa-download me-1"></i>Try Again';
+    }
+
+    function downloadWhsHandicapSampleFile() {
+        // Create sample CSV data for WHS handicap indexes
+        const sampleData = [
+            ['whs_no', 'whs_handicap_index', 'name', 'sex'],
+            ['12345', '12.5', 'John Doe', 'M'],
+            ['34567', '8.3', 'Jane Smith', 'F'],
+            ['67890', '15.7', 'Bob Johnson', 'M']
+        ];
+
+        // Convert to CSV
+        const csvContent = sampleData.map(row => row.join(',')).join('\n');
+
+        // Create and trigger download
+        const blob = new Blob([csvContent], {
+            type: 'text/csv'
+        });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'whs_handicap_indexes_sample.csv';
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);

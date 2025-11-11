@@ -17,11 +17,18 @@ return new class extends Migration
             $table->unsignedBigInteger('user_id')->nullable()->default(null);
             $table->unsignedBigInteger('player_profile_id')->nullable()->default(null);
 
+
+
             $table->unsignedTinyInteger('local_handicap_index')->nullable()->default(null);
             $table->unsignedTinyInteger('final_local_handicap_index')->nullable()->default(null);
+
+
+
             $table->unsignedTinyInteger('tournament_handicap_index')->nullable()->default(null)->comment('Final handicap index used for the tournament after any adjustments');
 
             $table->text('remarks')->nullable()->default(null);
+            $table->boolean('active')->default(true);
+            $table->boolean('is_adjusted')->default(false);
 
             $table->unique(['tournament_id', 'user_id'], 'tournament_user_unique');
 

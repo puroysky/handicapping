@@ -147,4 +147,11 @@ class PlayerController extends Controller
     {
         return $this->playerService->searchPlayers(request('q'));
     }
+
+
+    //used from the tournament participants to get available players
+    public function getAvailablePlayers(Request $request)
+    {
+        return $this->playerService->getAvailablePlayers($request);
+    }
 }

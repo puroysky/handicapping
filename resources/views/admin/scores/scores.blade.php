@@ -10,10 +10,10 @@
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
-                    <h6 class="header-title">Courses Management</h6>
+                    <h6 class="header-title">Scores Management</h6>
                     <p class="header-subtitle">
                         <i class="fas fa-golf-ball me-2"></i>
-                        Manage golf courses
+                        Manage golf scores
                     </p>
                 </div>
                 <div class="d-flex gap-2">
@@ -24,7 +24,7 @@
                         <i class="fas fa-upload me-1"></i>Import
                     </button>
                     <a href="{{ route('admin.scores.create') }}" class="btn btn-primary btn-modern">
-                        <i class="fas fa-plus me-2"></i>Add New Course
+                        <i class="fas fa-plus me-2"></i>Add New Score
                     </a>
                 </div>
             </div>

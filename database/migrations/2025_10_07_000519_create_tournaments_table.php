@@ -38,10 +38,10 @@ return new class extends Migration
 
 
             $table->text('remarks')->nullable()->default(null);
-            $table->enum('active', ['active', 'completed', 'cancelled'])->default('active');
+            $table->enum('status', ['active', 'completed', 'cancelled'])->default('active');
 
             $table->unsignedBigInteger('scorecard_id')->nullable()->default(null);
-
+            $table->unsignedBigInteger('whs_handicap_import_id')->nullable()->default(null)->comment('References the import record from which the WHS handicap index was sourced');
             $table->unsignedBigInteger('created_by');
             $table->unsignedBigInteger('updated_by')->nullable()->default(null);
             $table->timestamp('created_at')->useCurrent();

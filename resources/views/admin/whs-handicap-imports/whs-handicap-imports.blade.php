@@ -7,21 +7,18 @@
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
-                    <h6 class="header-title">Players Management</h6>
+                    <h6 class="header-title">WHS Handicap Imports</h6>
                     <p class="header-subtitle">
-                        <i class="fas fa-users me-2"></i>
-                        Manage system players and their golf profiles
+                        <i class="fas fa-download me-2"></i>
+                        Manage WHS handicap index imports
                     </p>
                 </div>
                 <div class="d-flex gap-2">
-                    <button class="btn btn-outline-secondary btn-modern" onclick="exportUsers()">
+                    <button class="btn btn-outline-secondary btn-modern" onclick="exportWHSImports()">
                         <i class="fas fa-download me-1"></i>Export
                     </button>
-                    <button class="btn btn-outline-secondary btn-modern" onclick="importUsers()">
-                        <i class="fas fa-upload me-1"></i>Import
-                    </button>
-                    <a href="{{ route('admin.players.create') }}" class="btn btn-primary btn-modern">
-                        <i class="fas fa-plus me-2"></i>Add New Player
+                    <a href="{{ route('admin.tournaments.index') }}" class="btn btn-primary btn-modern">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Tournaments
                     </a>
                 </div>
             </div>
@@ -38,13 +35,13 @@
                         <div class="col-md-6">
                             <div class="search-wrapper">
                                 <i class="fas fa-search search-icon"></i>
-                                <input type="text" class="search-input" id="tableSearch" placeholder="Search players..." autocomplete="off">
+                                <input type="text" class="search-input" id="tableSearch" placeholder="Search WHS imports..." autocomplete="off">
                             </div>
                         </div>
                         <div class="col-md-6 text-end">
                             <div class="table-info">
                                 <small class="text-muted">
-                                    Showing <span id="showing-count">{{ count($players) }}</span> of <span id="total-count">{{ count($players) }}</span> players
+                                    Showing <span id="showing-count">{{ count($imports ?? []) }}</span> of <span id="total-count">{{ count($imports ?? []) }}</span> imports
                                 </small>
                             </div>
                         </div>
@@ -58,47 +55,23 @@
                             <tr>
                                 <th class="sortable" data-column="0">
                                     <div class="d-flex align-items-center justify-content-between">
-                                        <span></i>Name</span>
+                                        <span>File Name</span>
                                         <i class="fas fa-sort sort-icon"></i>
                                     </div>
                                 </th>
                                 <th class="sortable" data-column="1">
                                     <div class="d-flex align-items-center justify-content-between">
-                                        <span>WHS No</span>
+                                        <span>Tournament</span>
                                         <i class="fas fa-sort sort-icon"></i>
                                     </div>
                                 </th>
                                 <th class="sortable" data-column="2">
                                     <div class="d-flex align-items-center justify-content-between">
-                                        <span>Account No</span>
-                                        <i class="fas fa-sort sort-icon"></i>
-                                    </div>
-                                </th>
-                                <th class="sortable" data-column="3">
-                                    <div class="d-flex align-items-center justify-content-between">
-                                        <span>Email</span>
-                                        <i class="fas fa-sort sort-icon"></i>
-                                    </div>
-                                </th>
-                                <th class="sortable" data-column="4">
-                                    <div class="d-flex align-items-center justify-content-between">
-                                        <span>Birthdate</span>
-                                        <i class="fas fa-sort sort-icon"></i>
-                                    </div>
-                                </th>
-                                <th class="sortable" data-column="5">
-                                    <div class="d-flex align-items-center justify-content-between">
-                                        <span>Sex</span>
-                                        <i class="fas fa-sort sort-icon"></i>
-                                    </div>
-                                </th>
-                                <th class="sortable" data-column="6">
-                                    <div class="d-flex align-items-center justify-content-between">
                                         <span>Status</span>
                                         <i class="fas fa-sort sort-icon"></i>
                                     </div>
                                 </th>
-                                <th class="sortable" data-column="7">
+                                <th class="sortable" data-column="3">
                                     <div class="d-flex align-items-center justify-content-between">
                                         <span>Created At</span>
                                         <i class="fas fa-sort sort-icon"></i>
@@ -110,70 +83,28 @@
                             </tr>
                         </thead>
                         <tbody id="mainTableBody">
-                            @foreach ($players as $player)
+                            @foreach ($imports ?? [] as $import)
                             <tr class="table-row">
-                                <td class="name-cell">
-                                    <div class="d-flex align-items-center">
-                                        <div class="user-avatar me-3">
-                                            @if($player->profile->avatar !== null)
-                                            <img src="{{ $player->profile->avatar }}" alt="Avatar" class="avatar-img">
-                                            @else
-                                            <div class="avatar-placeholder">
-                                                {{ strtoupper(
-                                                    (isset($player->profile->first_name) ? substr($player->profile->first_name, 0, 1) : '') . 
-                                                    (isset($player->profile->last_name) ? substr($player->profile->last_name, 0, 1) : '')
-                                                ) ?: 'U' }}
-                                            </div>
-                                            @endif
-                                            <!-- Status Indicator -->
-                                            <div class="status-indicator {{ $player->active ? 'status-online' : 'status-offline' }}"
-                                                title="{{ $player->active ? 'Active Player' : 'Inactive Player' }}">
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <div class="user-name">{{ ($player->profile->last_name ?? '') . ', ' . ($player->profile->first_name ?? '') }}</div>
-                                        </div>
-                                    </div>
+                                <td class="filename-cell">
+                                    <span class="fw-semibold">{{ $import->orig_filename }}</span>
                                 </td>
-                                <td class="whs-no-cell">
-                                    <span class="whs-no-text fw-semibold">{{ $player->player->whs_no ?? 'N/A' }}</span>
-                                </td>
-                                <td class="account-cell">
-                                    <span class="account-number">
-                                        {{ $player->player->account_no ?? 'Not Set' }}
-                                    </span>
-                                </td>
-                                <td class="email-cell">
-                                    <span class="user-email">{{ $player->email }}</span>
-                                </td>
-                                <td class="birthdate-cell">
-                                    <span class="birthdate-text">{{ $player->profile->birthdate ? \Carbon\Carbon::parse($player->profile->birthdate)->format('M d, Y') : 'N/A' }}</span>
-                                </td>
-                                <td class="sex-cell">
-                                    <span class="badge {{ $player->profile->sex === 'M' ? 'bg-primary' : 'bg-danger' }}">
-                                        {{ $player->profile->sex === 'M' ? 'Male' : ($player->profile->sex === 'F' ? 'Female' : 'N/A') }}
-                                    </span>
+                                <td class="tournament-cell">
+                                    <span class="text-muted">{{ $import->tournament->tournament_name ?? 'N/A' }}</span>
                                 </td>
                                 <td class="status-cell">
-                                    @if ($player->active)
                                     <span class="status-badge status-active">
-                                        <i class="fas fa-check-circle me-1"></i>Active
+                                        <i class="fas fa-check-circle me-1"></i>Completed
                                     </span>
-                                    @else
-                                    <span class="status-badge status-inactive">
-                                        <i class="fas fa-times-circle me-1"></i>Inactive
-                                    </span>
-                                    @endif
                                 </td>
                                 <td class="date-cell">
-                                    <span class="cell-text-date">{{ \Carbon\Carbon::parse($player->created_at)->format('M d, Y') }}</span>
-                                    <small class="cell-text-time d-block">{{ \Carbon\Carbon::parse($player->created_at)->format('g:i A') }}</small>
+                                    <span class="cell-text-date">{{ \Carbon\Carbon::parse($import->created_at)->format('M d, Y') }}</span>
+                                    <small class="cell-text-time d-block">{{ \Carbon\Carbon::parse($import->created_at)->format('g:i A') }}</small>
                                 </td>
                                 <td class="action-cell text-center">
                                     <div class="action-wrapper">
                                         <button class="btn btn-outline-secondary btn-context-menu"
                                             type="button"
-                                            onclick="showUserContextMenu({{ $player->id }}, '{{ ($player->profile->first_name ?? '') . ' ' . ($player->profile->last_name ?? '') }}', event)"
+                                            onclick="showWhsImportContextMenu({{ $import->whs_handicap_import_id }}, '{{ $import->orig_filename }}', event)"
                                             title="Actions"
                                             data-label="Actions">
                                             <i class="fas fa-ellipsis-v me-1"></i>
@@ -393,87 +324,69 @@
         }, 10);
     }
 
-    // Player-specific context menu
-    function showUserContextMenu(userId, userName, event) {
+    // WHS Import-specific context menu
+    function showWhsImportContextMenu(importId, fileName, event) {
         event.preventDefault();
         event.stopPropagation();
 
         modernContext({
             "data": {
-                "title": "Player Actions",
-                "subtitle": userName
+                "title": "WHS Import Actions",
+                "subtitle": fileName
             },
-            "recordId": userId,
+            "recordId": importId,
             "items": [{
                     "label": "View Details",
-                    "description": "View complete player profile",
+                    "description": "View import details",
                     "icon": "eye",
                     "action": function(id) {
-                        viewRecord(id);
+                        viewWhsImportRecord(id);
                     }
                 },
                 {
-                    "label": "Edit Player",
-                    "description": "Modify player information",
-                    "icon": "edit",
+                    "label": "Download File",
+                    "description": "Download the import file",
+                    "icon": "download",
                     "action": function(id) {
-                        editRecord(id);
-                    }
-                },
-                {
-                    "label": "Manage Profile",
-                    "description": "Update golf profile settings",
-                    "icon": "user-cog",
-                    "action": function(id) {
-                        window.location.href = `/admin/players/${id}/profile`;
-                    }
-                },
-                {
-                    "label": "View Handicap",
-                    "description": "Check current handicap status",
-                    "icon": "golf-ball",
-                    "action": function(id) {
-                        window.location.href = `/admin/players/${id}/handicap`;
+                        downloadWhsImportFile(id);
                     }
                 },
                 {
                     "label": "---"
                 },
                 {
-                    "label": "Delete Player",
-                    "description": "Permanently remove player",
+                    "label": "Delete Import",
+                    "description": "Remove this import record",
                     "icon": "trash",
                     "action": function(id) {
-                        deleteRecord(id);
+                        deleteWhsImportRecord(id);
                     }
                 }
             ]
         });
     }
 
-    function viewRecord(id) {
-        window.location.href = `/admin/players/${id}`;
+    function viewWhsImportRecord(id) {
+        // Redirect to view page
+        window.location.href = `/admin/whs-handicap-indexes/${id}`;
     }
 
-    function editRecord(id) {
-        window.location.href = `/admin/players/${id}/edit`;
+    function downloadWhsImportFile(id) {
+        window.location.href = `/admin/whs-handicap-indexes/${id}/download`;
     }
 
-    function deleteRecord(id) {
-        if (confirm('Are you sure you want to delete this player?')) {
-            // Create a form and submit it for DELETE request
+    function deleteWhsImportRecord(id) {
+        if (confirm('Are you sure you want to delete this WHS import record?')) {
             const form = document.createElement('form');
             form.method = 'POST';
-            form.action = `/admin/players/${id}`;
+            form.action = `/admin/whs-handicap-indexes/${id}`;
 
-            // Add CSRF token
             const csrfToken = document.createElement('input');
             csrfToken.type = 'hidden';
             csrfToken.name = '_token';
             csrfToken.value = '{{ csrf_token() }}';
             form.appendChild(csrfToken);
 
-            // Add method override for DELETE
             const methodField = document.createElement('input');
             methodField.type = 'hidden';
             methodField.name = '_method';
@@ -485,8 +398,8 @@
         }
     }
 
-    function exportUsers() {
-        console.log('Export players functionality');
+    function exportWHSImports() {
+        console.log('Export WHS imports functionality');
         // Implement export logic here
     }
 
@@ -711,7 +624,7 @@
 
             // Refresh page after delay to show new players
             setTimeout(() => {
-                // window.location.reload();
+                window.location.reload();
             }, 2000);
 
         } else {

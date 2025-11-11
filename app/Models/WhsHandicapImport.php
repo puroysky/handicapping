@@ -4,12 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class WhsHandicapIndex extends Model
+class WhsHandicapImport extends Model
 {
-    protected $table = 'whs_handicap_indexes';
+    protected $table = 'whs_handicap_imports';
 
-    protected $primaryKey = 'whs_handicap_index_id';
-
+    protected $primaryKey = 'whs_handicap_import_id';
 
     public function tournament()
     {
