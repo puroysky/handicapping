@@ -16,10 +16,10 @@ return new class extends Migration
             $table->unsignedBigInteger('tournament_id');
             $table->unsignedBigInteger('participant_id');
             $table->unsignedBigInteger('course_id');
-            $table->unsignedBigInteger('tee_id');
 
 
-            $table->unique(['participant_id', 'course_id', 'tee_id'], 'participant_course_unique');
+
+            $table->unique(['participant_id', 'course_id'], 'participant_course_unique');
             $table->unsignedTinyInteger('course_handicap')->nullable()->default(null);
 
             $table->unsignedBigInteger('created_by');
@@ -30,7 +30,6 @@ return new class extends Migration
             $table->foreign('updated_by')->references('id')->on('users');
 
             $table->foreign('course_id')->references('course_id')->on('courses')->onDelete('restrict');
-            $table->foreign('tee_id')->references('tee_id')->on('tees')->onDelete('restrict');
             $table->foreign('tournament_id')->references('tournament_id')->on('tournaments')->onDelete('restrict');
             $table->foreign('participant_id')->references('participant_id')->on('participants')->onDelete('restrict');
         });

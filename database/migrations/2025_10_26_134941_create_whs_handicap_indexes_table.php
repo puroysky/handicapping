@@ -11,20 +11,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('participants', function (Blueprint $table) {
-            $table->id('participant_id');
+        Schema::create('whs_handicap_indexes', function (Blueprint $table) {
+            $table->id('whs_handicap_index_id');
             $table->unsignedBigInteger('tournament_id');
-            $table->unsignedBigInteger('user_id')->nullable()->default(null);
-            $table->unsignedBigInteger('player_profile_id')->nullable()->default(null);
+            $table->unsignedBigInteger('user_id');
+            $table->unsignedBigInteger('whs_no')->comment('Identifies a player within the World Handicap System and serves as a foreign key reference to link tournament participants with their maintained player profiles in the system');
+            $table->unsignedTinyInteger('whs_handicap_index')->comment('The WHS handicap index imported from the WHS system for the player');
+            $table->unsignedTinyInteger('final_whs_handicap_index')->comment("Manual correction of WHS index imported from WHS. This will store the manual correction before it will be used in the handicap configuration and formula.");
+            $table->unique(['tournament_id', 'whs_no'], 'tournament_whs_no_unique');
 
-            $table->unsignedTinyInteger('local_handicap_index')->nullable()->default(null);
-            $table->unsignedTinyInteger('final_local_handicap_index')->nullable()->default(null);
-            $table->unsignedTinyInteger('tournament_handicap_index')->nullable()->default(null)->comment('Final handicap index used for the tournament after any adjustments');
 
+            $table->boolean('is_adjusted')->default(false)->comment('Indicates if the WHS handicap index has been manually adjusted for the tournament');
             $table->text('remarks')->nullable()->default(null);
-
-            $table->unique(['tournament_id', 'user_id'], 'tournament_user_unique');
-
             $table->unsignedBigInteger('created_by');
             $table->unsignedBigInteger('updated_by')->nullable()->default(null);
             $table->timestamp('created_at')->useCurrent();
@@ -35,7 +33,7 @@ return new class extends Migration
 
             $table->foreign('tournament_id')->references('tournament_id')->on('tournaments')->onDelete('restrict');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('restrict');
-            $table->foreign('player_profile_id')->references('player_profile_id')->on('player_profiles')->onDelete('restrict');
+            $table->foreign('whs_no')->references('whs_no')->on('player_profiles')->onDelete('restrict');
         });
     }
 

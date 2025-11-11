@@ -31,6 +31,13 @@ return new class extends Migration
         });
 
 
+
+
+
+
+
+
+
         Schema::create('user_profiles', function (Blueprint $table) {
             $table->id('user_profile_id');
             $table->unsignedBigInteger('user_id')->unique();
@@ -55,6 +62,10 @@ return new class extends Migration
         });
 
 
+
+
+
+
         Schema::create('members', function (Blueprint $table) {
             $table->id('member_id');
             $table->unsignedBigInteger('user_id')->unique();
@@ -69,13 +80,19 @@ return new class extends Migration
             $table->foreign('user_id')->references('id')->on('users')->onDelete('restrict');
         });
 
+
+
+
+
+
+
         Schema::create('player_profiles', function (Blueprint $table) {
             $table->id('player_profile_id');
             $table->unsignedBigInteger('user_id')->unique();
             $table->unsignedBigInteger('user_profile_id');
             $table->unsignedBigInteger('member_id')->nullable()->default(null);
             $table->string('account_no', 15)->unique();
-            $table->integer('whs_no')->unique();
+            $table->unsignedBigInteger('whs_no')->unique();
             $table->unsignedBigInteger('created_by');
             $table->unsignedBigInteger('updated_by')->nullable()->default(null);
             $table->timestamp('created_at')->useCurrent();

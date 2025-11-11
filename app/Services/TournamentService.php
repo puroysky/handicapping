@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Models\Division;
+use App\Models\Tournament;
 use App\Models\TournamentCourse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -15,10 +17,6 @@ class TournamentService
     {
         $tournaments = \App\Models\Tournament::with('tournamentCourses.course', 'tournamentCourses.scorecard')->get();
 
-        // echo '<pre>';
-        // print_r($tournaments->toArray());
-        // echo '</pre>';
-        // return;
         $title = 'Tournaments';
         return view('admin.tournaments.tournaments', compact('tournaments', 'title'));
     }
@@ -43,45 +41,25 @@ class TournamentService
     public function store($request)
     {
 
+
+
+        $ranges = $this->validateTournamenttRanges($request);
+        if (($ranges['success'] ?? false) === false) {
+            return response()->json([
+                'message' => $ranges['message']
+            ], 422);
+        }
+
         DB::beginTransaction();
 
         try {
 
-            $tournament = new \App\Models\Tournament();
-            $tournament->tournament_name = $request['tournament_name'];
-            $tournament->tournament_desc = $request['tournament_desc'];
-            $tournament->remarks = $request['remarks'];
-            $tournament->tournament_start = $request['tournament_start'];
-            $tournament->tournament_end = $request['tournament_end'];
+            $tournament = $this->createTournament($request);
 
 
-
-            $tournament->score_diff_start_date = $request['score_diff_start_date'] ?? null;
-            $tournament->score_diff_end_date = $request['score_diff_end_date'] ?? null;
-            $tournament->recent_scores_count = $request['recent_scores_count'] ?? null;
-
-            $tournament->scores_to_average = $request['scores_to_average'] ?? null;
-            $tournament->handicap_formula_expression = $request['handicap_formula_expression'] ?? null;
-            $tournament->created_by = Auth::id();
-
-            $tournament->save();
-
-
-
-            // echo '<pre>';
-            // print_r($request['course_scorecards']);
-            // echo '</pre>';
-
-            // return;
-
-
-
-            // return response()->json([
-            //     'message' => 'Tournament error occurred',
-            //     'tournament' => $tournament
-            // ], 500);
+            $divisionData = $this->prepareDivisionData($request, $tournament);
             $this->storeTournamentCourses($tournament, $request['course_ids'], $request['course_scorecards']);
-
+            $this->createDivisions($divisionData);
 
             DB::commit();
 
@@ -100,6 +78,101 @@ class TournamentService
             ], 500);
         }
     }
+
+    private function createTournament($request): Tournament
+    {
+        $tournament = new Tournament();
+        $tournament->tournament_name = $request['tournament_name'];
+        $tournament->tournament_desc = $request['tournament_desc'];
+        $tournament->remarks = $request['remarks'];
+        $tournament->tournament_start = $request['tournament_start'];
+        $tournament->tournament_end = $request['tournament_end'];
+
+
+
+        $tournament->score_diff_start_date = $request['score_diff_start_date'] ?? null;
+        $tournament->score_diff_end_date = $request['score_diff_end_date'] ?? null;
+        $tournament->recent_scores_count = $request['recent_scores_count'] ?? null;
+
+        $tournament->scores_to_average = $request['scores_to_average'] ?? null;
+        $tournament->handicap_formula_expression = $request['handicap_formula_expression'];
+        $tournament->handicap_formula_desc = $request['handicap_formula_desc'] ?? null;
+        $tournament->handicap_score_differential_config = json_encode($request['handicap_score_differential_config'] ?? []);
+        $tournament->created_by = Auth::id();
+
+        $tournament->save();
+
+
+        return $tournament;
+    }
+
+    private function createDivisions($divisionData)
+    {
+
+        $division =  Division::insert($divisionData);
+
+        return $division;
+    }
+
+
+    private function prepareDivisionData($request, $tournament)
+    {
+        $divisionData = [];
+
+
+        Log::info('Preparing division data for tournament', [
+            'tournament_id' => $tournament->tournament_id,
+            'divisions' => $request['divisions']
+        ]);
+        foreach ($request['divisions'] as $division) {
+            $divisionData[] = [
+
+                'tournament_id' => $tournament->tournament_id,
+                'division_name' => $division['name'],
+                'division_desc' => $division['description'] ?? null,
+                'division_sex' => $division['sex'],
+                'division_participant_type' => $division['participant_type'],
+                'age_min' => $division['age_min'] ?? null,
+                'age_max' => $division['age_max'] ?? null,
+                'handicap_index_min' => $division['handicap_min'] ?? null,
+                'handicap_index_max' => $division['handicap_max'] ?? null,
+                'created_by' => Auth::id(),
+            ];
+        }
+
+        return $divisionData;
+    }
+
+
+    private function validateTournamenttRanges($request)
+    {
+
+
+
+        $validConfig =  $this->validateRanges($request['handicap_score_differential_config'] ?? [], [
+            'min' => 'min',
+            'max' => 'max'
+        ]);
+
+
+
+
+
+
+        if (($validConfig['success'] ?? false) === false) {
+            return $validConfig;
+        }
+
+
+
+
+        return [
+            'success' => true,
+            'message' => 'Ranges are valid.'
+        ];
+    }
+
+
 
     private function storeTournamentCourses($tournament, $courseIds, $scorecardIds)
     {
@@ -132,5 +205,31 @@ class TournamentService
                 'message' => 'Error fetching tournament courses',
             ], 500);
         }
+    }
+
+
+    private function validateRanges($data, $minMaxFieldConfig): array
+    {
+
+        usort($data, fn($a, $b) => $a[$minMaxFieldConfig['min']] <=> $b[$minMaxFieldConfig['min']]);
+        for ($i = 1; $i < count($data); $i++) {
+            if ($data[$i][$minMaxFieldConfig['min']] <= $data[$i - 1][$minMaxFieldConfig['max']]) {
+                return [
+                    'success' => false,
+                    'message' => "Handicap score differential config ranges should not overlap. Overlap found between ranges {$data[$i - 1][$minMaxFieldConfig['min']]}-{$data[$i - 1][$minMaxFieldConfig['max']]} and {$data[$i][$minMaxFieldConfig['min']]}-{$data[$i][$minMaxFieldConfig['max']]}."
+                ];
+            }
+            if ($data[$i][$minMaxFieldConfig['min']] != $data[$i - 1][$minMaxFieldConfig['max']] + 1) {
+                return [
+                    'success' => false,
+                    'message' => "Handicap score differential config ranges should not have gaps. Gap found between ranges {$data[$i - 1][$minMaxFieldConfig['min']]}-{$data[$i - 1][$minMaxFieldConfig['max']]} and {$data[$i][$minMaxFieldConfig['min']]}-{$data[$i][$minMaxFieldConfig['max']]}."
+                ];
+            }
+        }
+
+        return [
+            'success' => true,
+            'message' => 'Ranges are valid.'
+        ];
     }
 }
