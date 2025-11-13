@@ -36,6 +36,8 @@ class ScorecardService
     public function store($validatedData)
     {
         try {
+
+
             DB::beginTransaction();
 
             $scorecard = $this->createScorecard($validatedData);

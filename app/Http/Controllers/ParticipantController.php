@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Participant;
+use App\Models\ParticipantCourse;
 use App\Models\PlayerProfile;
 use App\Models\Tournament;
 use App\Models\Participat;
+use App\Models\WhsHandicapIndex;
 use App\Services\ParticipantImportService;
 use Exception;
 use Illuminate\Http\Request;
@@ -117,7 +119,7 @@ class ParticipantController extends Controller
      */
     public function show(string $id)
     {
-        $tournament = Tournament::find($id);
+        $tournament = Tournament::with('tournamentCourses')->find($id);
         $players = Participant::with('user.profile', 'user.player', 'tournament', 'participantCourseHandicaps.course', 'participantCourseHandicaps.tee')
             ->leftJoin('users', 'participants.user_id', '=', 'users.id')
             ->leftJoin('tournaments', 'participants.tournament_id', '=', 'tournaments.tournament_id')
@@ -305,5 +307,158 @@ class ParticipantController extends Controller
     private function calculateLocalHandicap($whsHandicapIndex, $slopeRating)
     {
         $participants = Participant::get();
+    }
+
+    /**
+     * Handle course selection for a participant
+     */
+    public function setCourseSelection(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'participant_id' => 'required|integer',
+                'course_id' => 'required|integer',
+                'action' => 'required|in:check,uncheck'
+            ]);
+
+
+
+            $participantId = $validated['participant_id'];
+            $courseId = $validated['course_id'];
+            $action = $validated['action'];
+
+            $participant = Participant::findOrFail($participantId);
+
+
+            $exists = ParticipantCourse::where('participant_id', $participantId)
+                ->where('course_id', $courseId)
+                ->where('tournament_id', $participant->tournament_id)
+                ->first();
+
+
+            if ($action === 'check') {
+                if (!$exists) {
+                    ParticipantCourse::create([
+                        'participant_id' => $participantId,
+                        'course_id' => $courseId,
+                        'tournament_id' => $participant->tournament_id,
+                        'created_by' => Auth::id()
+                    ]);
+                }
+            } else {
+                if ($exists) {
+                    $exists = ParticipantCourse::where('participant_id', $participantId)
+                        ->where('course_id', $courseId)
+                        ->where('tournament_id', $participant->tournament_id)
+                        ->delete();
+                }
+            }
+
+
+
+
+
+            // Log the course selection event
+            Log::info('Course selection updated', [
+                'participant_id' => $participantId,
+                'course_id' => $courseId,
+                'action' => $action,
+                'user_id' => Auth::id() ?? 'unknown'
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => "Course $action event recorded successfully",
+                'data' => [
+                    'participant_id' => $participantId,
+                    'course_id' => $courseId,
+                    'action' => $action
+                ]
+            ]);
+        } catch (Exception $e) {
+            Log::error('Error updating course selection', ['error' => $e->getMessage()]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Error: ' . $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ], 500);
+        }
+    }
+
+    /**
+     * Update handicap index for a participant
+     */
+    public function updateHandicap(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'participant_id' => 'required|integer|exists:participants,participant_id',
+                'type' => 'required|in:local,tournament,whs',
+                'value' => 'required|numeric|min:0|max:54'
+            ]);
+
+            $participantId = $validated['participant_id'];
+            $type = $validated['type'];
+            $value = $validated['value'];
+
+            // Find the participant
+            $participant = Participant::with('playerProfile')->findOrFail($participantId);
+            $tournament = Tournament::find($participant->tournament_id);
+
+
+
+            // $table->unique(['tournament_id', 'whs_handicap_import_id', 'whs_no'], 'tournament_whs_handicap_unique');
+
+
+
+            $whsHandicapIndex = WhsHandicapIndex::where('tournament_id', $tournament->tournament_id)
+                ->where('whs_handicap_import_id', $tournament->whs_handicap_import_id)
+                ->where('whs_no', $participant->playerProfile->whs_no)
+                ->first();
+
+            // Update based on type
+            switch ($type) {
+                case 'local':
+                    $participant->final_local_handicap_index = $value;
+                    break;
+                case 'tournament':
+                    $participant->final_tournament_handicap_index = $value;
+                    break;
+                case 'whs':
+                    $whsHandicapIndex->final_whs_handicap_index = $value;
+                    break;
+            }
+
+            $participant->updated_by = Auth::id();
+            $whsHandicapIndex->updated_by = Auth::id();
+
+            $participant->save();
+            $whsHandicapIndex->save();
+
+            // Log the update
+            Log::info('Handicap index updated', [
+                'participant_id' => $participantId,
+                'type' => $type,
+                'value' => $value,
+                'user_id' => Auth::id()
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => ucfirst($type) . " handicap index updated successfully",
+                'data' => [
+                    'participant_id' => $participantId,
+                    'type' => $type,
+                    'value' => $value
+                ]
+            ]);
+        } catch (Exception $e) {
+            Log::error('Error updating handicap index', ['error' => $e->getMessage()]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Error: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

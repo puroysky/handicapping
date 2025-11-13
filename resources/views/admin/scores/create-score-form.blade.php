@@ -1,23 +1,23 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container-fluid px-4 py-4">
+<div class="container-fluid px-2 py-2">
     <div class="row justify-content-center">
         <div class="col-12">
             <!-- Modern Card Design -->
-            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+            <div class="card border-0 shadow-sm rounded-3 overflow-hidden">
 
 
                 <!-- Compact Card Body -->
-                <div class="card-body p-3" style="background: linear-gradient(180deg, #f8f9fa 0%, #ffffff 100%);">
+                <div class="card-body p-2" style="background: linear-gradient(180deg, #f8f9fa 0%, #ffffff 100%);">
                     <form class="needs-validation" novalidate>
                         @csrf
                         <!-- Player Selection Section -->
-                        <div class="row mb-3">
+                        <div class="row mb-2">
                             <div class="col-md-8">
                                 <div class="form-floating bg-white rounded-2 border border-light shadow-sm">
-                                    <input type="text" name="player_search" id="player_search" class="form-control border-0 bg-light" placeholder="Search players..." autocomplete="off">
-                                    <label for="player_search" class="fw-semibold text-dark small">
+                                    <input type="text" name="player_search" id="player_search" class="form-control border-0 bg-light" placeholder="Search players..." autocomplete="off" style="font-size: 0.9rem;">
+                                    <label for="player_search" class="fw-semibold text-dark" style="font-size: 0.8rem;">
                                         <i class="fas fa-user-golf text-primary me-1"></i>Search Player
                                     </label>
                                     <!-- Player dropdown results -->
@@ -28,124 +28,135 @@
                                 </div>
 
                                 <!-- Selected Player Info Display -->
-                                <div id="selected_player_info" class="d-none mt-2">
-                                    <div class="d-flex flex-wrap gap-2 align-items-center">
-                                        <small class="badge bg-primary">
+                                <div id="selected_player_info" class="d-none mt-1">
+                                    <div class="d-flex flex-wrap gap-1 align-items-center">
+                                        <small class="badge bg-primary" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">
                                             <i class="fas fa-user me-1"></i>
                                             <span id="player_name_display"></span>
                                         </small>
-                                        <small class="badge bg-secondary" id="player_whs_display">
+                                        <small class="badge bg-secondary" id="player_whs_display" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">
                                             <i class="fas fa-id-card me-1"></i>WHS: -
                                         </small>
-                                        <small class="badge bg-info" id="player_account_display">
+                                        <small class="badge bg-info" id="player_account_display" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">
                                             <i class="fas fa-hashtag me-1"></i>ACC: -
                                         </small>
-                                        <small class="badge bg-success" id="player_gender_display">
+                                        <small class="badge bg-success" id="player_gender_display" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">
                                             <i class="fas fa-venus-mars me-1"></i>-
                                         </small>
-                                        <small class="badge bg-warning text-dark d-none" id="tee_difference_display">
+                                        <small class="badge bg-warning text-dark d-none" id="tee_difference_display" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">
                                             <i class="fas fa-flag me-1"></i>-
                                         </small>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-4 d-flex align-items-center gap-2">
+                            <div class="col-md-4 d-flex align-items-center gap-1">
                                 <div class="form-floating bg-white rounded-2 border border-light shadow-sm flex-grow-1">
-                                    <input type="date" name="score_date" id="score_date" class="form-control border-0 bg-light" required value="{{ \Carbon\Carbon::now()->format('Y-m-d') }}">
-                                    <label for="score_date" class="fw-semibold text-dark small">
+                                    <input type="date" name="date_playes" id="date_playes" class="form-control border-0 bg-light" required value="{{ \Carbon\Carbon::now()->format('Y-m-d') }}" style="font-size: 0.9rem;">
+                                    <label for="date_playes" class="fw-semibold text-dark" style="font-size: 0.8rem;">
                                         <i class="fas fa-calendar-day text-primary me-1"></i>Score Date
                                     </label>
                                 </div>
-                                <div class="form-floating bg-white rounded-2 border border-light shadow-sm" style="min-width: 140px;">
-                                    <input type="text" name="handicap_index" id="handicap_index" class="form-control border-0 bg-light" placeholder="-">
-                                    <label for="handicap_index" class="fw-semibold text-dark small">
-                                        <i class="fas fa-chart-line text-warning me-1"></i>Handicap Index
+                                <div class="form-floating bg-white rounded-2 border border-light shadow-sm" style="min-width: 130px;">
+                                    <input type="text" name="handicap_index" id="handicap_index" class="form-control border-0 bg-light" placeholder="-" style="font-size: 0.9rem;">
+                                    <label for="handicap_index" class="fw-semibold text-dark" style="font-size: 0.8rem;">
+                                        <i class="fas fa-chart-line text-warning me-1"></i>HI
                                     </label>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Tournament, Course, Tee, and Score Mode Selection -->
-                        <div class="row mb-3">
-                            <div class="col-md-3 col-lg-3">
+                        <div class="row mb-2">
+                            <div class="col-md-2 col-lg-2">
                                 <div class="form-floating bg-white rounded-2 border border-light shadow-sm">
-                                    <select name="tournament_id" id="tournament_id" class="form-select form-select-sm border-0 bg-light" required>
+                                    <select name="tournament_id" id="tournament_id" class="form-select form-select-sm border-0 bg-light" required style="font-size: 0.9rem;">
                                         <option value="">Select Tournament</option>
                                         @foreach($tournaments as $tournament)
                                         <option value="{{ $tournament->tournament_id}}">{{ $tournament->tournament_name }}</option>
                                         @endforeach
                                     </select>
-                                    <label for="tournament_id" class="fw-semibold text-dark small">
+                                    <label for="tournament_id" class="fw-semibold text-dark" style="font-size: 0.8rem;">
                                         <i class="fas fa-trophy text-primary me-1"></i>Tournament
                                     </label>
                                 </div>
                             </div>
 
-                            <div class="col-md-3 col-lg-3">
+                            <div class="col-md-2 col-lg-2">
                                 <div class="form-floating bg-white rounded-2 border border-light shadow-sm">
-                                    <select name="tournament_course_id" id="tournament_course_id" class="form-select form-select-sm border-0 bg-light" required disabled>
+                                    <select name="tournament_course_id" id="tournament_course_id" class="form-select form-select-sm border-0 bg-light" required disabled style="font-size: 0.9rem;">
                                         <option value="">Select Course</option>
                                     </select>
-                                    <label for="tournament_course_id" class="fw-semibold text-dark small">
+                                    <label for="tournament_course_id" class="fw-semibold text-dark" style="font-size: 0.8rem;">
                                         <i class="fas fa-golf-ball text-primary me-1"></i>Course
                                     </label>
                                 </div>
                             </div>
 
-                            <div class="col-md-3 col-lg-3">
+                            <div class="col-md-2 col-lg-2">
                                 <div class="form-floating bg-white rounded-2 border border-light shadow-sm">
-                                    <select name="tee_id" id="tee_id" class="form-select form-select-sm border-0 bg-light" required>
+                                    <select name="tee_id" id="tee_id" class="form-select form-select-sm border-0 bg-light" required style="font-size: 0.9rem;">
 
                                     </select>
-                                    <label for="tee_id" class="fw-semibold text-dark small">
+                                    <label for="tee_id" class="fw-semibold text-dark" style="font-size: 0.8rem;">
                                         <i class="fas fa-flag text-primary me-1"></i>Tee
                                     </label>
                                 </div>
                             </div>
 
-                            <div class="col-md-3 col-lg-3">
+                            <div class="col-md-2 col-lg-2">
                                 <div class="form-floating bg-white rounded-2 border border-light shadow-sm">
-                                    <select name="scoring_method" id="scoring_method" class="form-select form-select-sm border-0 bg-light" required disabled>
-                                        <option value="">Select Score Mode</option>
+                                    <select name="scoring_method" id="scoring_method" class="form-select form-select-sm border-0 bg-light" required disabled style="font-size: 0.9rem;">
+                                        <option value="">Select Mode</option>
                                         <option value="hole_by_hole">Hole by Hole</option>
-                                        <option value="adjusted_score">Adjusted Score</option>
+                                        <option value="adjusted_score">Adjusted</option>
                                     </select>
-                                    <label for="scoring_method" class="fw-semibold text-dark small">
-                                        <i class="fas fa-calculator text-primary me-1"></i>Score Mode
+                                    <label for="scoring_method" class="fw-semibold text-dark" style="font-size: 0.8rem;">
+                                        <i class="fas fa-calculator text-primary me-1"></i>Mode
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="col-md-2 col-lg-2">
+                                <div class="form-floating bg-white rounded-2 border border-light shadow-sm">
+                                    <select name="division_id" id="division_id" class="form-select form-select-sm border-0 bg-light" disabled style="font-size: 0.9rem;">
+                                        <option value="">Select Div</option>
+                                    </select>
+                                    <label for="division_id" class="fw-semibold text-dark" style="font-size: 0.8rem;">
+                                        <i class="fas fa-layer-group text-primary me-1"></i>Div
                                     </label>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Compact Scorecard Section -->
-                        <div class="bg-white rounded-3 p-2 border border-light shadow-sm mb-3">
-                            <div class="d-flex align-items-center mb-2">
-                                <div class="bg-primary bg-opacity-10 rounded-2 p-1 me-2">
+                        <div class="bg-white rounded-2 p-1 border border-light shadow-sm mb-2">
+                            <div class="d-flex align-items-center mb-1">
+                                <div class="bg-primary bg-opacity-10 rounded-2 p-1 me-1">
                                     <i class="fas fa-table text-primary"></i>
                                 </div>
-                                <h5 class="mb-0 fw-bold text-dark" style="font-size: 1.25rem; font-weight: 700;">Scorecard</h5>
+                                <h6 class="mb-0 fw-bold text-dark" style="font-size: 1rem; font-weight: 700;">Scorecard</h6>
                             </div>
 
-                            <div class="table-responsive border-0 rounded-3 overflow-hidden" style="box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+                            <div class="table-responsive border-0 rounded-2 overflow-hidden" style="box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
                                 <table class="table table-sm align-middle text-center mb-0 score-table">
                                     <thead class="bg-primary">
                                         <tr>
-                                            <th class="text-start ps-3 text-white fw-bold py-2" style="font-size: 0.875rem; font-weight: 700;">Hole</th>
+                                            <th class="text-start ps-2 text-white fw-bold py-1" style="font-size: 0.75rem; font-weight: 700;">Hole</th>
                                             @for($i =1; $i <= 18; $i++)
-                                                <th class="text-primary fw-bold py-2 column-header text-white" style="font-size: 0.875rem; font-weight: 700;" data-hole="{{ $i }}" data-column="{{ $i }}">{{ $i }}</th>
+                                                <th class="text-primary fw-bold py-1 column-header text-white" style="font-size: 0.75rem; font-weight: 700;" data-hole="{{ $i }}" data-column="{{ $i }}">{{ $i }}</th>
                                                 @if($i == 9)
-                                                <th class="text-white fw-bold py-2 bg-success border-start border-2 border-light" style="font-size: 0.875rem; font-weight: 700;">OUT</th>
+                                                <th class="text-white fw-bold py-1 bg-success border-start border-2 border-light" style="font-size: 0.75rem; font-weight: 700;">OUT</th>
                                                 @endif
                                                 @endfor
-                                                <th class="text-white fw-bold py-2 bg-success border-start border-2 border-light" style="font-size: 0.875rem; font-weight: 700;">IN</th>
-                                                <th class="text-white fw-bold py-2 bg-primary border-start border-2 border-light" style="font-size: 0.875rem; font-weight: 700;">TOTAL</th>
+                                                <th class="text-white fw-bold py-1 bg-success border-start border-2 border-light" style="font-size: 0.75rem; font-weight: 700;">IN</th>
+                                                <th class="text-white fw-bold py-1 bg-primary border-start border-2 border-light" style="font-size: 0.75rem; font-weight: 700;">TOTAL</th>
                                         </tr>
                                     </thead>
                                     <tbody style="background: #ffffff;">
 
 
                                         <tr style="background: linear-gradient(90deg, #e9ecef 0%, #f8f9fa 100%);">
-                                            <td class="text-start ps-3 fw-bold text-info py-2" style="font-size: 0.875rem; font-weight: 700;">Yards</td>
+                                            <td class="text-start ps-2 fw-bold text-info py-1" style="font-size: 0.75rem; font-weight: 700;">Yards</td>
                                             @for($i = 1; $i <= 18; $i++)
                                                 <td class="py-2 column-cell" data-column="{{ $i }}">
                                                 <span class="yardage-span" data-hole="{{ $i }}" data-yardage="">-</span>
@@ -263,24 +274,24 @@
                         </div>
 
                         <!-- Keyboard Shortcuts Help -->
-                        <div class="text-center mb-3 keyboard-help">
-                            <small class="text-muted d-flex align-items-center justify-content-center gap-3">
-                                <span><kbd>Enter</kbd> Next field</span>
-                                <span><kbd>←</kbd><kbd>→</kbd> Navigate holes</span>
+                        <div class="text-center mb-2 keyboard-help">
+                            <small class="text-muted d-flex align-items-center justify-content-center gap-2" style="font-size: 0.75rem;">
+                                <span><kbd>Enter</kbd> Next</span>
+                                <span><kbd>←</kbd><kbd>→</kbd> Navigate</span>
                                 <span><kbd>Ctrl</kbd>+<kbd>S</kbd> Save</span>
                             </small>
                         </div>
 
                         <!-- Compact Action Buttons -->
-                        <div class="d-flex justify-content-between align-items-center gap-2">
-                            <button type="button" class="btn btn-outline-secondary rounded-pill px-3">
+                        <div class="d-flex justify-content-between align-items-center gap-1">
+                            <button type="button" class="btn btn-outline-secondary rounded-pill px-2 py-1" style="font-size: 0.85rem;">
                                 <i class="fas fa-arrow-left me-1"></i>Back
                             </button>
-                            <div class="d-flex gap-2">
-                                <button type="button" class="btn btn-outline-danger rounded-pill px-3" id="clearAllBtn">
-                                    <i class="fas fa-trash me-1"></i>Clear All
+                            <div class="d-flex gap-1">
+                                <button type="button" class="btn btn-outline-danger rounded-pill px-2 py-1" id="clearAllBtn" style="font-size: 0.85rem;">
+                                    <i class="fas fa-trash me-1"></i>Clear
                                 </button>
-                                <button type="button" class="btn rounded-pill px-4 text-white fw-bold" id="submitScoreBtn" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); border: none; box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);" title="Save scorecard (Ctrl+S)" data-bs-toggle="tooltip">
+                                <button type="button" class="btn rounded-pill px-3 py-1 text-white fw-bold" id="submitScoreBtn" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); border: none; box-shadow: 0 2px 6px rgba(40, 167, 69, 0.2); font-size: 0.85rem;" title="Save scorecard (Ctrl+S)" data-bs-toggle="tooltip">
                                     <i class="fas fa-save me-1"></i>Save
                                 </button>
                             </div>
@@ -1377,7 +1388,7 @@
                 tournament_course_id: document.getElementById('tournament_course_id')?.value,
                 tee_id: document.getElementById('tee_id')?.value,
                 scoring_method: document.getElementById('scoring_method')?.value,
-                score_date: document.getElementById('score_date')?.value,
+                date_playes: document.getElementById('date_playes')?.value,
                 // Include handicap index input so backend receives it
                 handicap_index: document.getElementById('handicap_index')?.value,
                 _token: document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ||
@@ -1654,8 +1665,8 @@
                                 const jsonStart = error.message.indexOf('{');
                                 if (jsonStart !== -1) {
                                     const errorJson = JSON.parse(error.message.substring(jsonStart));
-                                    if (errorJson.errors && errorJson.errors.score_date) {
-                                        errorMsg = errorJson.errors.score_date.join(' ');
+                                    if (errorJson.errors && errorJson.errors.date_playes) {
+                                        errorMsg = errorJson.errors.date_playes.join(' ');
                                     } else if (errorJson.message) {
                                         errorMsg = errorJson.message;
                                     }
@@ -1925,6 +1936,14 @@
                     teeSelect.value = '';
                     teeSelect.disabled = true;
 
+                    // Clear and reset division selection
+                    const divisionSelect = document.getElementById('division_id');
+                    if (divisionSelect) {
+                        divisionSelect.innerHTML = '<option value="">Select Division</option>';
+                        divisionSelect.value = '';
+                        divisionSelect.disabled = true;
+                    }
+
                     // Disable score mode when tee is cleared (tournament change)
                     const scoreModeSelect = document.getElementById('scoring_method');
                     if (scoreModeSelect) {
@@ -1937,6 +1956,12 @@
                         // Enable course select and show loading state
                         courseSelect.disabled = false;
                         courseSelect.innerHTML = '<option value="">Loading courses...</option>';
+
+                        // Enable division select and show loading state
+                        if (divisionSelect) {
+                            divisionSelect.disabled = false;
+                            divisionSelect.innerHTML = '<option value="">Loading divisions...</option>';
+                        }
 
                         // Fetch courses from API
                         console.log('Fetching courses for tournament:', tournamentId);
@@ -2002,6 +2027,48 @@
                                     courseSelect.appendChild(option);
                                 });
                                 console.log('Fallback courses loaded after API error');
+                            });
+
+                        // Fetch divisions from API
+                        console.log('Fetching divisions for tournament:', tournamentId);
+                        fetch(`${BASE_URL}/admin/tournaments/${tournamentId}/divisions`)
+                            .then(response => {
+                                console.log('Divisions API Response status:', response.status);
+                                if (!response.ok) {
+                                    throw new Error(`HTTP error! status: ${response.status}`);
+                                }
+                                return response.json();
+                            })
+                            .then(data => {
+                                console.log('Divisions API Response data:', data);
+                                const divisionSelect = document.getElementById('division_id');
+                                if (divisionSelect) {
+                                    divisionSelect.innerHTML = '<option value="">Select Division</option>';
+
+                                    if (data.success && data.divisions && data.divisions.length > 0) {
+                                        data.divisions.forEach(division => {
+                                            const option = document.createElement('option');
+                                            option.value = division.division_id;
+                                            option.textContent = division.name;
+                                            divisionSelect.appendChild(option);
+                                            console.log('Added division option:', division.name, 'with value:', division.division_id);
+                                        });
+                                        console.log(`Loaded ${data.divisions.length} divisions from API`);
+                                        divisionSelect.disabled = false;
+                                    } else {
+                                        divisionSelect.innerHTML = '<option value="">No divisions available</option>';
+                                        divisionSelect.disabled = true;
+                                        console.log('No divisions found in API response');
+                                    }
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error fetching divisions from API:', error);
+                                const divisionSelect = document.getElementById('division_id');
+                                if (divisionSelect) {
+                                    divisionSelect.innerHTML = '<option value="">Select Division</option>';
+                                    divisionSelect.disabled = true;
+                                }
                             });
                     }
                 });

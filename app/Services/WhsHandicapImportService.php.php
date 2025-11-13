@@ -211,7 +211,7 @@ class WhsHandicapImportService
             'data' => [
                 'whs_no' => $whsNo, // Result: "+1"
                 'whs_handicap_index' => $handicap['handicap_index'],
-                'handicap_type' => $handicap['handicap_type'],
+
                 'name' => $rowData['name'],
                 'sex' => $rowData['sex'],
                 'row_number' => $rowNumber
@@ -221,38 +221,27 @@ class WhsHandicapImportService
 
 
 
-    /**
-     * Format the raw Excel handicap value into numeric index and type.
-     *
-     * Examples:
-     *  '="+1"'  → ['handicap_index' => 1.0, 'handicap_type' => 'plus']
-     *  '="2"'   → ['handicap_index' => 2.0, 'handicap_type' => 'reg']
-     *  '="-1"'  → ['handicap_index' => 1.0, 'handicap_type' => 'reg']
-     *  null or empty → ['handicap_index' => null, 'handicap_type' => null]
-     */
-    private function formatHandicapIndex($value): array
+
+    private function formatHandicapIndex($value): float
     {
+        // Return 0.0 if the value is empty or null
         if (empty($value)) {
-            return [
-                'handicap_index' => 0,
-                'handicap_type' => 'none',
-            ];
+            return 0.0;
         }
 
-        // Step 1: Clean up value (remove =, quotes, and spaces)
+        // Step 1: Clean up the input (remove =, quotes, and extra spaces)
         $clean = trim(str_replace(['=', '"'], '', $value));
 
-        // Step 2: Determine type (plus if + found)
-        $handicapType = str_contains($clean, '+') ? 'plus' : 'reg';
+        // Step 2: Determine handicap type based on presence of "+"
+        $isPlus = str_contains($clean, '+');
 
-        // Step 3: Remove + sign and convert to float
+        // Step 3: Normalize the value (remove "+" and cast to float)
         $handicapIndex = (float) str_replace('+', '', $clean);
 
-        return [
-            'handicap_index' => $handicapIndex,
-            'handicap_type' => $handicapType,
-        ];
+        // Step 4: Convert to negative if it’s a plus handicap
+        return $isPlus ? -abs($handicapIndex) : abs($handicapIndex);
     }
+
 
 
 
@@ -313,7 +302,6 @@ class WhsHandicapImportService
                 'whs_no' => $rowData['whs_no'],
                 'whs_handicap_index' => $rowData['whs_handicap_index'],
                 'final_whs_handicap_index' => $rowData['whs_handicap_index'],
-                'handicap_type' => $rowData['handicap_type'],
                 'is_adjusted' => false,
                 'name' => $rowData['name'] ?? null,
                 'sex' => $rowData['sex'] ?? null,

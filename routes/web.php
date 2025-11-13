@@ -193,6 +193,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
 
     Route::post('participant/calculate-local-handicap', [ParticipantController::class, 'calculateLocalHandicap'])->name('participants.calculate-handicap');
+    Route::post('participant/course', [ParticipantController::class, 'setCourseSelection'])->name('participant.course');
+    Route::post('participant/handicap', [ParticipantController::class, 'updateHandicap'])->name('participant.handicap');
     Route::post('participants/import', [ParticipantController::class, 'import'])->name('participants.import');
     Route::get('participants/available', [ParticipantController::class, 'available'])->name('participants.available');
     Route::post('participants/add-bulk', [ParticipantController::class, 'addBulk'])->name('participants.add-bulk');

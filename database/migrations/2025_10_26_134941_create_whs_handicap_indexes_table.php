@@ -17,14 +17,14 @@ return new class extends Migration
             $table->unsignedBigInteger('whs_handicap_import_id');
 
             $table->unsignedBigInteger('whs_no')->comment('Identifies a player within the World Handicap System and serves as a foreign key reference to link tournament participants with their maintained player profiles in the system');
-            $table->unsignedTinyInteger('whs_handicap_index')->comment('The WHS handicap index imported from the WHS system for the player');
-            $table->unsignedTinyInteger('final_whs_handicap_index')->comment("Manual correction of WHS index imported from WHS. This will store the manual correction before it will be used in the handicap configuration and formula.");
+            $table->decimal('whs_handicap_index', 4, 2)->comment('The WHS handicap index imported from the WHS system for the player');
+            $table->decimal('final_whs_handicap_index', 4, 2)->comment("Manual correction of WHS index imported from WHS. This will store the manual correction before it will be used in the handicap configuration and formula.");
 
             //name and sex
             $table->string('name')->comment('Name of the player');
             $table->enum('sex', ['M', 'F'])->comment('Sex of the player');
 
-            $table->enum('handicap_type', ['reg', 'plus', 'none'])->default('reg')->comment('Indicates if the WHS handicap index is a regular or plus handicap');
+
             $table->unique(['tournament_id', 'whs_handicap_import_id', 'whs_no'], 'tournament_whs_handicap_unique');
 
 

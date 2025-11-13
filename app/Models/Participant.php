@@ -44,4 +44,9 @@ class Participant extends Model
     {
         return $this->hasMany(ParticipantCourseHandicap::class, 'participant_id', 'participant_id');
     }
+
+    public function participantDivisions()
+    {
+        return $this->hasMany(ParticipantDivision::class, 'participant_id', 'participant_id');
+    }
 }

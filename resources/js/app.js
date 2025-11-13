@@ -7,9 +7,3 @@ import "../../vendor/twbs/bootstrap/dist/js/bootstrap.bundle";
 import "./handicapping.js";
 import "./error-modal.js";
 import "./compact-modal.js";
-
-document.addEventListener("DOMContentLoaded", () => {
-    document.querySelectorAll("input").forEach((el) => {
-        el.setAttribute("autocomplete", "off");
-    });
-});

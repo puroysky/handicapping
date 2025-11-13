@@ -19,13 +19,13 @@ return new class extends Migration
 
 
 
-            $table->unsignedTinyInteger('local_handicap_index')->nullable()->default(null);
-            $table->unsignedTinyInteger('final_local_handicap_index')->nullable()->default(null);
+            $table->decimal('local_handicap_index', 4, 2)->nullable()->default(null);
+            $table->decimal('final_local_handicap_index', 4, 2)->nullable()->default(null);
 
 
 
-            $table->unsignedTinyInteger('tournament_handicap_index')->nullable()->default(null)->comment('Final handicap index used for the tournament after any adjustments');
-
+            $table->decimal('tournament_handicap_index', 4, 2)->nullable()->default(null)->comment('Final handicap index used for the tournament after any adjustments');
+            $table->decimal('final_tournament_handicap_index', 4, 2)->nullable()->default(null)->comment('Final handicap index used for the tournament after any adjustments');
             $table->text('remarks')->nullable()->default(null);
             $table->boolean('active')->default(true);
             $table->boolean('is_adjusted')->default(false);

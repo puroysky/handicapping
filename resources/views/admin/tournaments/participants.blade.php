@@ -112,6 +112,9 @@
                                     </div>
                                 </th>
                                 <!-- Removed Tee and Course columns per request -->
+                                <th class="text-center" style="font-size: 0.9rem;">
+                                    <span>Course to Use</span>
+                                </th>
                                 <th class="text-center">
                                     <i class="fas fa-cogs me-2"></i>Actions
                                 </th>
@@ -129,13 +132,13 @@
                                 <td class="whs-no-cell">
                                     <span class="fw-semibold">{{ $player->user->player->whs_no ?? 'N/A' }}</span>
                                 </td>
-                                <td class="local-handicap-index-cell">
+                                <td class="local-handicap-index-cell" style="cursor: pointer;" onclick="editHandicap({{ $player->participant_id }}, 'local', {{ $player->final_local_handicap_index ?? 'null' }}, '{{ $player->user->profile->first_name ?? '' }} {{ $player->user->profile->last_name ?? '' }}')">
                                     <span class="fw-semibold">{{ $player->final_local_handicap_index ?? 'N/A' }}</span>
                                 </td>
-                                <td class="tournament-handicap-index-cell">
+                                <td class="tournament-handicap-index-cell" style="cursor: pointer;" onclick="editHandicap({{ $player->participant_id }}, 'tournament', {{ $player->tournament_handicap_index ?? 'null' }}, '{{ $player->user->profile->first_name ?? '' }} {{ $player->user->profile->last_name ?? '' }}')">
                                     <span class="text-muted" style="font-size: 0.9rem;">{{ $player->tournament_handicap_index ?? 'N/A' }}</span>
                                 </td>
-                                <td class="whs-handicap-cell">
+                                <td class="whs-handicap-cell" style="cursor: pointer;" onclick="editHandicap({{ $player->participant_id }}, 'whs', {{ $player->final_whs_handicap_index ?? 'null' }}, '{{ $player->user->profile->first_name ?? '' }} {{ $player->user->profile->last_name ?? '' }}')">
                                     <span class="text-muted" style="font-size: 0.9rem;">{{ $player->final_whs_handicap_index ?? '-' }}</span>
                                 </td>
                                 <td class="course-handicap-cell">
@@ -152,6 +155,19 @@
                                     @else
                                         <span class="text-muted fst-italic">No handicaps assigned</span>
                                     @endif
+                                </td>
+                                <td class="text-center" style="font-size: 0.9rem;">
+                                    <div class="d-flex gap-2 justify-content-center">
+
+                                        @foreach ($tournament->tournamentCourses as $tournamentCourse)
+                                            @php $course = $tournamentCourse->course; @endphp
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input course-checkbox" type="checkbox" name="course_{{ $course->course_id }}" id="course_{{ $course->course_id }}_{{ $player->player_profile_id }}" value="{{ $course->course_id }}" data-participant-id="{{ $player->participant_id }}" data-player-id="{{ $player->player_profile_id }}" data-course-id="{{ $course->course_id }}" data-course-name="{{ $course->course_name }}" onchange="handleCourseCheckboxChange(this)" style="font-size: 0.9rem;">
+                                                <label class="form-check-label" for="course_{{ $course->course_id }}_{{ $player->player_profile_id }}" style="font-size: 0.85rem;">{{ $course->course_name }}</label>
+                                            </div>
+                                        @endforeach
+                                        
+                                    </div>
                                 </td>
                                 <td class="action-cell text-center">
                                     <div class="action-wrapper">
@@ -1150,11 +1166,52 @@
         event.preventDefault();
         const tournamentId = {{ $tournamentId }};
         
+        // Show warning with SweetAlert2
+        Swal.fire({
+            title: 'Calculate Local Handicap?',
+            html: `
+               <div class="text-start">
+                    <p class="mb-3">This action will recalculate the <strong>Local Handicap Index</strong> for all participants in this tournament.</p>
+                    <div class="alert alert-warning" role="alert">
+                        <strong><i class="fas fa-exclamation-triangle me-2"></i>Warning:</strong>
+                        <ul class="mb-0 mt-2">
+                            <li><strong>Any manual adjustments</strong> to Local HI values will be overridden.</li>
+                            <li>The system will apply the <strong>formula defined for this tournament</strong>.</li>
+                            <li>The <strong>Tournament Handicap Index</strong> for all participants will be recalculated, <strong>overriding any manual adjustments</strong> previously made.</li>
+                        </ul>
+                    </div>
+                    <p class="text-muted small mt-3 mb-0">Are you sure you want to proceed?</p>
+                </div>
+
+            `,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: '<i class="fas fa-calculator me-2"></i>Yes, Calculate',
+            cancelButtonText: 'Cancel',
+            allowOutsideClick: false,
+            allowEscapeKey: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Proceed with calculation
+                performLocalHandicapCalculation(tournamentId);
+            }
+        });
+    }
+
+    function performLocalHandicapCalculation(tournamentId) {
         // Show loading indicator
-        const btn = event.target.closest('.dropdown-item');
-        const originalText = btn.innerHTML;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Calculating...';
-        btn.disabled = true;
+        Swal.fire({
+            title: 'Calculating Handicaps...',
+            html: '<i class="fas fa-spinner fa-spin"></i> Processing Local HI and Tournament HI for all participants.',
+            icon: 'info',
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
         
         // Make background API call
         fetch(BASE_URL + `/admin/participant/calculate-handicap`, {
@@ -1180,32 +1237,156 @@
             
             // Show success message
             if (data.success) {
-                showNotification('Local Handicap calculated successfully for ' + data.count + ' participants', 'success');
-                // Refresh the page after a short delay
-                setTimeout(() => {
+                Swal.fire({
+                    title: 'Success!',
+                    html: `
+                        <div class="text-start">
+                            <p class="mb-2">Handicaps calculated successfully!</p>
+                            <ul class="text-muted small mb-0">
+                                <li><strong>Local HI</strong> - Recalculated using tournament formula</li>
+                                <li><strong>Tournament HI</strong> - Recalculated based on new Local HI</li>
+                            </ul>
+                            <p class="text-muted small mt-2"><strong>${data.count || 0}</strong> participant(s) updated.</p>
+                        </div>
+                    `,
+                    icon: 'success',
+                    confirmButtonText: 'OK'
+                }).then(() => {
+                    // Refresh the page to show updated values
                     window.location.reload();
-                }, 1500);
+                });
             } else {
-                showNotification(data.message || 'An error occurred during calculation', 'error');
+                Swal.fire({
+                    title: 'Calculation Failed',
+                    text: data.message || 'An error occurred during calculation',
+                    icon: 'error',
+                    confirmButtonText: 'Close'
+                });
             }
         })
         .catch(error => {
             console.error('Error calculating local handicap:', error);
-            showNotification('Error calculating local handicap. Please try again.', 'error');
-        })
-        .finally(() => {
-            // Restore button state
-            btn.innerHTML = originalText;
-            btn.disabled = false;
+            Swal.fire({
+                title: 'Error',
+                text: 'Error calculating handicaps. Please try again.',
+                icon: 'error',
+                confirmButtonText: 'Close'
+            });
         });
     }
 
     // Calculate Tournament Handicap
+    // Calculate Tournament Handicap
     function calculateTournamentHandicap(event) {
         event.preventDefault();
-        console.log('Calculating Tournament Handicap for all participants...');
-        alert('Tournament Handicap calculation initiated. Please wait...');
-        // TODO: Implement API call to calculate tournament handicaps
+        const tournamentId = {{ $tournamentId }};
+        
+        // Show warning with SweetAlert2
+        Swal.fire({
+            title: 'Calculate Tournament Handicap?',
+            html: `
+                <div class="text-start">
+                    <p class="mb-3">This action will recalculate the <strong>Tournament Handicap Index</strong> for all participants in this tournament.</p>
+                    <div class="alert alert-warning" role="alert">
+                        <strong><i class="fas fa-exclamation-triangle me-2"></i>Warning:</strong>
+                        <ul class="mb-0 mt-2">
+                            <li>This will <strong>override any manual adjustments</strong> made to Tournament HI values</li>
+                            <li>The system will use the formula defined in this tournament</li>
+                        
+                        </ul>
+                    </div>
+                    <p class="text-muted small mt-3 mb-0">Are you sure you want to proceed?</p>
+                </div>
+            `,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: '<i class="fas fa-calculator me-2"></i>Yes, Calculate',
+            cancelButtonText: 'Cancel',
+            allowOutsideClick: false,
+            allowEscapeKey: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Proceed with calculation
+                performTournamentHandicapCalculation(tournamentId);
+            }
+        });
+    }
+
+    function performTournamentHandicapCalculation(tournamentId) {
+        // Show loading indicator
+        Swal.fire({
+            title: 'Calculating Tournament Handicaps...',
+            html: '<i class="fas fa-spinner fa-spin"></i> Processing Tournament HI for all participants.',
+            icon: 'info',
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+        
+        // Make background API call
+        fetch(BASE_URL + `/admin/participant/calculate-handicap`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({
+                tournament_id: tournamentId,
+                type: 'tournament'
+            })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Tournament Handicap calculation completed:', data);
+            
+            // Show success message
+            if (data.success) {
+                Swal.fire({
+                    title: 'Success!',
+                    html: `
+                        <div class="text-start">
+                            <p class="mb-2">Tournament Handicap calculated successfully!</p>
+                            <ul class="text-muted small mb-0">
+                                <li>Based on current <strong>Local Handicap Index</strong> values</li>
+                                <li>Applied tournament-specific formulas and adjustments</li>
+                            </ul>
+                            <p class="text-muted small mt-2"><strong>${data.count || 0}</strong> participant(s) updated.</p>
+                        </div>
+                    `,
+                    icon: 'success',
+                    confirmButtonText: 'OK'
+                }).then(() => {
+                    // Refresh the page to show updated values
+                    window.location.reload();
+                });
+            } else {
+                Swal.fire({
+                    title: 'Calculation Failed',
+                    text: data.message || 'An error occurred during calculation',
+                    icon: 'error',
+                    confirmButtonText: 'Close'
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error calculating tournament handicap:', error);
+            Swal.fire({
+                title: 'Error',
+                text: 'Error calculating tournament handicap. Please try again.',
+                icon: 'error',
+                confirmButtonText: 'Close'
+            });
+        });
     }
 
     // Calculate Course Handicap
@@ -1224,6 +1405,194 @@
             alert('All handicaps recalculation initiated. Please wait...');
             // TODO: Implement API call to recalculate all handicaps
         }
+    }
+
+    // Handle Course Checkbox Change with SweetAlert2
+    function handleCourseCheckboxChange(checkbox) {
+        const participantId = checkbox.getAttribute('data-participant-id');
+        const courseId = checkbox.getAttribute('data-course-id');
+        const courseName = checkbox.getAttribute('data-course-name');
+        const isChecked = checkbox.checked;
+        const action = isChecked ? 'check' : 'uncheck';
+
+        // Show SweetAlert2 confirmation
+        Swal.fire({
+            title: 'Confirm Course Selection',
+            text: `Are you sure you want to ${action} ${courseName} for this player?`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#28a745',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, ' + action + ' it!',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Make API call to update course selection
+                fetch(BASE_URL + `/admin/participant/course`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({
+                        participant_id: participantId,
+                        course_id: courseId,
+                        action: action
+                    })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Course selection updated:', data);
+                    if (data.success) {
+                        Swal.fire({
+                            title: 'Success!',
+                            text: `${courseName} has been ${action}ed successfully`,
+                            icon: 'success',
+                            timer: 2000
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Error',
+                            text: data.message || 'An error occurred',
+                            icon: 'error'
+                        });
+                        // Revert checkbox state on error
+                        checkbox.checked = !isChecked;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error updating course selection:', error);
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'An error occurred. Please try again.',
+                        icon: 'error'
+                    });
+                    // Revert checkbox state on error
+                    checkbox.checked = !isChecked;
+                });
+            } else {
+                // Revert checkbox if user cancels
+                checkbox.checked = !isChecked;
+            }
+        });
+    }
+
+    // Edit Handicap Index with SweetAlert2
+    function editHandicap(participantId, handicapType, currentValue, playerName) {
+        const typeLabel = handicapType === 'local' ? 'Local HI' : handicapType === 'tournament' ? 'Tournament HI' : 'WHS HI';
+        
+        Swal.fire({
+            title: `Edit ${typeLabel}`,
+            html: `
+                <div class="form-group text-start">
+                    <label for="handicapInput" class="form-label mb-2">
+                        <strong>${typeLabel} for ${playerName}</strong>
+                    </label>
+                    <input 
+                        type="number" 
+                        id="handicapInput" 
+                        class="form-control" 
+                        placeholder="Enter handicap index" 
+                        value="${currentValue && currentValue !== 'null' ? currentValue : ''}"
+                        step="0.1"
+                        min="0"
+                        max="54"
+                    />
+                    <small class="form-text text-muted d-block mt-2">
+                        Valid range: 0.0 to 54.0
+                    </small>
+                </div>
+            `,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#28a745',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Save',
+            cancelButtonText: 'Cancel',
+            didOpen: () => {
+                // Focus on input field
+                document.getElementById('handicapInput').focus();
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const newValue = document.getElementById('handicapInput').value;
+                
+                // Validate input
+                if (newValue === '') {
+                    Swal.fire({
+                        title: 'Validation Error',
+                        text: 'Please enter a valid handicap index value',
+                        icon: 'error'
+                    });
+                    return;
+                }
+                
+                const numValue = parseFloat(newValue);
+                if (isNaN(numValue) || numValue < 0 || numValue > 54) {
+                    Swal.fire({
+                        title: 'Validation Error',
+                        text: 'Handicap index must be between 0.0 and 54.0',
+                        icon: 'error'
+                    });
+                    return;
+                }
+                
+                // Send to API
+                fetch(BASE_URL + `/admin/participant/handicap`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({
+                        participant_id: participantId,
+                        type: handicapType,
+                        value: numValue
+                    })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Handicap updated:', data);
+                    if (data.success) {
+                        Swal.fire({
+                            title: 'Success!',
+                            text: `${typeLabel} has been updated successfully`,
+                            icon: 'success',
+                            timer: 2000
+                        }).then(() => {
+                            // Refresh page to show updated values
+                            window.location.reload();
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Error',
+                            text: data.message || 'An error occurred',
+                            icon: 'error'
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error updating handicap:', error);
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'An error occurred. Please try again.',
+                        icon: 'error'
+                    });
+                });
+            }
+        });
     }
 
     // Modal close functionality for fallback
@@ -1399,4 +1768,9 @@
         padding: 0.5rem 1rem;
     }
 </style>
+
+<!-- SweetAlert2 CSS and JS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+
 @endsection

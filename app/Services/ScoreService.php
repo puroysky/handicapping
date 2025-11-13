@@ -2,10 +2,12 @@
 
 namespace App\Services;
 
+use App\Models\Participant;
 use App\Models\PlayerProfile;
 use App\Models\Score;
 use App\Models\Scorecard;
 use App\Models\ScoreHole;
+use App\Models\Tournament;
 use App\Models\TournamentCourse;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
@@ -18,6 +20,9 @@ class ScoreService
 {
     // How many strokes to add when input is 'x'
     private int $xStrokePenalty;
+
+    private Tournament $tournament;
+    private PlayerProfile $playerProfile;
 
     public function __construct(int $xStrokePenalty = 2)
     {
@@ -44,7 +49,7 @@ class ScoreService
     public function filter($request)
     {
         $filters = $request->input('filters', []);
-        
+
         $query = Score::with(['playerProfile.userProfile', 'tournament', 'tournamentCourse.course', 'tee']);
 
         foreach ($filters as $filter) {
@@ -104,7 +109,7 @@ class ScoreService
         }
 
         $scores = $query->orderBy('created_at', 'desc')->get();
-        
+
         // Generate HTML for filtered rows
         $html = view('admin.scores.partials.scores-table-rows', compact('scores'))->render();
 
@@ -132,21 +137,60 @@ class ScoreService
      */
     public function store($request)
     {
-        // Store request to file for debugging
-        $this->storeRequestToFile($request);
+
+
 
         try {
 
+            $this->storeRequestToFile($request);
 
 
-            DB::beginTransaction();
+            $this->playerProfile = PlayerProfile::with('user', 'userProfile')
+                ->where('player_profile_id', $request['player_profile_id'])
+                ->firstOrFail();
+
+
+
+
+            $tournamentCourse = TournamentCourse::with('tournament')
+                ->where('tournament_id', $request['tournament_id'])
+                ->where('tournament_course_id', $request['tournament_course_id'])
+                ->firstOrFail();
+
+            $this->tournament = $tournamentCourse->tournament;
+
+
+
+
+
+            $sex = $this->playerProfile->userProfile->sex;
+
+
 
             $scores = $request['scores'] ?? [];
             $side = $this->determineSide($scores);
-            $player = PlayerProfile::where('player_profile_id', $request['player_profile_id'])->firstOrFail();
-            $sex = $player->userProfile->sex;
 
-            $tournamentCourse = TournamentCourse::where('tournament_course_id', $request['tournament_course_id'])->firstOrFail();
+
+
+
+
+            $participant = Participant::where('tournament_id', $request['tournament_id'])
+                ->where('player_profile_id', $request['player_profile_id'])
+                ->first();
+
+            if ($participant === null) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to create score',
+                    'error' => 'Player is not registered in the selected tournament.'
+
+                ], 422);
+            }
+
+
+
+
+
             $scorecardId = $tournamentCourse->scorecard_id;
             $teeId = $request['tee_id'];
 
@@ -155,13 +199,32 @@ class ScoreService
 
 
 
+
+
+
             $scorecard = $this->getScorecard($scorecardId, $teeId);
+
+
+
+
             $courseHandicap = $this->getCourseHandicap($request, $scorecard);
+
+
+
+
+
             $scoreBreakdown = $this->getScoreBreakdown($formattedScore, $courseHandicap);
 
-
+            DB::beginTransaction();
             $score = $this->createScore($request, $side, $scoreBreakdown);
 
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to create score',
+                'error' => 'Error test.'
+
+            ], 422);
 
             Log::debug('Score created', ['score_id' => $score->score_id]);
             $this->createScoreHoles($score->score_id, $scores);
@@ -216,12 +279,10 @@ class ScoreService
     private function getScorecard($scorecardId, $teeId): ?Scorecard
     {
         return Scorecard::with([
-            'slopeRating' => function ($query) use ($teeId) {
+            'ratings' => function ($query) use ($teeId) {
                 $query->where('tee_id', $teeId);
             },
-            'courseRating' => function ($query) use ($teeId) {
-                $query->where('tee_id', $teeId);
-            },
+
             'courseRatingFormula'
         ])->where('scorecard_id', $scorecardId)->firstOrFail();
     }
@@ -323,12 +384,9 @@ class ScoreService
         $scoreCard = Scorecard::where('scorecard_id', $scorecardId)
             ->with([
                 'scorecardHoles:scorecard_id,scorecard_hole_id,hole,par',
-                'scorecardHoles.strokeIndex' => function ($query) use ($gender) {
-                    $query->select('scorecard_stroke_index_id', 'scorecard_hole_id', 'stroke_index')
-                        ->where('gender', $gender);
-                },
+
                 'scorecardHoles.yardage' => function ($query) use ($teeId) {
-                    $query->select('scorecard_yard_id', 'scorecard_hole_id', 'yardage')
+                    $query->select('scorecard_yardage_id', 'scorecard_hole_id', 'yardage')
                         ->where('tee_id', $teeId);
                 },
             ])->first();
@@ -345,12 +403,12 @@ class ScoreService
 
         // Use Laravel Collection for more idiomatic processing, keyed by hole number
         return $scoreCard->scorecardHoles
-            ->mapWithKeys(function ($hole) use ($score) {
+            ->mapWithKeys(function ($hole) use ($score, $gender) {
                 return [
                     $hole->hole => [
                         'hole' => $hole->hole,
                         'par' => $hole->par,
-                        'stroke_index' => $hole->strokeIndex?->stroke_index,
+                        'stroke_index' => $gender === 'M' ? $hole->men_stroke_index : $hole->ladies_stroke_index,
                         'yardage' => $hole->yardage?->yardage,
                         'gross_strokes' => $score[$hole->hole]['gross_strokes'] ?? null,
                     ]
@@ -366,7 +424,7 @@ class ScoreService
     private function determineSide(array $scores): string
     {
         if (empty($scores)) {
-            return 'both';
+            return '18';
         }
 
         $holeNumbers = array_keys($scores);
@@ -374,14 +432,14 @@ class ScoreService
         $hasBack = !empty(array_filter($holeNumbers, fn($h) => $h >= 10 && $h <= 18));
 
         if ($hasFront && !$hasBack) {
-            return 'front';
+            return 'F9';
         }
 
         if ($hasBack && !$hasFront) {
-            return 'back';
+            return 'B9';
         }
 
-        return 'both';
+        return '18';
     }
 
     /**
@@ -402,28 +460,43 @@ class ScoreService
 
         $player = PlayerProfile::findOrFail($request['player_profile_id']);
 
-        Log::debug('Player found', ['player_profile_id' => $player->player_profile_id, 'user_id' => $player->user_id, 'user_profile_id' => $player->user_profile_id]);
 
         return Score::create([
             'player_profile_id' => $request['player_profile_id'],
             'user_profile_id' => $player->user_profile_id,
             'user_id' => $player->user_id,
+            'participant_id' => null,
             'tournament_id' => $request['tournament_id'],
             'tournament_course_id' => $request['tournament_course_id'],
+            'division_id' => $request['division_id'],
+            'course_id' => null,
             'tee_id' => $request['tee_id'],
+
+            'date_played' => $request['date_played'],
             'scoring_method' => $request['scoring_method'],
-            'score_date' => $request['score_date'],
-            'entry_type' => 'manual',
-            'side' => $side,
+            'score_type' => $request['tournament_id'] ? 'tmt' : 'reg',
+            'score_source' => 'form',
+            'holes_played' => $side,
+
+            'handicap_index' => null,
+            'handicap_index_source' => null,
+            'course_handicap' => null,
+
+
+
             'gross_score' =>  $request['scoring_method'] === 'hole_by_hole' ? $scoreBreakdown['gross_score'] : null,
             'adjusted_score' => $request['scoring_method'] === 'adjusted_score' ? $request['adjusted_score'] : $scoreBreakdown['adjusted_gross_score'],
             'net_score' => $request['scoring_method'] === 'adjusted_score' ? null : $scoreBreakdown['net_score'],
+
+            'score_differential' => null,
+
+
             'is_verified' => true,
             'verified_by' => $userId,
             'verified_at' => $now,
             'remarks' => $request['remarks'] ?? null,
             'created_by' => $userId,
-            'created_at' => $now,
+
         ]);
     }
 
@@ -455,7 +528,7 @@ class ScoreService
             $scoreHoles[] = [
                 'score_id' => $scoreId,
                 'hole' => $holeNumber,
-                'side' => ($holeNumber <= 9) ? 'front' : 'back',
+                'side' => ($holeNumber <= 9) ? 'F9' : 'B9',
                 'strokes' => $holeData['gross_strokes'],
                 'raw_input' => $holeData['raw_input'],
                 'created_by' => $userId,
