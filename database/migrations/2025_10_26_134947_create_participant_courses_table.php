@@ -24,7 +24,7 @@ return new class extends Migration
             $table->primary(['participant_id', 'course_id'], 'participant_courses_primary');
 
             $table->unsignedBigInteger('tournament_id');
-            $table->decimal('course_handicap', 4, 2)->nullable()->default(null);
+
 
             $table->unsignedBigInteger('created_by');
             $table->unsignedBigInteger('updated_by')->nullable()->default(null);

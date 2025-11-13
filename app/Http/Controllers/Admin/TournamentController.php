@@ -200,7 +200,10 @@ class TournamentController extends Controller
 
 
 
-            'handicap_formula_expression' => 'required|string|max:255',
+            'local_handicap_formula_1' => 'required|string|max:255',
+            'local_handicap_formula_2' => 'required|string|max:255',
+            'local_handicap_formula_3' => 'required|string|max:255',
+            'local_handicap_formula_4' => 'required|string|max:255',
             'handicap_formula_desc' => 'required|string|max:255',
 
 
@@ -302,6 +305,13 @@ class TournamentController extends Controller
             $executor->addFunction('ROUND', fn($value, $precision = 0) => round($value, $precision));
             $executor->addFunction('MIN', fn(...$args) => min($args));
             $executor->addFunction('MAX', fn(...$args) => max($args));
+
+            $executor->addFunction('AVG', function (...$args) {
+                if (count($args) === 0) {
+                    throw new MathException("AVG requires at least one argument.");
+                }
+                return array_sum($args) / count($args);
+            });
             // Add variables to the executor
             $executor->setVar('WHS_HANDICAP_INDEX', (float) $validated['whs_handicap_index']);
             $executor->setVar('LOCAL_HANDICAP_INDEX', (float) $validated['local_handicap_index']);

@@ -10,10 +10,12 @@ use App\Models\Participat;
 use App\Models\WhsHandicapIndex;
 use App\Services\ParticipantImportService;
 use Exception;
+use Illuminate\Auth\Events\Validated;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use NXP\MathExecutor;
 
 class ParticipantController extends Controller
 {
@@ -304,9 +306,167 @@ class ParticipantController extends Controller
         }
     }
 
+    public function calculateHandicap(Request $request)
+    {
+
+        $validatedData = $request->validate([
+            'tournament_id' => 'required|integer',
+            'type' => 'required|in:tournament,local',
+        ]);
+
+
+
+
+        $tournamentId = $validatedData['tournament_id'];
+        $type = $validatedData['type'];
+
+
+        $tournament = Tournament::find($tournamentId);
+
+
+        switch ($type) {
+            case 'tournament':
+                $handicap = $this->calculateTournamentHandicap($tournament);
+                break;
+            case 'local':
+                // Example adjustment for local handicap
+
+                break;
+            default:
+                throw new Exception('Invalid handicap type specified.');
+        }
+
+
+        return $handicap;
+    }
+
+    private function calculateTournamentHandicap($tournament)
+    {
+        try {
+            DB::beginTransaction();
+
+            $participants = Participant::with('user.profile', 'user.player', 'tournament', 'participantCourseHandicaps.course', 'participantCourseHandicaps.tee')
+                ->leftJoin('users', 'participants.user_id', '=', 'users.id')
+                ->leftJoin('tournaments', 'participants.tournament_id', '=', 'tournaments.tournament_id')
+                ->leftJoin('player_profiles', 'participants.player_profile_id', '=', 'player_profiles.player_profile_id')
+                ->leftJoin('whs_handicap_indexes', function ($join) {
+                    $join->on('participants.tournament_id', '=', 'whs_handicap_indexes.tournament_id')
+                        ->on('tournaments.whs_handicap_import_id', '=', 'whs_handicap_indexes.whs_handicap_import_id')
+                        ->on('player_profiles.whs_no', '=', 'whs_handicap_indexes.whs_no');
+                })
+                ->select('participants.*', 'users.*', 'tournaments.*', 'player_profiles.*', 'whs_handicap_indexes.whs_handicap_index', 'whs_handicap_indexes.final_whs_handicap_index')
+                ->where('participants.tournament_id', $tournament->tournament_id)
+                ->get();
+
+            if ($participants->isEmpty()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'No participants found for this tournament',
+                    'updated_count' => 0
+                ]);
+            }
+
+
+
+            $executor = new MathExecutor();
+
+            // Register custom math helpers
+            $executor->addFunction('ROUND', fn($value, $precision = 0) => round($value, $precision));
+            $executor->addFunction('MIN', fn(...$args) => min($args));
+            $executor->addFunction('MAX', fn(...$args) => max($args));
+            $executor->addFunction('AVG', fn(...$args) => array_sum($args) / count($args));
+
+            $updatedCount = 0;
+            $skippedCount = 0;
+            $errors = [];
+
+            foreach ($participants as $participant) {
+
+                $whsHandicapIndex = $participant->final_whs_handicap_index;
+                $localHandicapIndex = $participant->final_local_handicap_index;
+                $expression = null;
+
+                // Determine which formula to use based on available data
+                if ($whsHandicapIndex === null && $localHandicapIndex === null) {
+                    $expression = $tournament->local_handicap_formula_4;
+                } elseif ($whsHandicapIndex !== null && $localHandicapIndex !== null) {
+                    $expression = $tournament->local_handicap_formula_1;
+                } elseif ($whsHandicapIndex !== null && $localHandicapIndex === null) {
+                    $expression = $tournament->local_handicap_formula_2;
+                } elseif ($localHandicapIndex !== null && $whsHandicapIndex === null) {
+                    $expression = $tournament->local_handicap_formula_3;
+                }
+
+                if (empty($expression)) {
+                    $skippedCount++;
+                    Log::warning('No formula available for participant', [
+                        'participant_id' => $participant->participant_id,
+                        'whs_handicap_index' => $whsHandicapIndex,
+                        'local_handicap_index' => $localHandicapIndex
+                    ]);
+                    continue;
+                }
+
+                $executor->setVar('WHS_HANDICAP_INDEX', (float) ($whsHandicapIndex ?? 0));
+                $executor->setVar('LOCAL_HANDICAP_INDEX', (float) ($localHandicapIndex ?? 0));
+
+                // Execute the formula
+                $result = $executor->execute($expression);
+
+                // Update participant with calculated handicap
+                // Log the SQL query before executing
+                DB::enableQueryLog();
+
+                Participant::where($participant->particpant_id)->update([
+                    'final_tournament_handicap_index' => $result,
+                    'updated_by' => Auth::id()
+                ]);
+
+                // Log the executed query
+                $queries = DB::getQueryLog();
+                Log::info('Participant update query', [
+                    'participant_id' => $participant->participant_id,
+                    'query' => end($queries)
+                ]);
+
+                $updatedCount++;
+
+                Log::info('Calculated tournament handicap', [
+                    'participant_id' => $participant->participant_id,
+                    'whs_handicap_index' => (float) ($whsHandicapIndex ?? 0),
+                    'local_handicap_index' => (float) ($localHandicapIndex ?? 0),
+                    'formula' => $expression,
+                    'result' => $result
+                ]);
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => "Tournament handicaps calculated successfully. Updated: $updatedCount, Skipped: $skippedCount",
+                'updated_count' => $updatedCount,
+                'skipped_count' => $skippedCount,
+                'errors' => !empty($errors) ? $errors : null
+            ]);
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error('Error calculating tournament handicaps', [
+                'tournament_id' => $tournament->tournament_id,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
     private function calculateLocalHandicap($whsHandicapIndex, $slopeRating)
     {
-        $participants = Participant::get();
+        // WHS to Local Handicap conversion formula
+        return ($whsHandicapIndex * $slopeRating) / 113;
     }
 
     /**

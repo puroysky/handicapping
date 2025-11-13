@@ -508,47 +508,172 @@
                             <div class="mb-4">
                                 <h6 class="mb-3">Tournament Handicap Formula</h6>
 
-                                <div class="alert alert-info mb-3">
+                                <div class="alert alert-info mb-4">
                                     <i class="fas fa-info-circle me-2"></i>
-                                    <strong>Formula Configuration:</strong> Define how to calculate the final tournament handicap using available system variables. You can use mathematical operations and the following variables:
+                                    <strong>Available Variables:</strong>
                                     <ul class="mb-0 mt-2 ms-4">
-                                        <li><code>WHS_HANDICAP_INDEX</code> - World Handicap System Index</li>
                                         <li><code>LOCAL_HANDICAP_INDEX</code> - Local Handicap Index</li>
+                                        <li><code>WHS_HANDICAP_INDEX</code> - World Handicap System Index</li>
+                             
+                                    </ul>
+                                    <hr class="my-2">
+                                    <strong>Formula Examples:</strong>
+                                    <ul class="mb-0 mt-2 ms-4">
+                                        <li><code>WHS_HANDICAP_INDEX * 0.8</code> - Get 80% of WHS Handicap</li>
+                                        <li><code>MIN(LOCAL_HANDICAP_INDEX, WHS_HANDICAP_INDEX)</code> - Whichever is lower between Local and WHS</li>
+                                        <li><code>MAX(LOCAL_HANDICAP_INDEX, WHS_HANDICAP_INDEX)</code> - Whichever is higher between Local and WHS</li>
+                                        <li><code>MIN(LOCAL_HANDICAP_INDEX * 0.8, WHS_HANDICAP_INDEX)</code> - 80% of Local or WHS, whichever is lower</li>
+                                        <li><code>ROUND(MAX(LOCAL_HANDICAP_INDEX, WHS_HANDICAP_INDEX * 0.8), 1)</code> - Higher of Local or 80% WHS, rounded to 1 decimal</li>
+                                        <li><code>AVG(LOCAL_HANDICAP_INDEX, WHS_HANDICAP_INDEX)</code> - Average of Local and WHS Handicap</li>
                                     </ul>
                                 </div>
 
-                                <label class="form-label fw-bold">
-                                    <i class="fas fa-calculator me-2"></i>Handicap Calculation Formula
-                                </label>
-                                <p class="text-muted small mb-2">
-                                    Enter a formula to calculate the final handicap. Examples:
-                                </p>
-                                <div class="alert alert-light border border-secondary p-2 mb-3 small">
-                                    <code>WHS_HANDICAP_INDEX</code> - Uses WHS Handicap Index as is<br>
-                                    <code>LOCAL_HANDICAP_INDEX</code> - Uses Local Handicap Index as is<br>
-                                    <code>MIN(WHS_HANDICAP_INDEX, LOCAL_HANDICAP_INDEX)</code> - Whichever is lower<br>
-                                    <code>MAX(WHS_HANDICAP_INDEX, LOCAL_HANDICAP_INDEX)</code> - Whichever is higher<br>
-                                    <code>(WHS_HANDICAP_INDEX + LOCAL_HANDICAP_INDEX) / 2</code> - Average of both<br>
-                                    <code>ROUND(WHS_HANDICAP_INDEX, 0)</code> - Rounded WHS to nearest integer<br>
-                                    <code>WHS_HANDICAP_INDEX * 0.95</code> - WHS reduced by 5%<br>
+                                <div class="alert alert-success mt-3">
+                                <i class="fas fa-check-circle me-2"></i>
+                                <strong>Four Formula Fields Configured:</strong> Each formula will be applied based on the player's data availability.
+                                <ul class="mb-0 mt-2 ms-4">
+                                    <li><strong>Formula 1:</strong> Applied when the player has both a WHS and a Local Handicap Index.</li>
+                                    <li><strong>Formula 2:</strong> Applied when the player has a WHS Handicap Index but no Local Handicap Index.</li>
+                                    <li><strong>Formula 3:</strong> Applied when the player has a Local Handicap Index but no WHS Handicap Index.</li>
+                                    <li><strong>Formula 4:</strong> Applied by default when the player has neither a WHS nor a Local Handicap Index.</li>
+                                </ul>
                                 </div>
 
-                                <div class="input-group">
-                                    <span class="input-group-text" id="formula-addon">
-                                        <i class="fas fa-code me-2"></i>Formula
-                                    </span>
-                                    <input type="text"
-                                        class="form-control form-control-lg"
-                                        id="handicap_formula_expression"
-                                        name="handicap_formula_expression"
-                                        placeholder="e.g., WHS_HANDICAP_INDEX or (WHS_HANDICAP_INDEX + LOCAL_HANDICAP_INDEX) / 2"
-                                        aria-describedby="formula-addon"
-                                        value="">
+                                <div class="card shadow-sm">
+                                    <div class="card-header bg-primary text-white py-3">
+                                        <h6 class="mb-0">
+                                            <i class="fas fa-calculator me-2"></i>Define Formulas for Each 1, 2, 3, 4
+                                        </h6>
+                                    </div>
+                                    <div class="card-body p-4">
+                                        <div class="table-responsive">
+                                            <table class="table table-borderless">
+                                                <tbody>
+                                                    <!-- 1 -->
+                                                    <tr>
+                                                        <td style="width: 25%;">
+                                                            <div class="fw-bold mb-2">
+                                                                <span class="badge bg-success me-2">FORMULA 1</span>
+                                                            </div>
+                                                          
+                                                        </td>
+                                                        <td>
+                                                            <input type="text"
+                                                                class="form-control formula-input"
+                                                                id="local_handicap_formula_1"
+                                                                name="local_handicap_formula_1"
+                                                                placeholder="Example: MIN(LOCAL_HANDICAP_INDEX, WHS_HANDICAP_INDEX)"
+                                                                value="">
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td colspan="2" style="border-top: 1px solid #e9ecef; padding-top: 1.5rem;"></td>
+                                                    </tr>
+                                                    <!-- 2 -->
+                                                    <tr>
+                                                        <td style="width: 25%;">
+                                                            <div class="fw-bold mb-2">
+                                                                <span class="badge bg-warning text-dark me-2">FORMULA 2</span>
+                                                            </div>
+                                              
+                                                        </td>
+                                                        <td>
+                                                            <input type="text"n
+                                                                class="form-control formula-input"
+                                                                id="local_handicap_formula_2"
+                                                                name="local_handicap_formula_2"
+                                                                placeholder="Example: WHS_HANDICAP_INDEX * 0.8"
+                                                                value="">
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td colspan="2" style="border-top: 1px solid #e9ecef; padding-top: 1.5rem;"></td>
+                                                    </tr>
+                                                    <!-- 3 -->
+                                                    <tr>
+                                                        <td style="width: 25%;">
+                                                            <div class="fw-bold mb-2">
+                                                                <span class="badge bg-danger me-2">FORMULA 3</span>
+                                                            </div>
+                                                        
+                                                        </td>
+                                                        <td>
+                                                            <input type="text"
+                                                                class="form-control formula-input"
+                                                                id="local_handicap_formula_3"
+                                                                name="local_handicap_formula_3"
+                                                                placeholder="Example: 0"
+                                                                value="">
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td colspan="2" style="border-top: 1px solid #e9ecef; padding-top: 1.5rem;"></td>
+                                                    </tr>
+                                                    <!-- 4 -->
+                                                    <tr>
+                                                        <td style="width: 25%;">
+                                                            <div class="fw-bold mb-2">
+                                                                <span class="badge bg-secondary me-2">FORMULA 4</span>
+                                                            </div>
+                                                        
+                                                        </td>
+                                                        <td>
+                                                            <input type="text"
+                                                                class="form-control formula-input"
+                                                                id="local_handicap_formula_4"
+                                                                name="local_handicap_formula_4"
+                                                                placeholder="Example: 0"
+                                                                value="">
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <div class="card-footer bg-light p-3">
+                                        <small class="text-muted">
+                                            <strong>Operators:</strong> +, -, *, / &nbsp;|&nbsp;
+                                            <strong>Functions:</strong> MIN(), MAX(), ROUND()
+                                        </small>
+                                    </div>
                                 </div>
-                                <small class="form-text text-muted d-block mt-2">
-                                    <i class="fas fa-lightbulb me-1"></i>
-                                    You can use standard mathematical operations: +, -, *, /, (), and functions like ROUND(), FLOOR(), CEIL(), MIN(), MAX().
-                                </small>
+
+                                <div class="card shadow-sm mt-4">
+                                    <div class="card-header bg-info text-white py-3">
+                                        <h6 class="mb-0">
+                                            <i class="fas fa-flask me-2"></i>Test Formulas
+                                        </h6>
+                                    </div>
+                                    <div class="card-body p-4">
+                                        <p class="text-muted small mb-3">
+                                            Enter test values below to verify your formulas work correctly:
+                                        </p>
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">Local Handicap Index</label>
+                                                <input type="number" step="0.1" class="form-control test-value" id="test-local-handicap" placeholder="e.g., 12.5">
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">WHS Handicap Index</label>
+                                                <input type="number" step="0.1" class="form-control test-value" id="test-whs-handicap" placeholder="e.g., 13.2">
+                                            </div>
+                                        </div>
+                                        <div class="text-center mt-3">
+                                            <button type="button" class="btn btn-info btn-sm" id="testFormulaBtn">
+                                                <i class="fas fa-play me-1"></i>Test Formulas
+                                            </button>
+                                        </div>
+                                        <div id="testResults" class="mt-3" style="display: none;">
+                                            <div class="alert alert-info mb-0">
+                                                <h6 class="mb-2">Results:</h6>
+                                                <div id="result1" class="mb-2"><strong>1:</strong> <code></code></div>
+                                                <div id="result2" class="mb-2"><strong>2:</strong> <code></code></div>
+                                                <div id="result3" class="mb-2"><strong>3:</strong> <code></code></div>
+                                                <div id="result4"><strong>4:</strong> <code></code></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
 
                             <div class="mb-4">
@@ -571,60 +696,7 @@
                                 </small>
                             </div>
 
-                            <div class="mb-4">
-                                <label class="form-label fw-bold">
-                                    <i class="fas fa-vials me-2"></i>Test Formula
-                                </label>
-                                <p class="text-muted small mb-2">
-                                    Test your formula with sample values before saving:
-                                </p>
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        <div class="form-floating mb-2">
-                                            <input type="number"
-                                                class="form-control form-control-sm"
-                                                id="test_whs"
-                                                placeholder="WHS Handicap Index"
-                                                step="0.1"
-                                                value="10">
-                                            <label for="test_whs">WHS Handicap Index</label>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="form-floating mb-2">
-                                            <input type="number"
-                                                class="form-control form-control-sm"
-                                                id="test_local"
-                                                placeholder="Local Handicap Index"
-                                                step="0.1"
-                                                value="12">
-                                            <label for="test_local">Local Handicap Index</label>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="d-grid">
-                                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="testFormulaCalculation()">
-                                                <i class="fas fa-play me-1"></i>Test Formula
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div id="formula-test-result" class="mt-2" style="display: none;">
-                                    <div class="alert alert-info p-2">
-                                        <small>
-                                            <strong>Result:</strong> <span id="formula-result-value">-</span>
-                                        </small>
-                                    </div>
-                                </div>
-                                <div id="formula-test-error" class="mt-2" style="display: none;">
-                                    <div class="alert alert-danger p-2">
-                                        <small>
-                                            <i class="fas fa-exclamation-circle me-1"></i>
-                                            <strong>Error:</strong> <span id="formula-error-message">-</span>
-                                        </small>
-                                    </div>
-                                </div>
-                            </div>
+                      
                         </div>
 
                         <!-- STEP 7: Review & Submit -->
@@ -1720,66 +1792,83 @@
             }
         };
 
-        // Formula Testing
-        window.testFormulaCalculation = function() {
-            const formulaInput = document.getElementById('handicap_formula_expression');
-            const whsValue = parseFloat(document.getElementById('test_whs').value);
-            const localValue = parseFloat(document.getElementById('test_local').value);
-            const resultDiv = document.getElementById('formula-test-result');
-            const errorDiv = document.getElementById('formula-test-error');
-            const resultValue = document.getElementById('formula-result-value');
-            const errorMessage = document.getElementById('formula-error-message');
-
-            resultDiv.style.display = 'none';
-            errorDiv.style.display = 'none';
-
-            if (!formulaInput.value.trim()) {
-                errorMessage.textContent = 'Please enter a formula first.';
-                errorDiv.style.display = 'block';
+        // Test Formula Functionality
+        document.getElementById('testFormulaBtn').addEventListener('click', function() {
+            const localHandicap = document.getElementById('test-local-handicap').value;
+            const whsHandicap = document.getElementById('test-whs-handicap').value;
+            
+            if (!localHandicap && !whsHandicap) {
+                alert('Please enter at least one test value.');
                 return;
             }
 
-            if (isNaN(whsValue) || isNaN(localValue)) {
-                errorMessage.textContent = 'Please enter valid numbers for test values.';
-                errorDiv.style.display = 'block';
+            const formulas = {
+                1: document.getElementById('local_handicap_formula_1').value,
+                2: document.getElementById('local_handicap_formula_2').value,
+                3: document.getElementById('local_handicap_formula_3').value,
+                4: document.getElementById('local_handicap_formula_4').value
+            };
+
+            if (!formulas[1] && !formulas[2] && !formulas[3] && !formulas[4]) {
+                alert('Please enter at least one formula.');
                 return;
             }
 
-            $.ajax({
-                url: '{{ route("tournaments.validate-formula") }}',
-                type: 'POST',
-                data: {
-                    formula: formulaInput.value.trim(),
-                    whs_handicap_index: whsValue,
-                    local_handicap_index: localValue,
-                    _token: $('meta[name="csrf-token"]').attr('content')
-                },
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'Accept': 'application/json'
-                },
-                success: function(response) {
-                    if (response.success) {
-                        resultValue.textContent = response.result;
-                        resultDiv.style.display = 'block';
-                    } else {
-                        errorMessage.textContent = response.message || 'Formula validation failed';
-                        errorDiv.style.display = 'block';
-                    }
-                },
-                error: function(xhr) {
-                    const errorResponse = xhr.responseJSON;
-                    errorMessage.textContent = errorResponse?.error || errorResponse?.message || 'Invalid formula syntax';
-                    errorDiv.style.display = 'block';
+            const results = {};
+            const resultsDiv = document.getElementById('testResults');
+            
+            // Show loading state
+            resultsDiv.innerHTML = '<div class="alert alert-info mb-0"><i class="fas fa-spinner fa-spin"></i> Testing formulas...</div>';
+            resultsDiv.style.display = 'block';
+
+            // Test each formula
+            let completed = 0;
+            for (let i = 1; i <= 4; i++) {
+                if (formulas[i]) {
+                    $.ajax({
+                        url: BASE_URL + '/api/tournaments/validate-formula',
+                        type: 'POST',
+                        dataType: 'json',
+                        data: {
+                            formula: formulas[i],
+                            local_handicap_index: parseFloat(localHandicap) || 0,
+                            whs_handicap_index: parseFloat(whsHandicap) || 0,
+                            _token: $('meta[name="csrf-token"]').attr('content')
+                        },
+                        success: function(response) {
+                            results[i] = response.result !== undefined ? response.result : 'Error';
+                            completed++;
+                            if (completed === Object.keys(formulas).filter(k => formulas[k]).length) {
+                                displayTestResults(formulas, results);
+                            }
+                        },
+                        error: function(xhr) {
+                            const errorMsg = xhr.responseJSON?.message || 'Error evaluating formula';
+                            results[i] = 'Error: ' + errorMsg;
+                            completed++;
+                            if (completed === Object.keys(formulas).filter(k => formulas[k]).length) {
+                                displayTestResults(formulas, results);
+                            }
+                        }
+                    });
                 }
-            });
-        };
+            }
 
-        document.getElementById('handicap_formula_expression').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                testFormulaCalculation();
+            function displayTestResults(formulas, results) {
+                let resultHTML = '<div class="alert alert-info mb-0"><h6 class="mb-2">Results:</h6>';
+                for (let i = 1; i <= 4; i++) {
+                    if (formulas[i]) {
+                        const value = typeof results[i] === 'number' ? results[i].toFixed(2) : results[i];
+                        resultHTML += `<div class="mb-2"><strong>${i}:</strong> <code>${value}</code></div>`;
+                    } else {
+                        resultHTML += `<div class="mb-2"><strong>${i}:</strong> <code>Not defined</code></div>`;
+                    }
+                }
+                resultHTML += '</div>';
+                resultsDiv.innerHTML = resultHTML;
             }
         });
+
     });
 </script>
 @endsection

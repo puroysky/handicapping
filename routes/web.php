@@ -22,6 +22,7 @@ use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
 use NXP\MathExecutor;
 use App\Http\Controllers\WhsHandicapIndexController;
+use App\Models\Participant;
 
 Route::get('/', function () {
     return view('welcome');
@@ -31,7 +32,26 @@ Route::get('test', function () {
 
 
 
+    $participants = Participant::with('user.profile', 'user.player', 'tournament', 'participantCourseHandicaps.course', 'participantCourseHandicaps.tee')
+        ->leftJoin('users', 'participants.user_id', '=', 'users.id')
+        ->leftJoin('tournaments', 'participants.tournament_id', '=', 'tournaments.tournament_id')
+        ->leftJoin('player_profiles', 'participants.player_profile_id', '=', 'player_profiles.player_profile_id')
+        ->leftJoin('whs_handicap_indexes', function ($join) {
+            $join->on('participants.tournament_id', '=', 'whs_handicap_indexes.tournament_id')
+                ->on('tournaments.whs_handicap_import_id', '=', 'whs_handicap_indexes.whs_handicap_import_id')
+                ->on('player_profiles.whs_no', '=', 'whs_handicap_indexes.whs_no');
+        })
+        ->select('participants.*', 'users.*', 'tournaments.*', 'player_profiles.*', 'whs_handicap_indexes.whs_handicap_index', 'whs_handicap_indexes.final_whs_handicap_index')
+        ->where('participants.tournament_id', 15)
+        // ->where('participants.participant_id', 10)
+        ->get();
+    echo '<pre>';
+    print_r($participants->toArray());
+    echo '</pre>';
 
+
+
+    return;
 
 
     $testService = new \App\Services\ImportCheckerService();
@@ -192,7 +212,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('tournaments/{tournament_id}/courses', [App\Http\Controllers\Admin\TournamentController::class, 'getCourses'])->name('tournaments.courses');
 
 
-    Route::post('participant/calculate-local-handicap', [ParticipantController::class, 'calculateLocalHandicap'])->name('participants.calculate-handicap');
+    Route::post('participant/calculate-handicap', [ParticipantController::class, 'calculateHandicap'])->name('participants.calculate-handicap');
     Route::post('participant/course', [ParticipantController::class, 'setCourseSelection'])->name('participant.course');
     Route::post('participant/handicap', [ParticipantController::class, 'updateHandicap'])->name('participant.handicap');
     Route::post('participants/import', [ParticipantController::class, 'import'])->name('participants.import');

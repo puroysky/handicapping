@@ -95,13 +95,13 @@
                                 </th>
                                 <th class="sortable" data-column="4">
                                     <div class="d-flex align-items-center justify-content-between">
-                                        <span>Tournament HI</span>
+                                        <span>WHS HI</span>
                                         <i class="fas fa-sort sort-icon"></i>
                                     </div>
                                 </th>
                                 <th class="sortable" data-column="5">
                                     <div class="d-flex align-items-center justify-content-between">
-                                        <span>WHS HI</span>
+                                        <span>Tournament HI</span>
                                         <i class="fas fa-sort sort-icon"></i>
                                     </div>
                                 </th>
@@ -135,11 +135,11 @@
                                 <td class="local-handicap-index-cell" style="cursor: pointer;" onclick="editHandicap({{ $player->participant_id }}, 'local', {{ $player->final_local_handicap_index ?? 'null' }}, '{{ $player->user->profile->first_name ?? '' }} {{ $player->user->profile->last_name ?? '' }}')">
                                     <span class="fw-semibold">{{ $player->final_local_handicap_index ?? 'N/A' }}</span>
                                 </td>
-                                <td class="tournament-handicap-index-cell" style="cursor: pointer;" onclick="editHandicap({{ $player->participant_id }}, 'tournament', {{ $player->tournament_handicap_index ?? 'null' }}, '{{ $player->user->profile->first_name ?? '' }} {{ $player->user->profile->last_name ?? '' }}')">
-                                    <span class="text-muted" style="font-size: 0.9rem;">{{ $player->tournament_handicap_index ?? 'N/A' }}</span>
-                                </td>
                                 <td class="whs-handicap-cell" style="cursor: pointer;" onclick="editHandicap({{ $player->participant_id }}, 'whs', {{ $player->final_whs_handicap_index ?? 'null' }}, '{{ $player->user->profile->first_name ?? '' }} {{ $player->user->profile->last_name ?? '' }}')">
                                     <span class="text-muted" style="font-size: 0.9rem;">{{ $player->final_whs_handicap_index ?? '-' }}</span>
+                                </td>
+                                <td class="tournament-handicap-index-cell" style="cursor: pointer;" onclick="editHandicap({{ $player->participant_id }}, 'tournament', {{ $player->tournament_handicap_index ?? 'null' }}, '{{ $player->user->profile->first_name ?? '' }} {{ $player->user->profile->last_name ?? '' }}')">
+                                    <span class="text-muted" style="font-size: 0.9rem;">{{ $player->final_tournament_handicap_index ?? 'N/A' }}</span>
                                 </td>
                                 <td class="course-handicap-cell">
                                     @if($player->playerCourseHandicaps && count($player->playerCourseHandicaps) > 0)
@@ -1237,6 +1237,10 @@
             
             // Show success message
             if (data.success) {
+                const updatedCount = data.updated_count || 0;
+                const skippedCount = data.skipped_count || 0;
+                const hasErrors = data.errors && data.errors.length > 0;
+                
                 Swal.fire({
                     title: 'Success!',
                     html: `
@@ -1246,7 +1250,11 @@
                                 <li><strong>Local HI</strong> - Recalculated using tournament formula</li>
                                 <li><strong>Tournament HI</strong> - Recalculated based on new Local HI</li>
                             </ul>
-                            <p class="text-muted small mt-2"><strong>${data.count || 0}</strong> participant(s) updated.</p>
+                            <div class="mt-3 p-2 bg-light rounded">
+                                <small class="d-block"><i class="fas fa-check text-success me-1"></i><strong>Updated:</strong> ${updatedCount} participant(s)</small>
+                                ${skippedCount > 0 ? `<small class="d-block mt-1"><i class="fas fa-info-circle text-warning me-1"></i><strong>Skipped:</strong> ${skippedCount} participant(s)</small>` : ''}
+                                ${hasErrors ? `<small class="d-block mt-1 text-danger"><i class="fas fa-exclamation-circle me-1"></i><strong>Issues:</strong> ${data.errors.length} error(s)</small>` : ''}
+                            </div>
                         </div>
                     `,
                     icon: 'success',
@@ -1351,6 +1359,10 @@
             
             // Show success message
             if (data.success) {
+                const updatedCount = data.updated_count || 0;
+                const skippedCount = data.skipped_count || 0;
+                const hasErrors = data.errors && data.errors.length > 0;
+                
                 Swal.fire({
                     title: 'Success!',
                     html: `
@@ -1360,7 +1372,11 @@
                                 <li>Based on current <strong>Local Handicap Index</strong> values</li>
                                 <li>Applied tournament-specific formulas and adjustments</li>
                             </ul>
-                            <p class="text-muted small mt-2"><strong>${data.count || 0}</strong> participant(s) updated.</p>
+                            <div class="mt-3 p-2 bg-light rounded">
+                                <small class="d-block"><i class="fas fa-check text-success me-1"></i><strong>Updated:</strong> ${updatedCount} participant(s)</small>
+                                ${skippedCount > 0 ? `<small class="d-block mt-1"><i class="fas fa-info-circle text-warning me-1"></i><strong>Skipped:</strong> ${skippedCount} participant(s)</small>` : ''}
+                                ${hasErrors ? `<small class="d-block mt-1 text-danger"><i class="fas fa-exclamation-circle me-1"></i><strong>Issues:</strong> ${data.errors.length} error(s)</small>` : ''}
+                            </div>
                         </div>
                     `,
                     icon: 'success',
