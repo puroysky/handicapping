@@ -254,7 +254,9 @@ class PlayerImportService
 
         // Check duplicates in existing database
         if (in_array($rowData['whs_no'], $existingData['whs_numbers'])) {
-            $errors[] = "Row {$rowNumber}: WHS No {$rowData['whs_no']} already exists in database.";
+            if (!empty(trim($rowData['whs_no']))) {
+                $errors[] = "Row {$rowNumber}: WHS No {$rowData['whs_no']} already exists in database.";
+            }
         }
 
         if (in_array($rowData['account_no'], $existingData['account_numbers'])) {
@@ -271,7 +273,9 @@ class PlayerImportService
         $batchEmails = array_column($validRows, 'email');
 
         if (in_array($rowData['whs_no'], $batchWhsNumbers)) {
-            $errors[] = "Row {$rowNumber}: Duplicate WHS No {$rowData['whs_no']} found in import file.";
+            if (!empty(trim($rowData['whs_no']))) {
+                $errors[] = "Row {$rowNumber}: Duplicate WHS No {$rowData['whs_no']} found in import file.";
+            }
         }
 
         if (in_array($rowData['account_no'], $batchAccountNumbers)) {
