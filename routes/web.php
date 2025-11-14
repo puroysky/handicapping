@@ -23,12 +23,20 @@ use Maatwebsite\Excel\Facades\Excel;
 use NXP\MathExecutor;
 use App\Http\Controllers\WhsHandicapIndexController;
 use App\Models\Participant;
+use App\Models\Score;
+use Illuminate\Support\Facades\DB;
 
 Route::get('/', function () {
     return view('welcome');
 })->name('home');
 
 Route::get('test', function () {
+
+    $tournamentId = 1;
+    Score::where('tournament_id', $tournamentId)->get();
+
+    DB::raw('SELECT scores.* FROM scores WHERE tournament_id = ' . $tournamentId);
+
 
 
 

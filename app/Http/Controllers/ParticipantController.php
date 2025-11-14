@@ -283,18 +283,7 @@ class ParticipantController extends Controller
         try {
             DB::beginTransaction();
 
-            $participants = Participant::with('user.profile', 'user.player', 'tournament', 'participantCourseHandicaps.course', 'participantCourseHandicaps.tee')
-                ->leftJoin('users', 'participants.user_id', '=', 'users.id')
-                ->leftJoin('tournaments', 'participants.tournament_id', '=', 'tournaments.tournament_id')
-                ->leftJoin('player_profiles', 'participants.player_profile_id', '=', 'player_profiles.player_profile_id')
-                ->leftJoin('whs_handicap_indexes', function ($join) {
-                    $join->on('participants.tournament_id', '=', 'whs_handicap_indexes.tournament_id')
-                        ->on('tournaments.whs_handicap_import_id', '=', 'whs_handicap_indexes.whs_handicap_import_id')
-                        ->on('player_profiles.whs_no', '=', 'whs_handicap_indexes.whs_no');
-                })
-                ->select('participants.*', 'users.*', 'tournaments.*', 'player_profiles.*', 'whs_handicap_indexes.whs_handicap_index', 'whs_handicap_indexes.final_whs_handicap_index')
-                ->where('participants.tournament_id', $tournament->tournament_id)
-                ->get();
+            $participants = $this->getParticipantData($tournament->tournament_id);
 
             if ($participants->isEmpty()) {
                 return response()->json([
@@ -475,11 +464,27 @@ class ParticipantController extends Controller
         }
     }
 
-    private function calculateLocalHandicap($whsHandicapIndex, $slopeRating)
+
+    private function getParticipantData($tournamentId)
     {
-        // WHS to Local Handicap conversion formula
-        return ($whsHandicapIndex * $slopeRating) / 113;
+
+        $participants = Participant::with('user.profile', 'user.player', 'tournament', 'participantCourseHandicaps.course', 'participantCourseHandicaps.tee')
+            ->leftJoin('users', 'participants.user_id', '=', 'users.id')
+            ->leftJoin('tournaments', 'participants.tournament_id', '=', 'tournaments.tournament_id')
+            ->leftJoin('player_profiles', 'participants.player_profile_id', '=', 'player_profiles.player_profile_id')
+            ->leftJoin('whs_handicap_indexes', function ($join) {
+                $join->on('participants.tournament_id', '=', 'whs_handicap_indexes.tournament_id')
+                    ->on('tournaments.whs_handicap_import_id', '=', 'whs_handicap_indexes.whs_handicap_import_id')
+                    ->on('player_profiles.whs_no', '=', 'whs_handicap_indexes.whs_no');
+            })
+            ->select('participants.*', 'users.*', 'tournaments.*', 'player_profiles.*', 'whs_handicap_indexes.whs_handicap_index', 'whs_handicap_indexes.final_whs_handicap_index')
+            ->where('participants.tournament_id', $tournamentId)
+            ->get();
+
+        return $participants;
     }
+
+    private function calculateLocalHandicap($whsHandicapIndex, $slopeRating) {}
 
     /**
      * Handle course selection for a participant
