@@ -92,7 +92,7 @@ return new class extends Migration
             $table->unsignedBigInteger('user_profile_id');
             $table->unsignedBigInteger('member_id')->nullable()->default(null);
             $table->string('account_no', 15)->unique();
-            $table->unsignedBigInteger('whs_no')->unique();
+            $table->unsignedBigInteger('whs_no')->nullable()->default(null)->unique();
             $table->unsignedBigInteger('created_by');
             $table->unsignedBigInteger('updated_by')->nullable()->default(null);
             $table->timestamp('created_at')->useCurrent();

@@ -16,4 +16,9 @@ class ParticipantCourse extends Model
         'created_by',
         'updated_by'
     ];
+
+    public function course()
+    {
+        return $this->belongsTo(Course::class, 'course_id', 'course_id');
+    }
 }

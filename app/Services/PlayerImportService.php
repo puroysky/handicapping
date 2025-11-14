@@ -203,7 +203,7 @@ class PlayerImportService
         Log::debug('Validating row', ['row_number' => $rowNumber, 'row_data' => $rowData]);
         // Validate field formats
         $rowValidator = Validator::make($rowData, [
-            'whs_no' => 'required|numeric|integer',
+            'whs_no' => 'nullable|numeric|integer',
             'account_no' => 'required|string|max:50',
             'first_name' => 'required|string|max:100',
             'middle_name' => 'nullable|string|max:100',
@@ -220,7 +220,7 @@ class PlayerImportService
         }
 
         $sex = strtoupper($rowData['sex']);
-        $email = strtolower($rowData['account_no']) . '@golf.local';
+        $email = strtolower($rowData['account_no']) . '@valleygolf.local';
 
         // Check for duplicates
         $duplicateCheck = $this->checkForDuplicates($rowData, $email, $existingData, $validRows, $rowNumber);
@@ -232,7 +232,7 @@ class PlayerImportService
         return [
             'success' => true,
             'data' => [
-                'whs_no' => $rowData['whs_no'],
+                'whs_no' => empty(trim($rowData['whs_no'])) ? null : $rowData['whs_no'],
                 'account_no' => $rowData['account_no'],
                 'first_name' => $rowData['first_name'],
                 'middle_name' => $rowData['middle_name'],

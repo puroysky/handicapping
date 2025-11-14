@@ -26,7 +26,7 @@ return new class extends Migration
             $table->unsignedBigInteger('tournament_id')->comment('Tournament played');
             $table->unsignedBigInteger('tournament_course_id')->comment('Used for tournament rounds only');
 
-            $table->unsignedBigInteger('division_id')->comment('Division played');
+            $table->unsignedBigInteger('division_id')->nullable()->default(NULL)->comment('Division played');
             $table->unsignedBigInteger('course_id')->comment('Identifies the golf course where the round was played, applicable to both tournament and non-tournament rounds');
             $table->unsignedBigInteger('tee_id')->comment('Tee played');
 
@@ -42,7 +42,6 @@ return new class extends Migration
 
 
             $table->decimal('handicap_index', 4, 1)->nullable()->default(NULL)->comment('Actual handicap index of the player at time of round');
-            $table->enum('handicap_category', ['reg', 'plus', 'none', 'legacy'])->default('reg')->comment('Type of handicap index used: WHS official, local club, none, or unknown');
             $table->enum('handicap_index_source', ['tournament', 'whs', 'local', 'legacy'])->nullable()->comment('Type of handicap index used: tournament, WHS official, local club, or unknown');
             $table->unsignedSmallInteger('course_handicap')->nullable()->comment('Course handicap for the player at time of round');
 
@@ -86,6 +85,9 @@ return new class extends Migration
         DB::statement('ALTER TABLE scores ADD CONSTRAINT chk_net_score_required CHECK (NOT (score_source IN (\'import\', \'form\') AND net_score IS NULL))');
         DB::statement('ALTER TABLE scores ADD CONSTRAINT chk_participant_id_required CHECK (NOT (score_source IN (\'import\', \'form\') AND participant_id IS NULL))');
         DB::statement('ALTER TABLE scores ADD CONSTRAINT chk_course_handicap_required CHECK (NOT (score_source IN (\'import\', \'form\') AND course_handicap IS NULL))');
+
+
+        DB::statement('ALTER TABLE scores ADD CONSTRAINT chk_division_id_required CHECK (NOT (score_source IN (\'import\', \'form\') AND division_id IS NULL))');
     }
 
     /**
