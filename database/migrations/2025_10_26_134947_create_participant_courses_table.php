@@ -16,12 +16,11 @@ return new class extends Migration
             $table->unsignedBigInteger('course_id');
 
 
-            $table->decimal('course_handicap', 4, 2)->nullable()->default(null);
-            $table->decimal('final_course_handicap', 4, 2)->nullable()->default(null);
+
 
 
             // Composite primary key
-            $table->primary(['participant_id', 'course_id'], 'participant_courses_primary');
+            $table->primary(['tournament_id', 'participant_id', 'course_id'], 'tournament_participant_courses_primary');
 
             $table->unsignedBigInteger('tournament_id');
 

@@ -35,11 +35,12 @@ return new class extends Migration
 
 
 
-            $table->string('local_handicap_formula_1', 255)->nullable()->default(null)->comment('Formula applied when the player has both a WHS and a Local Handicap Index');
-            $table->string('local_handicap_formula_2', 255)->nullable()->default(null)->comment('Formula applied when the player has a WHS Handicap Index but no Local Handicap Index');
-            $table->string('local_handicap_formula_3', 255)->nullable()->default(null)->comment('Formula applied when the player has a Local Handicap Index but no WHS Handicap Index');
-            $table->string('local_handicap_formula_4', 255)->nullable()->default(null)->comment('Formula applied by default when the player has neither a WHS nor a Local Handicap Index');
-            $table->string('handicap_formula_desc', 255)->nullable()->default(null);
+            $table->string('tournament_handicap_formula_1', 255)->nullable()->default(null)->comment('Formula applied when the player has both a WHS and a Local Handicap Index');
+            $table->string('tournament_handicap_formula_2', 255)->nullable()->default(null)->comment('Formula applied when the player has a WHS Handicap Index but no Local Handicap Index');
+            $table->string('tournament_handicap_formula_3', 255)->nullable()->default(null)->comment('Formula applied when the player has a Local Handicap Index but no WHS Handicap Index');
+            $table->string('tournament_handicap_formula_4', 255)->nullable()->default(null)->comment('Formula applied by default when the player has neither a WHS nor a Local Handicap Index');
+            $table->string('tournament_handicap_formula_desc', 255)->nullable()->default(null);
+            $table->string('course_handicap_formula_desc', 255)->nullable()->default(null);
 
             $table->json('handicap_score_differential_config')->nullable()->default(null);
 

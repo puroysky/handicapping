@@ -22,7 +22,9 @@ class ScoreService
     private int $xStrokePenalty;
 
     private Tournament $tournament;
+    private TournamentCourse $tournamentCourse;
     private PlayerProfile $playerProfile;
+    private Participant $participant;
 
     public function __construct(int $xStrokePenalty = 2)
     {
@@ -138,74 +140,24 @@ class ScoreService
     public function store($request)
     {
 
-
-
         try {
 
             $this->storeRequestToFile($request);
-
-
-            $this->playerProfile = PlayerProfile::with('user', 'userProfile')
-                ->where('player_profile_id', $request['player_profile_id'])
-                ->firstOrFail();
-
-
-
-
-            $tournamentCourse = TournamentCourse::with('tournament')
-                ->where('tournament_id', $request['tournament_id'])
-                ->where('tournament_course_id', $request['tournament_course_id'])
-                ->firstOrFail();
-
-            $this->tournament = $tournamentCourse->tournament;
-
-
-
-
-
-            $sex = $this->playerProfile->userProfile->sex;
-
+            $this->loadScoreData($request);
 
 
             $scores = $request['scores'] ?? [];
+
             $side = $this->determineSide($scores);
 
 
 
 
 
-            $participant = Participant::where('tournament_id', $request['tournament_id'])
-                ->where('player_profile_id', $request['player_profile_id'])
-                ->first();
-
-            if ($participant === null) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Failed to create score',
-                    'error' => 'Player is not registered in the selected tournament.'
-
-                ], 422);
-            }
-
-
-
-
-
-            $scorecardId = $tournamentCourse->scorecard_id;
+            $scorecardId = $this->tournamentCourse->scorecard_id;
             $teeId = $request['tee_id'];
-
-            $formattedScore = $this->formatScoreInput($scorecardId, $sex, $teeId, $scores);
-
-
-
-
-
-
-
+            $formattedScore = $this->formatScoreInput($teeId, $scores);
             $scorecard = $this->getScorecard($scorecardId, $teeId);
-
-
-
 
             $courseHandicap = $this->getCourseHandicap($request, $scorecard);
 
@@ -274,6 +226,27 @@ class ScoreService
         }
     }
 
+
+
+    private function loadScoreData($request)
+    {
+
+
+        $this->playerProfile = PlayerProfile::with('user', 'userProfile')
+            ->where('player_profile_id', $request['player_profile_id'])
+            ->firstOrFail();
+
+        $this->tournamentCourse = TournamentCourse::with('scorecard.scoreDifferentialFormula')
+            ->where('tournament_course_id', $request['tournament_course_id'])
+            ->firstOrFail();
+
+        $this->tournament = $this->tournamentCourse->tournament;
+
+
+        $this->participant = Participant::where('tournament_id', $request['tournament_id'])
+            ->where('player_profile_id', $request['player_profile_id'])
+            ->firstOrFail();
+    }
 
 
     private function getScorecard($scorecardId, $teeId): ?Scorecard
@@ -368,15 +341,18 @@ class ScoreService
      * Format scorecard input data for a given scorecard, gender, and tee.
      *
      * @param int $scorecardId
-     * @param string $gender
+     * @param string $sex
      * @param int $teeId
      * @param array $score Array of scores [hole => ['gross_strokes' => int, ...]]
      * @return array|null Returns array keyed by hole number with par, stroke index, yardage, and gross strokes, or null if not found.
      */
-    private function formatScoreInput(int $scorecardId, string $gender, int $teeId, array $score): ?array
+    private function formatScoreInput(int $teeId, array $score): ?array
     {
+
+        $scorecardId = $this->tournamentCourse->scorecard_id;
+        $sex = $this->playerProfile->userProfile->sex;
         // Validate input parameters
-        if (empty($scorecardId) || empty($gender) || empty($teeId)) {
+        if (empty($scorecardId) || empty($sex) || empty($teeId)) {
             Log::warning('formatScoreInput: Missing required parameters', compact('scorecardId', 'gender', 'teeId'));
             return null;
         }
@@ -403,12 +379,12 @@ class ScoreService
 
         // Use Laravel Collection for more idiomatic processing, keyed by hole number
         return $scoreCard->scorecardHoles
-            ->mapWithKeys(function ($hole) use ($score, $gender) {
+            ->mapWithKeys(function ($hole) use ($score, $sex) {
                 return [
                     $hole->hole => [
                         'hole' => $hole->hole,
                         'par' => $hole->par,
-                        'stroke_index' => $gender === 'M' ? $hole->men_stroke_index : $hole->ladies_stroke_index,
+                        'stroke_index' => $sex === 'M' ? $hole->men_stroke_index : $hole->ladies_stroke_index,
                         'yardage' => $hole->yardage?->yardage,
                         'gross_strokes' => $score[$hole->hole]['gross_strokes'] ?? null,
                     ]
@@ -458,18 +434,45 @@ class ScoreService
         $userId = Auth::id();
         $now = now();
 
-        $player = PlayerProfile::findOrFail($request['player_profile_id']);
+        $player = $this->playerProfile;
+
+        $tournamentCourse = $this->tournamentCourse;
+        $courseId = $tournamentCourse->course_id;
+
+        $scorecard = $tournamentCourse->scorecard->scoreDifferentialFormula;
+
+        if (!$scorecard) {
+            Log::warning('createScore: Scorecard not found', ['tournament_id' => $request['tournament_id'], 'course_id' => $courseId]);
+            throw new \Exception('Scorecard not found');
+        }
+
+        $participant = Participant::with('participantCourse', function ($query) use ($courseId) {
+            $query->where('course_id', $courseId);
+        })
+            ->where('user_id', $player->user_id)
+            ->where('tournament_id', $request['tournament_id'])
+            ->first();
+
+
+
+        if (!$participant) {
+            Log::warning('createScore: Participant not found', ['user_id' => $player->user_id, 'tournament_id' => $request['tournament_id']]);
+            throw new \Exception('Participant not found');
+        }
+
+
+
 
 
         return Score::create([
             'player_profile_id' => $request['player_profile_id'],
             'user_profile_id' => $player->user_profile_id,
             'user_id' => $player->user_id,
-            'participant_id' => null,
+            'participant_id' => $participant->participant_id,
             'tournament_id' => $request['tournament_id'],
             'tournament_course_id' => $request['tournament_course_id'],
             'division_id' => $request['division_id'],
-            'course_id' => null,
+            'course_id' => $tournamentCourse->course_id,
             'tee_id' => $request['tee_id'],
 
             'date_played' => $request['date_played'],
@@ -478,8 +481,8 @@ class ScoreService
             'score_source' => 'form',
             'holes_played' => $side,
 
-            'handicap_index' => null,
-            'handicap_index_source' => null,
+            'handicap_index' => $participant->final_tournament_handicap,
+            'handicap_index_source' => 'tournament',
             'course_handicap' => null,
 
 

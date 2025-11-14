@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id('division_id');
             $table->string('division_name', 100);
             $table->string('division_desc', 255)->nullable()->default(null);
+            $table->enum('division_type', ['regular', 'sponsored'])->nullable()->default('regular');
 
             $table->enum('division_sex', ['M', 'F', 'X'])->default('X');
             $table->enum('division_participant_type', ['member', 'guest', 'mixed'])->default('mixed');

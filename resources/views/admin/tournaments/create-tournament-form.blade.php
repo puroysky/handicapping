@@ -38,16 +38,21 @@
                             <div class="step-connector"></div>
                             <div class="step" data-step="5">
                                 <div class="step-circle">5</div>
-                                <div class="step-label">Divisions</div>
+                                <div class="step-label">Tournament Handicap</div>
                             </div>
                             <div class="step-connector"></div>
                             <div class="step" data-step="6">
                                 <div class="step-circle">6</div>
-                                <div class="step-label">Formula</div>
+                                <div class="step-label">Course Handicap</div>
                             </div>
                             <div class="step-connector"></div>
                             <div class="step" data-step="7">
                                 <div class="step-circle">7</div>
+                                <div class="step-label">Divisions</div>
+                            </div>
+                            <div class="step-connector"></div>
+                            <div class="step" data-step="8">
+                                <div class="step-circle">8</div>
                                 <div class="step-label">Review</div>
                             </div>
                         </div>
@@ -228,7 +233,7 @@
                                                 <tr>
                                                     <td>
                                                         <div class="d-flex gap-1">
-                                                            <input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[3][min]" value="1" placeholder="Min">
+                                                            <input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[3][min]" value="3" placeholder="Min">
                                                             <span class="text-muted">to</span>
                                                             <input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[3][max]" value="3" placeholder="Max">
                                                         </div>
@@ -250,10 +255,64 @@
                                                         </button>
                                                     </td>
                                                 </tr>
+
                                                 <tr>
                                                     <td>
                                                         <div class="d-flex gap-1">
-                                                            <input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[6][min]" value="4" placeholder="Min">
+                                                            <input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[4][min]" value="4" placeholder="Min">
+                                                            <span class="text-muted">to</span>
+                                                            <input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[4][max]" value="4" placeholder="Max">
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="d-flex gap-2">
+                                                            <select class="form-control form-control-sm" name="handicap_score_differential_config[4][method]" required>
+                                                                <option value="LOWEST">Lowest</option>
+                                                                <option value="AVERAGE_OF_LOWEST">Average of Lowest</option>
+                                                                <option value="HIGHEST">Highest</option>
+                                                            </select>
+                                                            <input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[4][count]" value="1" min="1" placeholder="Count" style="width: 80px;">
+                                                        </div>
+                                                    </td>
+                                                    <td><input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[4][adjustment]" value="-1.0" step="0.1"></td>
+                                                    <td style="text-align: center;">
+                                                        <button type="button" class="btn btn-sm btn-danger" onclick="removeScoresConfigRow(this)">
+                                                            <i class="fas fa-trash-alt"></i>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+
+
+                                                <tr>
+                                                    <td>
+                                                        <div class="d-flex gap-1">
+                                                            <input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[5][min]" value="5" placeholder="Min">
+                                                            <span class="text-muted">to</span>
+                                                            <input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[5][max]" value="5" placeholder="Max">
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="d-flex gap-2">
+                                                            <select class="form-control form-control-sm" name="handicap_score_differential_config[5][method]" required>
+                                                                <option value="LOWEST">Lowest</option>
+                                                                <option value="AVERAGE_OF_LOWEST">Average of Lowest</option>
+                                                                <option value="HIGHEST">Highest</option>
+                                                            </select>
+                                                            <input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[5][count]" value="1" min="1" placeholder="Count" style="width: 80px;">
+                                                        </div>
+                                                    </td>
+                                                    <td><input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[5][adjustment]" value="0" step="0.1"></td>
+                                                    <td style="text-align: center;">
+                                                        <button type="button" class="btn btn-sm btn-danger" onclick="removeScoresConfigRow(this)">
+                                                            <i class="fas fa-trash-alt"></i>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+
+                                                <tr>
+                                                    <td>
+                                                        <div class="d-flex gap-1">
+                                                            <input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[6][min]" value="6" placeholder="Min">
                                                             <span class="text-muted">to</span>
                                                             <input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[6][max]" value="6" placeholder="Max">
                                                         </div>
@@ -261,8 +320,8 @@
                                                     <td>
                                                         <div class="d-flex gap-2">
                                                             <select class="form-control form-control-sm" name="handicap_score_differential_config[6][method]" required>
-                                                                <option value="AVERAGE_OF_LOWEST" selected>Average of Lowest</option>
                                                                 <option value="LOWEST">Lowest</option>
+                                                                <option value="AVERAGE_OF_LOWEST" selected>Average of Lowest</option>
                                                                 <option value="HIGHEST">Highest</option>
                                                             </select>
                                                             <input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[6][count]" value="2" min="1" placeholder="Count" style="width: 80px;">
@@ -275,19 +334,49 @@
                                                         </button>
                                                     </td>
                                                 </tr>
+
+
                                                 <tr>
                                                     <td>
                                                         <div class="d-flex gap-1">
-                                                            <input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[9][min]" value="7" placeholder="Min">
+                                                            <input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[7][min]" value="7" placeholder="Min">
                                                             <span class="text-muted">to</span>
-                                                            <input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[9][max]" value="9" placeholder="Max">
+                                                            <input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[7][max]" value="8" placeholder="Max">
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="d-flex gap-2">
+                                                            <select class="form-control form-control-sm" name="handicap_score_differential_config[7][method]" required>
+                                                                <option value="LOWEST">Lowest</option>
+                                                                <option value="AVERAGE_OF_LOWEST" selected>Average of Lowest</option>
+                                                                <option value="HIGHEST">Highest</option>
+                                                            </select>
+                                                            <input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[7][count]" value="2" min="1" placeholder="Count" style="width: 80px;">
+                                                        </div>
+                                                    </td>
+                                                    <td><input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[7][adjustment]" value="0" step="0.1"></td>
+                                                    <td style="text-align: center;">
+                                                        <button type="button" class="btn btn-sm btn-danger" onclick="removeScoresConfigRow(this)">
+                                                            <i class="fas fa-trash-alt"></i>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+
+
+
+                                                <tr>
+                                                    <td>
+                                                        <div class="d-flex gap-1">
+                                                            <input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[9][min]" value="9" placeholder="Min">
+                                                            <span class="text-muted">to</span>
+                                                            <input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[9][max]" value="11" placeholder="Max">
                                                         </div>
                                                     </td>
                                                     <td>
                                                         <div class="d-flex gap-2">
                                                             <select class="form-control form-control-sm" name="handicap_score_differential_config[9][method]" required>
-                                                                <option value="AVERAGE_OF_LOWEST" selected>Average of Lowest</option>
                                                                 <option value="LOWEST">Lowest</option>
+                                                                <option value="AVERAGE_OF_LOWEST" selected>Average of Lowest</option>
                                                                 <option value="HIGHEST">Highest</option>
                                                             </select>
                                                             <input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[9][count]" value="3" min="1" placeholder="Count" style="width: 80px;">
@@ -300,35 +389,93 @@
                                                         </button>
                                                     </td>
                                                 </tr>
+
+
                                                 <tr>
                                                     <td>
                                                         <div class="d-flex gap-1">
-                                                            <input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[14][min]" value="10" placeholder="Min">
+                                                            <input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[12][min]" value="12" placeholder="Min">
                                                             <span class="text-muted">to</span>
-                                                            <input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[14][max]" value="14" placeholder="Max">
+                                                            <input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[12][max]" value="14" placeholder="Max">
                                                         </div>
                                                     </td>
                                                     <td>
                                                         <div class="d-flex gap-2">
-                                                            <select class="form-control form-control-sm" name="handicap_score_differential_config[14][method]" required>
-                                                                <option value="AVERAGE_OF_LOWEST" selected>Average of Lowest</option>
+                                                            <select class="form-control form-control-sm" name="handicap_score_differential_config[12][method]" required>
                                                                 <option value="LOWEST">Lowest</option>
+                                                                <option value="AVERAGE_OF_LOWEST" selected>Average of Lowest</option>
                                                                 <option value="HIGHEST">Highest</option>
                                                             </select>
-                                                            <input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[14][count]" value="4" min="1" placeholder="Count" style="width: 80px;">
+                                                            <input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[12][count]" value="4" min="1" placeholder="Count" style="width: 80px;">
                                                         </div>
                                                     </td>
-                                                    <td><input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[14][adjustment]" value="0" step="0.1"></td>
+                                                    <td><input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[12][adjustment]" value="0" step="0.1"></td>
                                                     <td style="text-align: center;">
                                                         <button type="button" class="btn btn-sm btn-danger" onclick="removeScoresConfigRow(this)">
                                                             <i class="fas fa-trash-alt"></i>
                                                         </button>
                                                     </td>
                                                 </tr>
+
+
+
                                                 <tr>
                                                     <td>
                                                         <div class="d-flex gap-1">
-                                                            <input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[19][min]" value="15" placeholder="Min">
+                                                            <input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[15][min]" value="15" placeholder="Min">
+                                                            <span class="text-muted">to</span>
+                                                            <input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[15][max]" value="16" placeholder="Max">
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="d-flex gap-2">
+                                                            <select class="form-control form-control-sm" name="handicap_score_differential_config[15][method]" required>
+                                                                <option value="LOWEST">Lowest</option>
+                                                                <option value="AVERAGE_OF_LOWEST" selected>Average of Lowest</option>
+                                                                <option value="HIGHEST">Highest</option>
+                                                            </select>
+                                                            <input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[15][count]" value="5" min="1" placeholder="Count" style="width: 80px;">
+                                                        </div>
+                                                    </td>
+                                                    <td><input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[15][adjustment]" value="0" step="0.1"></td>
+                                                    <td style="text-align: center;">
+                                                        <button type="button" class="btn btn-sm btn-danger" onclick="removeScoresConfigRow(this)">
+                                                            <i class="fas fa-trash-alt"></i>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+
+
+                                                <tr>
+                                                    <td>
+                                                        <div class="d-flex gap-1">
+                                                            <input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[17][min]" value="17" placeholder="Min">
+                                                            <span class="text-muted">to</span>
+                                                            <input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[17][max]" value="18" placeholder="Max">
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="d-flex gap-2">
+                                                            <select class="form-control form-control-sm" name="handicap_score_differential_config[17][method]" required>
+                                                                <option value="LOWEST">Lowest</option>
+                                                                <option value="AVERAGE_OF_LOWEST" selected>Average of Lowest</option>
+                                                                <option value="HIGHEST">Highest</option>
+                                                            </select>
+                                                            <input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[17][count]" value="6" min="1" placeholder="Count" style="width: 80px;">
+                                                        </div>
+                                                    </td>
+                                                    <td><input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[17][adjustment]" value="0" step="0.1"></td>
+                                                    <td style="text-align: center;">
+                                                        <button type="button" class="btn btn-sm btn-danger" onclick="removeScoresConfigRow(this)">
+                                                            <i class="fas fa-trash-alt"></i>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+
+                                                <tr>
+                                                    <td>
+                                                        <div class="d-flex gap-1">
+                                                            <input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[19][min]" value="19" placeholder="Min">
                                                             <span class="text-muted">to</span>
                                                             <input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[19][max]" value="19" placeholder="Max">
                                                         </div>
@@ -336,11 +483,11 @@
                                                     <td>
                                                         <div class="d-flex gap-2">
                                                             <select class="form-control form-control-sm" name="handicap_score_differential_config[19][method]" required>
-                                                                <option value="AVERAGE_OF_LOWEST" selected>Average of Lowest</option>
                                                                 <option value="LOWEST">Lowest</option>
+                                                                <option value="AVERAGE_OF_LOWEST" selected>Average of Lowest</option>
                                                                 <option value="HIGHEST">Highest</option>
                                                             </select>
-                                                            <input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[19][count]" value="5" min="1" placeholder="Count" style="width: 80px;">
+                                                            <input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[19][count]" value="7" min="1" placeholder="Count" style="width: 80px;">
                                                         </div>
                                                     </td>
                                                     <td><input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[19][adjustment]" value="0" step="0.1"></td>
@@ -350,19 +497,21 @@
                                                         </button>
                                                     </td>
                                                 </tr>
+
+
                                                 <tr>
                                                     <td>
                                                         <div class="d-flex gap-1">
                                                             <input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[20][min]" value="20" placeholder="Min">
                                                             <span class="text-muted">to</span>
-                                                            <input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[20][max]" value="999" placeholder="Max">
+                                                            <input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[20][max]" value="20" placeholder="Max">
                                                         </div>
                                                     </td>
                                                     <td>
                                                         <div class="d-flex gap-2">
                                                             <select class="form-control form-control-sm" name="handicap_score_differential_config[20][method]" required>
-                                                                <option value="AVERAGE_OF_LOWEST" selected>Average of Lowest</option>
                                                                 <option value="LOWEST">Lowest</option>
+                                                                <option value="AVERAGE_OF_LOWEST" selected>Average of Lowest</option>
                                                                 <option value="HIGHEST">Highest</option>
                                                             </select>
                                                             <input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[20][count]" value="8" min="1" placeholder="Count" style="width: 80px;">
@@ -375,6 +524,15 @@
                                                         </button>
                                                     </td>
                                                 </tr>
+
+
+
+
+
+
+
+
+
                                             </tbody>
                                         </table>
                                     </div>
@@ -401,10 +559,366 @@
                             </div>
                         </div>
 
-                        <!-- STEP 5: Tournament Setup -->
+                        <!-- STEP 5: Tournament Handicap Configuration -->
                         <div class="form-step" data-step="5">
                             <div class="step-header">
-                                <h5>Step 5: Tournament Divisions</h5>
+                                <h5>Step 5: Tournament Handicap Configuration</h5>
+                                <p class="text-muted">Configure how to calculate tournament handicaps</p>
+                            </div>
+
+                            <div class="alert alert-info mb-4">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <strong>Tournament Handicap Formulas:</strong> Define how to calculate handicaps based on player handicap data availability.
+                                <ul class="mb-0 mt-2 ms-4">
+                                    <li><strong>Formula 1:</strong> Both WHS and Local Handicap Index available</li>
+                                    <li><strong>Formula 2:</strong> Only WHS Handicap Index available</li>
+                                    <li><strong>Formula 3:</strong> Only Local Handicap Index available</li>
+                                    <li><strong>Formula 4:</strong> Neither WHS nor Local Handicap Index available (default)</li>
+                                </ul>
+                            </div>
+
+                            <div class="mb-4 p-3 bg-light border rounded">
+                                <small class="text-muted">
+                                    <strong>Available Variables:</strong>
+                                    <ul class="mb-0 mt-2 ms-4">
+                                        <li><code>LOCAL_HANDICAP_INDEX</code> - Local Handicap Index</li>
+                                        <li><code>WHS_HANDICAP_INDEX</code> - World Handicap System Index</li>
+                                    </ul>
+                                    <strong class="d-block mt-2">Operators:</strong> +, -, *, / &nbsp;|&nbsp;
+                                    <strong>Functions:</strong> MIN(), MAX(), ROUND(), AVG()
+                                </small>
+                            </div>
+
+                            <div class="card shadow-sm">
+                                <div class="card-header bg-primary text-white py-3">
+                                    <h6 class="mb-0">
+                                        <i class="fas fa-calculator me-2"></i>Handicap Formulas
+                                    </h6>
+                                </div>
+                                <div class="card-body p-4">
+                                    <div class="row mb-4">
+                                        <div class="col-12">
+                                            <h6 class="mb-3">
+                                                <span class="badge bg-success me-2">FORMULA 1</span>
+                                                <span class="text-muted small">Both WHS and Local Available</span>
+                                            </h6>
+                                            <div class="form-floating">
+                                                <textarea class="form-control tournament-handicap-formula"
+                                                    id="tournament_handicap_formula_1"
+                                                    name="tournament_handicap_formula_1"
+                                                    placeholder="Enter formula for when both handicaps are available"
+                                                    style="height: 100px;"
+                                                    maxlength="500">MIN(LOCAL_HANDICAP_INDEX, WHS_HANDICAP_INDEX)</textarea>
+                                                <label for="tournament_handicap_formula_1">Formula 1 *</label>
+                                                <div class="invalid-feedback">
+                                                    Please provide a valid formula.
+                                                </div>
+                                            </div>
+                                            <small class="form-text text-muted d-block mt-2">
+                                                <i class="fas fa-info-circle me-1"></i>
+                                                Example: <code>MIN(LOCAL_HANDICAP_INDEX, WHS_HANDICAP_INDEX)</code>
+                                            </small>
+                                        </div>
+                                    </div>
+
+                                    <hr class="my-4">
+
+                                    <div class="row mb-4">
+                                        <div class="col-12">
+                                            <h6 class="mb-3">
+                                                <span class="badge bg-warning text-dark me-2">FORMULA 2</span>
+                                                <span class="text-muted small">Only WHS Available</span>
+                                            </h6>
+                                            <div class="form-floating">
+                                                <textarea class="form-control tournament-handicap-formula"
+                                                    id="tournament_handicap_formula_2"
+                                                    name="tournament_handicap_formula_2"
+                                                    placeholder="Enter formula for when only WHS handicap is available"
+                                                    style="height: 100px;"
+                                                    maxlength="500">WHS_HANDICAP_INDEX * 0.8</textarea>
+                                                <label for="tournament_handicap_formula_2">Formula 2 *</label>
+                                                <div class="invalid-feedback">
+                                                    Please provide a valid formula.
+                                                </div>
+                                            </div>
+                                            <small class="form-text text-muted d-block mt-2">
+                                                <i class="fas fa-info-circle me-1"></i>
+                                                Example: <code>WHS_HANDICAP_INDEX * 0.8</code>
+                                            </small>
+                                        </div>
+                                    </div>
+
+                                    <hr class="my-4">
+
+                                    <div class="row mb-4">
+                                        <div class="col-12">
+                                            <h6 class="mb-3">
+                                                <span class="badge bg-danger me-2">FORMULA 3</span>
+                                                <span class="text-muted small">Only Local Available</span>
+                                            </h6>
+                                            <div class="form-floating">
+                                                <textarea class="form-control tournament-handicap-formula"
+                                                    id="tournament_handicap_formula_3"
+                                                    name="tournament_handicap_formula_3"
+                                                    placeholder="Enter formula for when only local handicap is available"
+                                                    style="height: 100px;"
+                                                    maxlength="500">LOCAL_HANDICAP_INDEX</textarea>
+                                                <label for="tournament_handicap_formula_3">Formula 3 *</label>
+                                                <div class="invalid-feedback">
+                                                    Please provide a valid formula.
+                                                </div>
+                                            </div>
+                                            <small class="form-text text-muted d-block mt-2">
+                                                <i class="fas fa-info-circle me-1"></i>
+                                                Example: <code>LOCAL_HANDICAP_INDEX</code>
+                                            </small>
+                                        </div>
+                                    </div>
+
+                                    <hr class="my-4">
+
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <h6 class="mb-3">
+                                                <span class="badge bg-secondary me-2">FORMULA 4</span>
+                                                <span class="text-muted small">Neither Available (Default)</span>
+                                            </h6>
+                                            <div class="form-floating">
+                                                <textarea class="form-control tournament-handicap-formula"
+                                                    id="tournament_handicap_formula_4"
+                                                    name="tournament_handicap_formula_4"
+                                                    placeholder="Enter default formula when no handicap data is available"
+                                                    style="height: 100px;"
+                                                    maxlength="500"></textarea>
+                                                <label for="tournament_handicap_formula_4">Formula 4 (Optional)</label>
+                                                <div class="invalid-feedback">
+                                                    Please provide a valid formula.
+                                                </div>
+                                            </div>
+                                            <small class="form-text text-muted d-block mt-2">
+                                                <i class="fas fa-info-circle me-1"></i>
+                                                Example: <code>0</code>
+                                            </small>
+                                            <div class="alert alert-info mt-3 mb-0" style="font-size: 0.9rem;">
+                                                <i class="fas fa-lightbulb me-2"></i>
+                                                <strong>Leave this blank to make handicap null.</strong> A handicap value of <code>0</code> is different from a null (empty) value.
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card shadow-sm mt-4">
+                                <div class="card-header bg-info text-white py-3">
+                                    <h6 class="mb-0">
+                                        <i class="fas fa-flask me-2"></i>Test Tournament Handicap Formulas
+                                    </h6>
+                                </div>
+                                <div class="card-body p-4">
+                                    <p class="text-muted small mb-3">
+                                        Enter test values below to verify your tournament handicap formulas work correctly:
+                                    </p>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Local Handicap Index</label>
+                                            <input type="number" step="0.1" class="form-control test-tournament-value" id="test-tournament-local-handicap" placeholder="e.g., 12.5">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">WHS Handicap Index</label>
+                                            <input type="number" step="0.1" class="form-control test-tournament-value" id="test-tournament-whs-handicap" placeholder="e.g., 13.2">
+                                        </div>
+                                    </div>
+                                    <div class="text-center mt-3">
+                                        <button type="button" class="btn btn-info btn-sm" id="testTournamentFormulaBtn">
+                                            <i class="fas fa-play me-1"></i>Test Formulas
+                                        </button>
+                                    </div>
+                                    <div id="testTournamentResults" class="mt-3" style="display: none;">
+                                        <div class="alert alert-info mb-0">
+                                            <h6 class="mb-2">Results:</h6>
+                                            <div id="tournamentResult-1" class="mb-2"><strong>1:</strong> <code></code></div>
+                                            <div id="tournamentResult-2" class="mb-2"><strong>2:</strong> <code></code></div>
+                                            <div id="tournamentResult-3" class="mb-2"><strong>3:</strong> <code></code></div>
+                                            <div id="tournamentResult-4"><strong>4:</strong> <code></code></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-4 mt-4">
+                                <label class="form-label fw-bold">
+                                    <i class="fas fa-align-left me-2"></i>Formula Description (Optional)
+                                </label>
+                                <p class="text-muted small mb-2">
+                                    Add a description to explain your handicap formulas:
+                                </p>
+                                <textarea
+                                    class="form-control"
+                                    id="tournament_handicap_formula_desc"
+                                    name="tournament_handicap_formula_desc"
+                                    placeholder="e.g., 'Uses the lower of WHS or Local handicap to ensure fair play' or 'Average of both systems for balanced scoring'"
+                                    rows="3"
+                                    maxlength="500"></textarea>
+                                <small class="form-text text-muted d-block mt-1">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Maximum 500 characters.
+                                </small>
+                            </div>
+                        </div>
+
+                        <!-- STEP 6: Course Handicap Configuration -->
+                        <div class="form-step" data-step="6">
+                            <div class="step-header">
+                                <h5>Step 6: Course Handicap Configuration</h5>
+                                <p class="text-muted">Configure formulas for Regular and Plus handicaps by course</p>
+                            </div>
+
+                            <div class="alert alert-info mb-4">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <strong>Course Handicap Formulas:</strong> Define how to calculate course handicaps based on player handicap indices and course ratings.
+                                <ul class="mb-0 mt-2 ms-4">
+                                    <li><strong>Regular Handicap:</strong> Standard course handicap calculation</li>
+                                    <li><strong>Plus Handicap:</strong> Alternative course handicap calculation (e.g., for handicap analysis or tournament adjustments)</li>
+                                </ul>
+                            </div>
+
+                            <div class="mb-4 p-3 bg-light border rounded">
+                                <small class="text-muted">
+                                    <strong>Available Variables:</strong>
+                                    <ul class="mb-0 mt-2 ms-4">
+                                        <li><code>HANDICAP_INDEX</code> - Player's handicap index</li>
+                                        <li><code>SLOPE_RATING</code> - Course slope rating</li>
+                                        <li><code>COURSE_RATING</code> - Course rating</li>
+                                        <li><code>PAR</code> - Course par</li>
+                                    </ul>
+                                    <strong class="d-block mt-2">Operators:</strong> +, -, *, / &nbsp;|&nbsp;
+                                    <strong>Functions:</strong> MIN(), MAX(), ROUND(), CEIL(), FLOOR()
+                                </small>
+                            </div>
+
+                            <div class="card shadow-sm">
+                                <div class="card-header bg-primary text-white py-3">
+                                    <h6 class="mb-0">
+                                        <i class="fas fa-calculator me-2"></i>Course Handicap Formulas
+                                    </h6>
+                                </div>
+                                <div class="card-body p-4">
+                                    <div class="row mb-4">
+                                        <div class="col-12">
+                                            <h6 class="mb-3">
+                                                <span class="badge bg-success me-2">REGULAR HANDICAP</span>
+                                            </h6>
+                                            <div class="form-floating">
+                                                <textarea class="form-control course-handicap-formula"
+                                                    id="course_handicap_formula_regular"
+                                                    name="course_handicap_formula_regular"
+                                                    placeholder="Enter formula for regular course handicap"
+                                                    style="height: 100px;"
+                                                    maxlength="500">MIN((HANDICAP_INDEX * (SLOPE_RATING / 113)) + (COURSE_RATING - PAR), 36)</textarea>
+                                                <label for="course_handicap_formula_regular">Regular Handicap Formula *</label>
+                                                <div class="invalid-feedback">
+                                                    Please provide a valid formula.
+                                                </div>
+                                            </div>
+                                            <small class="form-text text-muted d-block mt-2">
+                                                <i class="fas fa-info-circle me-1"></i>
+                                                Example: <code>MIN((HANDICAP_INDEX * (SLOPE_RATING / 113)) + (COURSE_RATING - PAR), 36)</code>
+                                            </small>
+                                        </div>
+                                    </div>
+
+                                    <hr class="my-4">
+
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <h6 class="mb-3">
+                                                <span class="badge bg-warning text-dark me-2">PLUS HANDICAP</span>
+                                            </h6>
+                                            <div class="form-floating">
+                                                <textarea class="form-control course-handicap-formula"
+                                                    id="course_handicap_formula_plus"
+                                                    name="course_handicap_formula_plus"
+                                                    placeholder="Enter formula for plus course handicap"
+                                                    style="height: 100px;"
+                                                    maxlength="500">HANDICAP_INDEX + 1</textarea>
+                                                <label for="course_handicap_formula_plus">Plus Handicap Formula *</label>
+                                                <div class="invalid-feedback">
+                                                    Please provide a valid formula.
+                                                </div>
+                                            </div>
+                                            <small class="form-text text-muted d-block mt-2">
+                                                <i class="fas fa-info-circle me-1"></i>
+                                                Example: <code>HANDICAP_INDEX + 1</code>
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card shadow-sm mt-4">
+                                <div class="card-header bg-info text-white py-3">
+                                    <h6 class="mb-0">
+                                        <i class="fas fa-flask me-2"></i>Test Course Handicap Formulas
+                                    </h6>
+                                </div>
+                                <div class="card-body p-4">
+                                    <p class="text-muted small mb-3">
+                                        Enter test values below to verify your course handicap formulas work correctly:
+                                    </p>
+                                    <div class="row">
+                                        <div class="col-md-4 mb-3">
+                                            <label class="form-label">Handicap Index</label>
+                                            <input type="number" step="0.1" class="form-control test-course-value" id="test-handicap-index" placeholder="e.g., 12.5">
+                                        </div>
+                                        <div class="col-md-4 mb-3">
+                                            <label class="form-label">Slope Rating</label>
+                                            <input type="number" step="0.1" class="form-control test-course-value" id="test-slope-rating" placeholder="e.g., 130" value="130">
+                                        </div>
+                                        <div class="col-md-4 mb-3">
+                                            <label class="form-label">Course Rating</label>
+                                            <input type="number" step="0.1" class="form-control test-course-value" id="test-course-rating" placeholder="e.g., 73.5" value="73.5">
+                                        </div>
+                                    </div>
+                                    <div class="text-center mt-3">
+                                        <button type="button" class="btn btn-info btn-sm" id="testCourseFormulaBtn">
+                                            <i class="fas fa-play me-1"></i>Test Formulas
+                                        </button>
+                                    </div>
+                                    <div id="testCourseResults" class="mt-3" style="display: none;">
+                                        <div class="alert alert-info mb-0">
+                                            <h6 class="mb-2">Results:</h6>
+                                            <div id="courseResult-regular" class="mb-2"><strong>Regular:</strong> <code></code></div>
+                                            <div id="courseResult-plus"><strong>Plus:</strong> <code></code></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-4 mt-4">
+                                <label class="form-label fw-bold">
+                                    <i class="fas fa-align-left me-2"></i>Formula Description (Optional)
+                                </label>
+                                <p class="text-muted small mb-2">
+                                    Add a description to explain your course handicap formulas:
+                                </p>
+                                <textarea
+                                    class="form-control"
+                                    id="course_handicap_formula_desc"
+                                    name="course_handicap_formula_desc"
+                                    placeholder="e.g., 'Regular uses standard USGA calculation, Plus applies 1.1x modifier for tournament adjustments'"
+                                    rows="3"
+                                    maxlength="500"></textarea>
+                                <small class="form-text text-muted d-block mt-1">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Maximum 500 characters.
+                                </small>
+                            </div>
+                        </div>
+
+                        <!-- STEP 7: Tournament Setup -->
+                        <div class="form-step" data-step="7">
+                            <div class="step-header">
+                                <h5>Step 7: Tournament Divisions</h5>
                                 <p class="text-muted">Define tournament divisions with eligibility criteria</p>
                             </div>
 
@@ -430,8 +944,9 @@
                                             <tr>
                                                 <th style="width: 15%;">Division Name *</th>
                                                 <th style="width: 15%;">Description</th>
-                                                <th style="width: 10%; text-align: center;">Sex</th>
                                                 <th style="width: 12%; text-align: center;">Type</th>
+                                                <th style="width: 10%; text-align: center;">Sex</th>
+                                                <th style="width: 12%; text-align: center;">Participant Type</th>
                                                 <th style="width: 15%; text-align: center;">Age Range</th>
                                                 <th style="width: 15%; text-align: center;">Handicap Range</th>
                                                 <th style="width: 8%; text-align: center;">Action</th>
@@ -444,6 +959,12 @@
                                                 </td>
                                                 <td>
                                                     <input type="text" class="form-control form-control-sm" name="divisions[0][description]" placeholder="e.g., Handicap 0-5">
+                                                </td>
+                                                <td style="text-align: center;">
+                                                    <select class="form-control form-control-sm" name="divisions[0][type]">
+                                                        <option value="regular" selected>Regular</option>
+                                                        <option value="sponsored">Sponsored</option>
+                                                    </select>
                                                 </td>
                                                 <td style="text-align: center;">
                                                     <select class="form-control form-control-sm" name="divisions[0][sex]">
@@ -498,211 +1019,10 @@
                             </div>
                         </div>
 
-                        <!-- STEP 6: Tournament Handicap Formula -->
-                        <div class="form-step" data-step="6">
+                        <!-- STEP 8: Review & Submit -->
+                        <div class="form-step" data-step="8">
                             <div class="step-header">
-                                <h5>Step 6: Handicap Formula</h5>
-                                <p class="text-muted">Configure how to calculate tournament handicaps</p>
-                            </div>
-
-                            <div class="mb-4">
-                                <h6 class="mb-3">Tournament Handicap Formula</h6>
-
-                                <div class="alert alert-info mb-4">
-                                    <i class="fas fa-info-circle me-2"></i>
-                                    <strong>Available Variables:</strong>
-                                    <ul class="mb-0 mt-2 ms-4">
-                                        <li><code>LOCAL_HANDICAP_INDEX</code> - Local Handicap Index</li>
-                                        <li><code>WHS_HANDICAP_INDEX</code> - World Handicap System Index</li>
-                             
-                                    </ul>
-                                    <hr class="my-2">
-                                    <strong>Formula Examples:</strong>
-                                    <ul class="mb-0 mt-2 ms-4">
-                                        <li><code>WHS_HANDICAP_INDEX * 0.8</code> - Get 80% of WHS Handicap</li>
-                                        <li><code>MIN(LOCAL_HANDICAP_INDEX, WHS_HANDICAP_INDEX)</code> - Whichever is lower between Local and WHS</li>
-                                        <li><code>MAX(LOCAL_HANDICAP_INDEX, WHS_HANDICAP_INDEX)</code> - Whichever is higher between Local and WHS</li>
-                                        <li><code>MIN(LOCAL_HANDICAP_INDEX * 0.8, WHS_HANDICAP_INDEX)</code> - 80% of Local or WHS, whichever is lower</li>
-                                        <li><code>ROUND(MAX(LOCAL_HANDICAP_INDEX, WHS_HANDICAP_INDEX * 0.8), 1)</code> - Higher of Local or 80% WHS, rounded to 1 decimal</li>
-                                        <li><code>AVG(LOCAL_HANDICAP_INDEX, WHS_HANDICAP_INDEX)</code> - Average of Local and WHS Handicap</li>
-                                    </ul>
-                                </div>
-
-                                <div class="alert alert-success mt-3">
-                                <i class="fas fa-check-circle me-2"></i>
-                                <strong>Four Formula Fields Configured:</strong> Each formula will be applied based on the player's data availability.
-                                <ul class="mb-0 mt-2 ms-4">
-                                    <li><strong>Formula 1:</strong> Applied when the player has both a WHS and a Local Handicap Index.</li>
-                                    <li><strong>Formula 2:</strong> Applied when the player has a WHS Handicap Index but no Local Handicap Index.</li>
-                                    <li><strong>Formula 3:</strong> Applied when the player has a Local Handicap Index but no WHS Handicap Index.</li>
-                                    <li><strong>Formula 4:</strong> Applied by default when the player has neither a WHS nor a Local Handicap Index.</li>
-                                </ul>
-                                </div>
-
-                                <div class="card shadow-sm">
-                                    <div class="card-header bg-primary text-white py-3">
-                                        <h6 class="mb-0">
-                                            <i class="fas fa-calculator me-2"></i>Define Formulas for Each 1, 2, 3, 4
-                                        </h6>
-                                    </div>
-                                    <div class="card-body p-4">
-                                        <div class="table-responsive">
-                                            <table class="table table-borderless">
-                                                <tbody>
-                                                    <!-- 1 -->
-                                                    <tr>
-                                                        <td style="width: 25%;">
-                                                            <div class="fw-bold mb-2">
-                                                                <span class="badge bg-success me-2">FORMULA 1</span>
-                                                            </div>
-                                                          
-                                                        </td>
-                                                        <td>
-                                                            <input type="text"
-                                                                class="form-control formula-input"
-                                                                id="local_handicap_formula_1"
-                                                                name="local_handicap_formula_1"
-                                                                placeholder="Example: MIN(LOCAL_HANDICAP_INDEX, WHS_HANDICAP_INDEX)"
-                                                                value="">
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td colspan="2" style="border-top: 1px solid #e9ecef; padding-top: 1.5rem;"></td>
-                                                    </tr>
-                                                    <!-- 2 -->
-                                                    <tr>
-                                                        <td style="width: 25%;">
-                                                            <div class="fw-bold mb-2">
-                                                                <span class="badge bg-warning text-dark me-2">FORMULA 2</span>
-                                                            </div>
-                                              
-                                                        </td>
-                                                        <td>
-                                                            <input type="text"n
-                                                                class="form-control formula-input"
-                                                                id="local_handicap_formula_2"
-                                                                name="local_handicap_formula_2"
-                                                                placeholder="Example: WHS_HANDICAP_INDEX * 0.8"
-                                                                value="">
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td colspan="2" style="border-top: 1px solid #e9ecef; padding-top: 1.5rem;"></td>
-                                                    </tr>
-                                                    <!-- 3 -->
-                                                    <tr>
-                                                        <td style="width: 25%;">
-                                                            <div class="fw-bold mb-2">
-                                                                <span class="badge bg-danger me-2">FORMULA 3</span>
-                                                            </div>
-                                                        
-                                                        </td>
-                                                        <td>
-                                                            <input type="text"
-                                                                class="form-control formula-input"
-                                                                id="local_handicap_formula_3"
-                                                                name="local_handicap_formula_3"
-                                                                placeholder="Example: 0"
-                                                                value="">
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td colspan="2" style="border-top: 1px solid #e9ecef; padding-top: 1.5rem;"></td>
-                                                    </tr>
-                                                    <!-- 4 -->
-                                                    <tr>
-                                                        <td style="width: 25%;">
-                                                            <div class="fw-bold mb-2">
-                                                                <span class="badge bg-secondary me-2">FORMULA 4</span>
-                                                            </div>
-                                                        
-                                                        </td>
-                                                        <td>
-                                                            <input type="text"
-                                                                class="form-control formula-input"
-                                                                id="local_handicap_formula_4"
-                                                                name="local_handicap_formula_4"
-                                                                placeholder="Example: 0"
-                                                                value="">
-                                                        </td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
-                                    <div class="card-footer bg-light p-3">
-                                        <small class="text-muted">
-                                            <strong>Operators:</strong> +, -, *, / &nbsp;|&nbsp;
-                                            <strong>Functions:</strong> MIN(), MAX(), ROUND()
-                                        </small>
-                                    </div>
-                                </div>
-
-                                <div class="card shadow-sm mt-4">
-                                    <div class="card-header bg-info text-white py-3">
-                                        <h6 class="mb-0">
-                                            <i class="fas fa-flask me-2"></i>Test Formulas
-                                        </h6>
-                                    </div>
-                                    <div class="card-body p-4">
-                                        <p class="text-muted small mb-3">
-                                            Enter test values below to verify your formulas work correctly:
-                                        </p>
-                                        <div class="row">
-                                            <div class="col-md-6 mb-3">
-                                                <label class="form-label">Local Handicap Index</label>
-                                                <input type="number" step="0.1" class="form-control test-value" id="test-local-handicap" placeholder="e.g., 12.5">
-                                            </div>
-                                            <div class="col-md-6 mb-3">
-                                                <label class="form-label">WHS Handicap Index</label>
-                                                <input type="number" step="0.1" class="form-control test-value" id="test-whs-handicap" placeholder="e.g., 13.2">
-                                            </div>
-                                        </div>
-                                        <div class="text-center mt-3">
-                                            <button type="button" class="btn btn-info btn-sm" id="testFormulaBtn">
-                                                <i class="fas fa-play me-1"></i>Test Formulas
-                                            </button>
-                                        </div>
-                                        <div id="testResults" class="mt-3" style="display: none;">
-                                            <div class="alert alert-info mb-0">
-                                                <h6 class="mb-2">Results:</h6>
-                                                <div id="result1" class="mb-2"><strong>1:</strong> <code></code></div>
-                                                <div id="result2" class="mb-2"><strong>2:</strong> <code></code></div>
-                                                <div id="result3" class="mb-2"><strong>3:</strong> <code></code></div>
-                                                <div id="result4"><strong>4:</strong> <code></code></div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="mb-4">
-                                <label class="form-label fw-bold">
-                                    <i class="fas fa-align-left me-2"></i>Formula Description (Optional)
-                                </label>
-                                <p class="text-muted small mb-2">
-                                    Add a description to explain your formula for future reference:
-                                </p>
-                                <textarea
-                                    class="form-control"
-                                    id="handicap_formula_desc"
-                                    name="handicap_formula_desc"
-                                    placeholder="e.g., 'Uses the lower of WHS or Local handicap to ensure fair play' or 'Average of both systems for balanced scoring'"
-                                    rows="3"
-                                    maxlength="500"></textarea>
-                                <small class="form-text text-muted d-block mt-1">
-                                    <i class="fas fa-info-circle me-1"></i>
-                                    Maximum 500 characters. This helps document why this formula was chosen.
-                                </small>
-                            </div>
-
-                      
-                        </div>
-
-                        <!-- STEP 7: Review & Submit -->
-                        <div class="form-step" data-step="7">
-                            <div class="step-header">
-                                <h5>Step 7: Review & Submit</h5>
+                                <h5>Step 8: Review & Submit</h5>
                                 <p class="text-muted">Review your tournament information and submit</p>
                             </div>
 
@@ -1259,7 +1579,7 @@
 <script>
     $(document).ready(function() {
         let currentStep = 1;
-        const totalSteps = 7;
+        const totalSteps = 8;
         let isSubmitting = false;
 
         // Initialize stepper
@@ -1408,17 +1728,61 @@
                     isValid = true;
                     break;
 
-                case 5: // Tournament Divisions
+                case 5: // Tournament Handicap Formula
+                    const formula1 = $('#tournament_handicap_formula_1').val().trim();
+                    const formula2 = $('#tournament_handicap_formula_2').val().trim();
+                    const formula3 = $('#tournament_handicap_formula_3').val().trim();
+                    const formula4 = $('#tournament_handicap_formula_4').val().trim();
+
+                    if (!formula1) {
+                        $('#tournament_handicap_formula_1').addClass('is-invalid');
+                        isValid = false;
+                    } else {
+                        $('#tournament_handicap_formula_1').removeClass('is-invalid');
+                    }
+
+                    if (!formula2) {
+                        $('#tournament_handicap_formula_2').addClass('is-invalid');
+                        isValid = false;
+                    } else {
+                        $('#tournament_handicap_formula_2').removeClass('is-invalid');
+                    }
+
+                    if (!formula3) {
+                        $('#tournament_handicap_formula_3').addClass('is-invalid');
+                        isValid = false;
+                    } else {
+                        $('#tournament_handicap_formula_3').removeClass('is-invalid');
+                    }
+
+
+                    break;
+
+                case 6: // Course Handicap Configuration
+                    const regularFormula = $('#course_handicap_formula_regular').val().trim();
+                    const plusFormula = $('#course_handicap_formula_plus').val().trim();
+
+                    if (!regularFormula) {
+                        $('#course_handicap_formula_regular').addClass('is-invalid');
+                        isValid = false;
+                    } else {
+                        $('#course_handicap_formula_regular').removeClass('is-invalid');
+                    }
+
+                    if (!plusFormula) {
+                        $('#course_handicap_formula_plus').addClass('is-invalid');
+                        isValid = false;
+                    } else {
+                        $('#course_handicap_formula_plus').removeClass('is-invalid');
+                    }
+                    break;
+
+                case 7: // Tournament Divisions
                     // Optional validation
                     isValid = true;
                     break;
 
-                case 6: // Handicap Formula
-                    // Optional validation
-                    isValid = true;
-                    break;
-
-                case 7: // Review
+                case 8: // Review
                     // Final validation before submit
                     isValid = true;
                     break;
@@ -1742,6 +2106,12 @@
                     <input type="text" class="form-control form-control-sm" name="divisions[${rowCount}][description]" placeholder="e.g., Handicap 0-5">
                 </td>
                 <td style="text-align: center;">
+                    <select class="form-control form-control-sm" name="divisions[${rowCount}][type]">
+                        <option value="regular" selected>Regular</option>
+                        <option value="sponsored">Sponsored</option>
+                    </select>
+                </td>
+                <td style="text-align: center;">
                     <select class="form-control form-control-sm" name="divisions[${rowCount}][sex]">
                         <option value="X" selected>All</option>
                         <option value="M">Male</option>
@@ -1792,82 +2162,163 @@
             }
         };
 
-        // Test Formula Functionality
-        document.getElementById('testFormulaBtn').addEventListener('click', function() {
-            const localHandicap = document.getElementById('test-local-handicap').value;
-            const whsHandicap = document.getElementById('test-whs-handicap').value;
-            
-            if (!localHandicap && !whsHandicap) {
-                alert('Please enter at least one test value.');
-                return;
-            }
+        // Test Tournament Handicap Formula Functionality
+        if (document.getElementById('testTournamentFormulaBtn')) {
+            document.getElementById('testTournamentFormulaBtn').addEventListener('click', function() {
+                const localHandicap = document.getElementById('test-tournament-local-handicap').value;
+                const whsHandicap = document.getElementById('test-tournament-whs-handicap').value;
 
-            const formulas = {
-                1: document.getElementById('local_handicap_formula_1').value,
-                2: document.getElementById('local_handicap_formula_2').value,
-                3: document.getElementById('local_handicap_formula_3').value,
-                4: document.getElementById('local_handicap_formula_4').value
-            };
+                const formulas = {
+                    1: document.getElementById('tournament_handicap_formula_1').value,
+                    2: document.getElementById('tournament_handicap_formula_2').value,
+                    3: document.getElementById('tournament_handicap_formula_3').value,
+                    4: document.getElementById('tournament_handicap_formula_4').value
+                };
 
-            if (!formulas[1] && !formulas[2] && !formulas[3] && !formulas[4]) {
-                alert('Please enter at least one formula.');
-                return;
-            }
-
-            const results = {};
-            const resultsDiv = document.getElementById('testResults');
-            
-            // Show loading state
-            resultsDiv.innerHTML = '<div class="alert alert-info mb-0"><i class="fas fa-spinner fa-spin"></i> Testing formulas...</div>';
-            resultsDiv.style.display = 'block';
-
-            // Test each formula
-            let completed = 0;
-            for (let i = 1; i <= 4; i++) {
-                if (formulas[i]) {
-                    $.ajax({
-                        url: BASE_URL + '/api/tournaments/validate-formula',
-                        type: 'POST',
-                        dataType: 'json',
-                        data: {
-                            formula: formulas[i],
-                            local_handicap_index: parseFloat(localHandicap) || 0,
-                            whs_handicap_index: parseFloat(whsHandicap) || 0,
-                            _token: $('meta[name="csrf-token"]').attr('content')
-                        },
-                        success: function(response) {
-                            results[i] = response.result !== undefined ? response.result : 'Error';
-                            completed++;
-                            if (completed === Object.keys(formulas).filter(k => formulas[k]).length) {
-                                displayTestResults(formulas, results);
-                            }
-                        },
-                        error: function(xhr) {
-                            const errorMsg = xhr.responseJSON?.message || 'Error evaluating formula';
-                            results[i] = 'Error: ' + errorMsg;
-                            completed++;
-                            if (completed === Object.keys(formulas).filter(k => formulas[k]).length) {
-                                displayTestResults(formulas, results);
-                            }
-                        }
-                    });
+                if (!formulas[1] && !formulas[2] && !formulas[3] && !formulas[4]) {
+                    alert('Please enter at least one formula.');
+                    return;
                 }
-            }
 
-            function displayTestResults(formulas, results) {
-                let resultHTML = '<div class="alert alert-info mb-0"><h6 class="mb-2">Results:</h6>';
+                const results = {};
+                const resultsDiv = document.getElementById('testTournamentResults');
+
+                // Show loading state
+                resultsDiv.innerHTML = '<div class="alert alert-info mb-0"><i class="fas fa-spinner fa-spin"></i> Testing formulas...</div>';
+                resultsDiv.style.display = 'block';
+
+                // Test each formula
+                let completed = 0;
                 for (let i = 1; i <= 4; i++) {
                     if (formulas[i]) {
-                        const value = typeof results[i] === 'number' ? results[i].toFixed(2) : results[i];
-                        resultHTML += `<div class="mb-2"><strong>${i}:</strong> <code>${value}</code></div>`;
-                    } else {
-                        resultHTML += `<div class="mb-2"><strong>${i}:</strong> <code>Not defined</code></div>`;
+                        $.ajax({
+                            url: BASE_URL + '/api/tournaments/validate-local-handicap-formula',
+                            type: 'POST',
+                            dataType: 'json',
+                            data: {
+                                formula: formulas[i],
+                                local_handicap_index: parseFloat(localHandicap) || 0,
+                                whs_handicap_index: parseFloat(whsHandicap) || 0,
+                                _token: $('meta[name="csrf-token"]').attr('content')
+                            },
+                            success: function(response) {
+                                results[i] = response.result !== undefined ? response.result : 'Error';
+                                completed++;
+                                if (completed === Object.keys(formulas).filter(k => formulas[k]).length) {
+                                    displayTournamentTestResults(formulas, results);
+                                }
+                            },
+                            error: function(xhr) {
+                                const errorMsg = xhr.responseJSON?.message || 'Error evaluating formula';
+                                results[i] = 'Error: ' + errorMsg;
+                                completed++;
+                                if (completed === Object.keys(formulas).filter(k => formulas[k]).length) {
+                                    displayTournamentTestResults(formulas, results);
+                                }
+                            }
+                        });
                     }
                 }
-                resultHTML += '</div>';
-                resultsDiv.innerHTML = resultHTML;
-            }
-        });
+
+                function displayTournamentTestResults(formulas, results) {
+                    let resultHTML = '<div class="alert alert-info mb-0"><h6 class="mb-2">Results:</h6>';
+                    for (let i = 1; i <= 4; i++) {
+                        if (formulas[i]) {
+                            const value = typeof results[i] === 'number' ? results[i].toFixed(2) : results[i];
+                            resultHTML += `<div class="mb-2"><strong>${i}:</strong> <code>${value}</code></div>`;
+                        } else {
+                            resultHTML += `<div class="mb-2"><strong>${i}:</strong> <code>Not defined</code></div>`;
+                        }
+                    }
+                    resultHTML += '</div>';
+                    resultsDiv.innerHTML = resultHTML;
+                }
+            });
+        }
+
+        // Test Course Handicap Formula Functionality
+        if (document.getElementById('testCourseFormulaBtn')) {
+            document.getElementById('testCourseFormulaBtn').addEventListener('click', function() {
+                const handicapIndex = document.getElementById('test-handicap-index').value;
+                const slopeRating = document.getElementById('test-slope-rating').value || 130;
+                const courseRating = document.getElementById('test-course-rating').value || 73.5;
+
+                if (!handicapIndex) {
+                    alert('Please enter a Handicap Index value.');
+                    return;
+                }
+
+                const formulas = {
+                    regular: document.getElementById('course_handicap_formula_regular').value,
+                    plus: document.getElementById('course_handicap_formula_plus').value
+                };
+
+                if (!formulas.regular && !formulas.plus) {
+                    alert('Please enter at least one formula.');
+                    return;
+                }
+
+                const results = {};
+                const resultsDiv = document.getElementById('testCourseResults');
+
+                // Show loading state
+                resultsDiv.innerHTML = '<div class="alert alert-info mb-0"><i class="fas fa-spinner fa-spin"></i> Testing formulas...</div>';
+                resultsDiv.style.display = 'block';
+
+                // Test each formula
+                let completed = 0;
+                for (const [key, formula] of Object.entries(formulas)) {
+                    if (formula) {
+                        $.ajax({
+                            url: BASE_URL + '/api/tournaments/validate-course-handicap-formula',
+                            type: 'POST',
+                            dataType: 'json',
+                            data: {
+                                formula: formula,
+                                handicap_index: parseFloat(handicapIndex) || 0,
+                                slope_rating: parseFloat(slopeRating) || 130,
+                                course_rating: parseFloat(courseRating) || 73.5,
+                                par: 72,
+                                _token: $('meta[name="csrf-token"]').attr('content')
+                            },
+                            success: function(response) {
+                                results[key] = response.result !== undefined ? response.result : 'Error';
+                                completed++;
+                                if (completed === Object.keys(formulas).filter(k => formulas[k]).length) {
+                                    displayCourseTestResults(formulas, results);
+                                }
+                            },
+                            error: function(xhr) {
+                                const errorMsg = xhr.responseJSON?.message || 'Error evaluating formula';
+                                results[key] = 'Error: ' + errorMsg;
+                                completed++;
+                                if (completed === Object.keys(formulas).filter(k => formulas[k]).length) {
+                                    displayCourseTestResults(formulas, results);
+                                }
+                            }
+                        });
+                    }
+                }
+
+                function displayCourseTestResults(formulas, results) {
+                    let resultHTML = '<div class="alert alert-info mb-0"><h6 class="mb-2">Results:</h6>';
+                    if (formulas.regular) {
+                        const value = typeof results.regular === 'number' ? results.regular.toFixed(2) : results.regular;
+                        resultHTML += `<div class="mb-2"><strong>Regular:</strong> <code>${value}</code></div>`;
+                    } else {
+                        resultHTML += `<div class="mb-2"><strong>Regular:</strong> <code>Not defined</code></div>`;
+                    }
+                    if (formulas.plus) {
+                        const value = typeof results.plus === 'number' ? results.plus.toFixed(2) : results.plus;
+                        resultHTML += `<div class="mb-2"><strong>Plus:</strong> <code>${value}</code></div>`;
+                    } else {
+                        resultHTML += `<div class="mb-2"><strong>Plus:</strong> <code>Not defined</code></div>`;
+                    }
+                    resultHTML += '</div>';
+                    resultsDiv.innerHTML = resultHTML;
+                }
+            });
+        }
 
     });
 </script>

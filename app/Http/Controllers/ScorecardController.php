@@ -35,10 +35,14 @@ class ScorecardController extends Controller
 
 
 
+
+
+
+
         $courseId = $request->input('course_id');
 
 
-        $course = Course::with('tees')->where('course_id', $courseId)->firstOrFail();
+        $course = Course::with('tees')->where('course_id', $courseId)->first();
 
 
 

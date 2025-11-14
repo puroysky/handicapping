@@ -95,11 +95,17 @@ class TournamentService
         $tournament->recent_scores_count = $request['recent_scores_count'] ?? null;
 
         $tournament->scores_to_average = $request['scores_to_average'] ?? null;
-        $tournament->local_handicap_formula_1 = $request['local_handicap_formula_1'] ?? null;
-        $tournament->local_handicap_formula_2 = $request['local_handicap_formula_2'] ?? null;
-        $tournament->local_handicap_formula_3 = $request['local_handicap_formula_3'] ?? null;
-        $tournament->local_handicap_formula_4 = $request['local_handicap_formula_4'] ?? null;
-        $tournament->handicap_formula_desc = $request['handicap_formula_desc'] ?? null;
+        $tournament->tournament_handicap_formula_1 = $request['tournament_handicap_formula_1'] ?? null;
+        $tournament->tournament_handicap_formula_2 = $request['tournament_handicap_formula_2'] ?? null;
+        $tournament->tournament_handicap_formula_3 = $request['tournament_handicap_formula_3'] ?? null;
+        $tournament->tournament_handicap_formula_4 = $request['tournament_handicap_formula_4'] ?? null;
+        $tournament->tournament_handicap_formula_desc = $request['tournament_handicap_formula_desc'] ?? null;
+        $tournament->course_handicap_formula_desc = $request['course_handicap_formula_desc'] ?? null;
+
+
+
+
+
         $tournament->handicap_score_differential_config = json_encode($request['handicap_score_differential_config'] ?? []);
         $tournament->created_by = Auth::id();
 
@@ -133,6 +139,7 @@ class TournamentService
                 'tournament_id' => $tournament->tournament_id,
                 'division_name' => $division['name'],
                 'division_desc' => $division['description'] ?? null,
+                'division_type' => $division['type'],
                 'division_sex' => $division['sex'],
                 'division_participant_type' => $division['participant_type'],
                 'age_min' => $division['age_min'] ?? null,

@@ -32,26 +32,26 @@ Route::get('test', function () {
 
 
 
-    $participants = Participant::with('user.profile', 'user.player', 'tournament', 'participantCourseHandicaps.course', 'participantCourseHandicaps.tee')
-        ->leftJoin('users', 'participants.user_id', '=', 'users.id')
-        ->leftJoin('tournaments', 'participants.tournament_id', '=', 'tournaments.tournament_id')
-        ->leftJoin('player_profiles', 'participants.player_profile_id', '=', 'player_profiles.player_profile_id')
-        ->leftJoin('whs_handicap_indexes', function ($join) {
-            $join->on('participants.tournament_id', '=', 'whs_handicap_indexes.tournament_id')
-                ->on('tournaments.whs_handicap_import_id', '=', 'whs_handicap_indexes.whs_handicap_import_id')
-                ->on('player_profiles.whs_no', '=', 'whs_handicap_indexes.whs_no');
-        })
-        ->select('participants.*', 'users.*', 'tournaments.*', 'player_profiles.*', 'whs_handicap_indexes.whs_handicap_index', 'whs_handicap_indexes.final_whs_handicap_index')
-        ->where('participants.tournament_id', 15)
-        // ->where('participants.participant_id', 10)
-        ->get();
-    echo '<pre>';
-    print_r($participants->toArray());
-    echo '</pre>';
+    // $participants = Participant::with('user.profile', 'user.player', 'tournament', 'participantCourseHandicaps.course', 'participantCourseHandicaps.tee')
+    //     ->leftJoin('users', 'participants.user_id', '=', 'users.id')
+    //     ->leftJoin('tournaments', 'participants.tournament_id', '=', 'tournaments.tournament_id')
+    //     ->leftJoin('player_profiles', 'participants.player_profile_id', '=', 'player_profiles.player_profile_id')
+    //     ->leftJoin('whs_handicap_indexes', function ($join) {
+    //         $join->on('participants.tournament_id', '=', 'whs_handicap_indexes.tournament_id')
+    //             ->on('tournaments.whs_handicap_import_id', '=', 'whs_handicap_indexes.whs_handicap_import_id')
+    //             ->on('player_profiles.whs_no', '=', 'whs_handicap_indexes.whs_no');
+    //     })
+    //     ->select('participants.*', 'users.*', 'tournaments.*', 'player_profiles.*', 'whs_handicap_indexes.whs_handicap_index', 'whs_handicap_indexes.final_whs_handicap_index')
+    //     ->where('participants.tournament_id', 15)
+    //     // ->where('participants.participant_id', 10)
+    //     ->get();
+    // echo '<pre>';
+    // print_r($participants->toArray());
+    // echo '</pre>';
 
 
 
-    return;
+    // return;
 
 
     $testService = new \App\Services\ImportCheckerService();
@@ -60,106 +60,6 @@ Route::get('test', function () {
 
 
 
-Route::get('test-2', function () {
-
-
-
-
-
-    $file = storage_path('Tournament.xlsx');
-
-    $data = Excel::toArray([], $file)[0];
-
-    // Check if file has data
-    if (empty($data) || count($data) < 2) {
-        return [
-            'success' => false,
-            'message' => 'File is empty or has no data rows.'
-        ];
-    }
-
-    // Extract header and validate required columns
-    $header = array_map('strtolower', array_map('trim', $data[0]));
-    $requiredColumns = ['account_no', 'adjusted_gross_score', 'slope_rating', 'course_rating', 'holes_completed', 'date_played', 'tee_id', 'course_id', 'tournament_name'];
-
-    foreach ($requiredColumns as $column) {
-        if (!in_array($column, $header)) {
-            return [
-                'success' => false,
-                'message' => "Missing required column: {$column}. Required columns: " . implode(', ', $requiredColumns)
-            ];
-        }
-    }
-
-
-
-    $newFormat = [];
-    foreach ($data as $index => $row) {
-
-        if ($index === 0) {
-            continue;
-        }
-
-        $newFormat[$row[8]][$row[7]][$row[9]][$row[5]][$row[3] . '_' . $row[4]][] = $row;
-    }
-    $errors = [];
-
-    foreach ($newFormat as $course => $courses) {
-        foreach ($courses as $tee => $tees) {
-            foreach ($tees as $tournament => $tournaments) {
-                foreach ($tournaments as $holePlayed => $holesPlayed) {
-
-                    // echo '<pre>';
-                    // print_r(array_keys($holesPlayed));
-                    // echo '</pre>';
-
-                    if (count($holesPlayed) > 1) {
-
-
-
-
-                        $errors[] = array(
-                            "course" => $course,
-                            "tournament" => $tournament,
-                            'tee' => $tee,
-                            'holes_played' => $holePlayed,
-                            'multiple_slope_course_ratings' => array_keys($holesPlayed)
-
-                        );
-                    } else {
-                        $goods[$tournament][$course][] = array(
-                            "course" => $course,
-                            "tournament" => $tournament,
-                            'tee' => $tee,
-                            'holes_played' => $holePlayed,
-                            'slope_course_rating' => array_keys($holesPlayed)
-
-                        );
-                    }
-                }
-            }
-        }
-    }
-
-
-    // echo '<pre>';
-    // print_r($goods);
-
-    // echo '</pre>';
-
-    echo '<pre>';
-    print_r($errors);
-
-    echo '</pre>';
-
-    return;
-
-
-    echo '<pre>';
-    print_r($newFormat);
-    echo '<pre>';
-    return;
-})->name('test-2');
 
 Route::prefix('api')->group(function () {
     // API endpoints
@@ -172,7 +72,8 @@ Route::prefix('api')->group(function () {
     });
 
     // Formula validation endpoint
-    Route::post('tournaments/validate-formula', [App\Http\Controllers\Admin\TournamentController::class, 'validateFormula'])->name('tournaments.validate-formula');
+    Route::post('tournaments/validate-local-handicap-formula', [App\Http\Controllers\Admin\TournamentController::class, 'validateTournamentHandicapFormula'])->name('tournaments.validate-formula');
+    Route::post('tournaments/validate-course-handicap-formula', [App\Http\Controllers\Admin\TournamentController::class, 'validateCourseHandicapFormula'])->name('tournaments.validate-course-handicap-formula');
 });
 
 Route::prefix('admin')->name('admin.')->group(function () {

@@ -49,4 +49,16 @@ class Participant extends Model
     {
         return $this->hasMany(ParticipantDivision::class, 'participant_id', 'participant_id');
     }
+
+
+    public function participantCourses()
+    {
+        return $this->hasMany(ParticipantCourse::class, 'participant_id', 'participant_id');
+    }
+
+
+    public function participantCourse()
+    {
+        return $this->hasOne(ParticipantCourse::class, 'participant_id', 'participant_id');
+    }
 }

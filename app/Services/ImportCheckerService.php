@@ -163,17 +163,19 @@ class ImportCheckerService
 
 
 
-        echo '<pre>';
-        print_r($dateErrors);
+        // echo '<pre>';
+        // print_r($dateErrors);
 
-        echo '</pre>';
-        return;
+        // echo '</pre>';
+        // return;
 
 
-        echo '<pre>';
-        print_r($errors);
+        // echo '<pre>';
+        // print_r($errors);
 
-        echo '</pre>';
+        // echo '</pre>';
+
+        // return;
 
         echo '<pre>';
         print_r($errorsWithoutTournamentLevel);
@@ -183,8 +185,8 @@ class ImportCheckerService
         return;
 
 
-        echo '<pre>';
-        print_r($newFormatWithTournamentLevel);
-        echo '<pre>';
+        // echo '<pre>';
+        // print_r($newFormatWithTournamentLevel);
+        // echo '<pre>';
     }
 }

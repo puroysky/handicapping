@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Participant;
 use App\Models\ParticipantCourse;
+use App\Models\ParticipantCourseHandicap;
 use App\Models\PlayerProfile;
 use App\Models\Tournament;
 use App\Models\Participat;
@@ -48,73 +49,7 @@ class ParticipantController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
-    {
-
-
-
-        DB::beginTransaction();
-        try {
-            // Validate the request data
-            $validatedData = $request->validate([
-                'tournament_id' => 'required|exists:tournaments,tournament_id',
-                'player_profile_id' => 'required|exists:player_profiles,player_profile_id',
-                'whs_handicap_index' => 'nullable|numeric|min:0|max:54',
-                'tournament_course_tee' => 'required|array',
-                'tournament_course_tee.*' => 'required|numeric',
-                'remarks' => 'nullable|string|max:1000',
-            ]);
-
-            // Find the tournament by name since tournament_id is now a string (tournament name)
-            $tournament = Tournament::where('tournament_id', $validatedData['tournament_id'])->first();
-
-            if ($tournament->participants()->where('player_profile_id', $validatedData['player_profile_id'])->exists()) {
-                return response()->json(['message' => 'Player is already registered for this tournament.'], 422);
-            }
-
-            $playerProfile = PlayerProfile::find($validatedData['player_profile_id']);
-
-
-            // echo '<pre>';
-            // print_r($tournament->toArray());
-            // echo '</pre>';
-            // return;
-
-            // Create a new Participat record
-            $tournamentPlayer = new Participant();
-            $tournamentPlayer->tournament_id = $tournament->tournament_id; // Use the actual tournament ID
-            $tournamentPlayer->player_profile_id = $validatedData['player_profile_id'];
-            $tournamentPlayer->user_id = $playerProfile->user_id;
-            $tournamentPlayer->whs_handicap_index = $validatedData['whs_handicap_index'] ?? null;
-            $tournamentPlayer->remarks = $validatedData['remarks'] ?? null;
-            $tournamentPlayer->created_by = Auth::id() ?? 1; // Use authenticated user ID or default to 1
-            $tournamentPlayer->save();
-
-            // Save player course handicaps
-            foreach ($validatedData['tournament_course_tee'] as $courseId => $teeId) {
-
-                $tournamentPlayer->participantCourseHandicaps()->create([
-                    'tournament_id' => $tournament->tournament_id,
-                    'tournament_player_id' => $tournamentPlayer->tournament_player_id,
-                    'course_id' => $courseId,
-                    'tee_id' => $teeId,
-                    'created_by' => Auth::id() ?? 1,
-                ]);
-            }
-
-            DB::commit();
-
-            return response()->json(['success' => true, 'message' => 'Player added to tournament successfully.'], 201);
-        } catch (Exception $e) {
-            DB::rollBack();
-
-            Log::error('Error adding player to tournament: ' . $e->getMessage(), [
-                'line' => $e->getLine(),
-                'file' => $e->getFile()
-            ]);
-            return response()->json(['success' => false, 'message' => 'An error occurred while adding the player to the tournament.', 'error' => $e->getMessage()], 500);
-        }
-    }
+    public function store(Request $request) {}
 
     /**
      * Display the specified resource.
@@ -368,6 +303,18 @@ class ParticipantController extends Controller
 
 
 
+            $courseHandicapFormula = [];
+
+
+            foreach ($tournament->tournamentCourses as $course) {
+                $courseHandicapFormula[$course->course_id] = $course->scorecard->courseHandicapFormula->formula_expression;
+            }
+
+
+            Log::debug('Course Handicap Formula', ['formula' => $courseHandicapFormula]);
+
+
+
             $executor = new MathExecutor();
 
             // Register custom math helpers
@@ -388,13 +335,13 @@ class ParticipantController extends Controller
 
                 // Determine which formula to use based on available data
                 if ($whsHandicapIndex === null && $localHandicapIndex === null) {
-                    $expression = $tournament->local_handicap_formula_4;
+                    $expression = $tournament->tournament_handicap_formula_4;
                 } elseif ($whsHandicapIndex !== null && $localHandicapIndex !== null) {
-                    $expression = $tournament->local_handicap_formula_1;
+                    $expression = $tournament->tournament_handicap_formula_1;
                 } elseif ($whsHandicapIndex !== null && $localHandicapIndex === null) {
-                    $expression = $tournament->local_handicap_formula_2;
+                    $expression = $tournament->tournament_handicap_formula_2;
                 } elseif ($localHandicapIndex !== null && $whsHandicapIndex === null) {
-                    $expression = $tournament->local_handicap_formula_3;
+                    $expression = $tournament->tournament_handicap_formula_3;
                 }
 
                 if (empty($expression)) {
@@ -438,7 +385,53 @@ class ParticipantController extends Controller
                     'formula' => $expression,
                     'result' => $result
                 ]);
+
+
+
+
+
+                ParticipantCourse::where('participant_id', $participant->participant_id)
+                    ->where('tournament_id', $tournament->tournament_id)
+                    ->get()
+                    ->each(function ($participantCourse) use ($executor, $courseHandicapFormula, $result, $whsHandicapIndex, $localHandicapIndex) {
+                        $courseId = $participantCourse->course_id;
+                        if (isset($courseHandicapFormula[$courseId])) {
+                            $formula = $courseHandicapFormula[$courseId];
+
+                            $executor->setVar('HANDICAP_INDEX', (float) ($result ?? 0));
+                            $executor->setVar('SLOPE_RATING', (float) ($localHandicapIndex ?? 0));
+                            $executor->setVar('COURSE_RATING', (float) ($localHandicapIndex ?? 0));
+                            $executor->setVar('PAR', (float) ($localHandicapIndex ?? 0));
+
+                            $courseHandicap = $executor->execute($formula);
+
+                            $participantCourse->update([
+                                'course_handicap' => $courseHandicap,
+                                'updated_by' => Auth::id()
+                            ]);
+
+                            Log::info('Calculated course handicap', [
+                                'participant_course_id' => $participantCourse->participant_course_id,
+                                'course_id' => $courseId,
+                                'formula' => $formula,
+                                'course_handicap' => $courseHandicap
+                            ]);
+                        }
+                    });
             }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
             DB::commit();
 
@@ -487,7 +480,14 @@ class ParticipantController extends Controller
             $courseId = $validated['course_id'];
             $action = $validated['action'];
 
-            $participant = Participant::findOrFail($participantId);
+            $participant = Participant::with('tournament')->findOrFail($participantId);
+
+            $courseTees = $participant->tournament->tournamentCourses->where('course_id', $courseId)->first()->course->tees;
+
+
+
+
+
 
 
             $exists = ParticipantCourse::where('participant_id', $participantId)
@@ -504,6 +504,45 @@ class ParticipantController extends Controller
                         'tournament_id' => $participant->tournament_id,
                         'created_by' => Auth::id()
                     ]);
+
+
+                    // $table->unsignedBigInteger('tournament_id');
+                    // $table->unsignedBigInteger('participant_id');
+                    // $table->unsignedBigInteger('course_id');
+                    // $table->unsignedBigInteger('tee_id');
+
+                    // $table->decimal('course_handicap', 4, 2)->nullable()->default(null);
+                    // $table->decimal('final_course_handicap', 4, 2)->nullable()->default(null);
+
+
+
+
+
+                    foreach ($courseTees as $tee) {
+
+                        Log::info('Adding ParticipantCourseHandicap', [
+                            'participant_id' => $participantId,
+                            'course_id' => $courseId,
+                            'tournament_id' => $participant->tournament_id,
+                            'tee_id' => $tee->tee_id,
+                        ]);
+
+
+
+
+
+
+
+
+
+                        ParticipantCourseHandicap::create([
+                            'participant_id' => $participantId,
+                            'course_id' => $courseId,
+                            'tournament_id' => $participant->tournament_id,
+                            'tee_id' => $tee->tee_id,
+                            'created_by' => Auth::id()
+                        ]);
+                    }
                 }
             } else {
                 if ($exists) {

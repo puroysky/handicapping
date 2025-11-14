@@ -1,0 +1,83 @@
+Array
+(
+    [0] => Array
+        (
+            [course] => SOUTH
+            [tee] => W
+            [holes_played] => 18
+            [multiple_slope_course_ratings] => Array
+                (
+                    [0] => 126_70.6
+                    [1] => 125_66.7
+                    [2] => 131_70
+                )
+
+        )
+
+    [1] => Array
+        (
+            [course] => SOUTH
+            [tee] => B
+            [holes_played] => 18
+            [multiple_slope_course_ratings] => Array
+                (
+                    [0] => 134_72.8
+                    [1] => 135_72
+                )
+
+        )
+
+    [2] => Array
+        (
+            [course] => SOUTH
+            [tee] => R
+            [holes_played] => 18
+            [multiple_slope_course_ratings] => Array
+                (
+                    [0] => 129_73.3
+                    [1] => 131_73.1
+                    [2] => 125_68.5
+                )
+
+        )
+
+    [3] => Array
+        (
+            [course] => NORTH
+            [tee] => W
+            [holes_played] => 18
+            [multiple_slope_course_ratings] => Array
+                (
+                    [0] => 125_66.7
+                    [1] => 123_66.5
+                )
+
+        )
+
+    [4] => Array
+        (
+            [course] => NORTH
+            [tee] => B
+            [holes_played] => 18
+            [multiple_slope_course_ratings] => Array
+                (
+                    [0] => 132_68.8
+                    [1] => 130_67.8
+                )
+
+        )
+
+    [5] => Array
+        (
+            [course] => NORTH
+            [tee] => R
+            [holes_played] => 18
+            [multiple_slope_course_ratings] => Array
+                (
+                    [0] => 125_68.5
+                    [1] => 124_68.3
+                )
+
+        )
+
+)
