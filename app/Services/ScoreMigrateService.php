@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\UserProfile;
 use App\Models\PlayerProfile;
 use App\Models\Score;
+use App\Models\Tee;
 use App\Models\Tournament;
 use Exception;
 use Illuminate\Http\Request;
@@ -131,7 +132,7 @@ class ScoreMigrateService
 
         // Extract header and validate required columns
         $header = array_map('strtolower', array_map('trim', $data[0]));
-        $requiredColumns = ['account_no', 'adjusted_gross_score', 'holes_completed', 'date_played', 'tee_id', 'course_id'];
+        $requiredColumns = ['account_no', 'adjusted_gross_score', 'holes_completed', 'date_played', 'tee', 'course'];
 
         foreach ($requiredColumns as $column) {
             if (!in_array($column, $header)) {
@@ -213,8 +214,8 @@ class ScoreMigrateService
                 (is_numeric($row[$columnMap['date_played']]) ?
                     ExcelDate::excelToDateTimeObject($row[$columnMap['date_played']])->format('Y-m-d') :
                     Carbon::parse(trim($row[$columnMap['date_played']]))->format('Y-m-d')) : '',
-            'tee_id' => isset($row[$columnMap['tee_id']]) ? trim($row[$columnMap['tee_id']]) : '',
-            'course_id' => isset($row[$columnMap['course_id']]) ? trim($row[$columnMap['course_id']]) : '',
+            'tee' => isset($row[$columnMap['tee']]) ? trim($row[$columnMap['tee']]) : '',
+            'course' => isset($row[$columnMap['course']]) ? trim($row[$columnMap['course']]) : '',
         ];
 
         Log::debug('Validating row', ['row_number' => $rowNumber, 'row_data' => $rowData]);
@@ -224,8 +225,8 @@ class ScoreMigrateService
             'adjusted_gross_score' => 'required|integer|min:1|max:200',
             'holes_completed' => 'required|string|in:F9,B9,18',
             'date_played' => 'required|date',
-            'tee_id' => 'required|integer|max:10',
-            'course_id' => 'required|integer|max:10',
+            'tee' => 'required|in:R,B,W,G',
+            'course' => 'required|in:NORTH,SOUTH',
         ]);
 
         if ($rowValidator->fails()) {
@@ -242,8 +243,8 @@ class ScoreMigrateService
                 'adjusted_gross_score' => $rowData['adjusted_gross_score'],
                 'holes_played' => $rowData['holes_completed'],
                 'date_played' => Carbon::parse($rowData['date_played'])->format('Y-m-d'),
-                'course_id' => $rowData['course_id'],
-                'tee_id' => $rowData['tee_id'],
+                'course' => $rowData['course'],
+                'tee' => $rowData['tee'],
                 'row_number' => $rowNumber
             ]
         ];
@@ -294,14 +295,46 @@ class ScoreMigrateService
         Log::info('Preparing score data for bulk insert', ['count' => count($validRows)]);
         $scoresData = [];
 
+
+
+
+
+
+
+        $courseMap = [
+            'NORTH' => 1,
+            'SOUTH' => 2,
+        ];
+
+        $revesedCoureMap = [
+            1 => 'NORTH',
+            2 => 'SOUTH',
+        ];
+
+
+        $teeMap = [];
+        $tees = Tee::get();
+
+
+
+        foreach ($tees as $tee) {
+            $teeMap[$revesedCoureMap[$tee->course_id]][$tee->tee_code] = $tee->tee_id;
+        }
+
+
         foreach ($validRows as $rowData) {
+
+            $courseId = $courseMap[$rowData['course']];
+
+            $teeId = $teeMap[$rowData['course']][$rowData['tee']];
+
             $ratings = $this->extractRatingsByHoles(
                 $rowData['holes_played'],
-                $rowData['course_id'],
-                $rowData['tee_id']
+                $courseId,
+                $teeId
             );
 
-            $formulaExpression = $this->tournament->tournamentCourses[$rowData['course_id']]
+            $formulaExpression = $this->tournament->tournamentCourses[$courseId]
                 ->scorecard->scoreDifferentialFormula->formula_expression;
 
             $scoreDifferential = $this->getScoreDifferential(
@@ -317,10 +350,10 @@ class ScoreMigrateService
                 'user_id' => $players[$rowData['account_no']]->user_id,
                 'participant_id' => null,
                 'tournament_id' => $this->tournament->tournament_id,
-                'tournament_course_id' => $this->tournament->tournamentCourses[$rowData['course_id']]->tournament_course_id,
+                'tournament_course_id' => $this->tournament->tournamentCourses[$courseId]->tournament_course_id,
                 'division_id' => null,
-                'course_id' => $rowData['course_id'],
-                'tee_id' => $rowData['tee_id'],
+                'course_id' => $courseId,
+                'tee_id' => $teeId,
                 'date_played' => $rowData['date_played'],
                 'scoring_method' => 'adj',
                 'score_type' => 'tmt',

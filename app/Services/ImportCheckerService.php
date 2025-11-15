@@ -163,17 +163,17 @@ class ImportCheckerService
 
 
 
-        // echo '<pre>';
-        // print_r($dateErrors);
+        echo '<pre>';
+        print_r($dateErrors);
 
-        // echo '</pre>';
+        echo '</pre>';
         // return;
 
 
-        // echo '<pre>';
-        // print_r($errors);
+        echo '<pre>';
+        print_r($errors);
 
-        // echo '</pre>';
+        echo '</pre>';
 
         // return;
 

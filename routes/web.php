@@ -37,6 +37,34 @@ Route::get('test', function () {
 
 
 
+
+
+    $reveseCoureMap = [
+        1 => 'NORTH',
+        2 => 'SOUTH',
+    ];
+
+
+    $teeMap = [];
+    $tees = Tee::get();
+
+
+
+    foreach ($tees as $tee) {
+        $teeMap[$reveseCoureMap[$tee->course_id]][$tee->tee_code] = $tee->tee_id;
+    }
+
+
+
+    echo '<pre>';
+    print_r($teeMap);
+    echo '</pre>';
+
+
+
+
+    return;
+
     $testService = new \App\Services\ImportCheckerService();
     $testService->test('Tournament.xlsx');
 
