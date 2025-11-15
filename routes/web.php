@@ -34,85 +34,85 @@ Route::get('test', function () {
 
 
 
-    $bracket = {
-    "3": {
-        "max": "3",
-        "min": "3",
-        "count": "1",
-        "method": "LOWEST",
-        "adjustment": "-2.0"
-    },
-    "4": {
-        "max": "4",
-        "min": "4",
-        "count": "1",
-        "method": "LOWEST",
-        "adjustment": "-1.0"
-    },
-    "5": {
-        "max": "5",
-        "min": "5",
-        "count": "1",
-        "method": "LOWEST",
-        "adjustment": "0"
-    },
-    "6": {
-        "max": "6",
-        "min": "6",
-        "count": "2",
-        "method": "AVERAGE_OF_LOWEST",
-        "adjustment": "-1.0"
-    },
-    "7": {
-        "max": "8",
-        "min": "7",
-        "count": "2",
-        "method": "AVERAGE_OF_LOWEST",
-        "adjustment": "0"
-    },
-    "9": {
-        "max": "11",
-        "min": "9",
-        "count": "3",
-        "method": "AVERAGE_OF_LOWEST",
-        "adjustment": "0"
-    },
-    "12": {
-        "max": "14",
-        "min": "12",
-        "count": "4",
-        "method": "AVERAGE_OF_LOWEST",
-        "adjustment": "0"
-    },
-    "15": {
-        "max": "16",
-        "min": "15",
-        "count": "5",
-        "method": "AVERAGE_OF_LOWEST",
-        "adjustment": "0"
-    },
-    "17": {
-        "max": "18",
-        "min": "17",
-        "count": "6",
-        "method": "AVERAGE_OF_LOWEST",
-        "adjustment": "0"
-    },
-    "19": {
-        "max": "19",
-        "min": "19",
-        "count": "7",
-        "method": "AVERAGE_OF_LOWEST",
-        "adjustment": "0"
-    },
-    "20": {
-        "max": "20",
-        "min": "20",
-        "count": "8",
-        "method": "AVERAGE_OF_LOWEST",
-        "adjustment": "0"
-    }
-};
+    //     $bracket = {
+    //     "3": {
+    //         "max": "3",
+    //         "min": "3",
+    //         "count": "1",
+    //         "method": "LOWEST",
+    //         "adjustment": "-2.0"
+    //     },
+    //     "4": {
+    //         "max": "4",
+    //         "min": "4",
+    //         "count": "1",
+    //         "method": "LOWEST",
+    //         "adjustment": "-1.0"
+    //     },
+    //     "5": {
+    //         "max": "5",
+    //         "min": "5",
+    //         "count": "1",
+    //         "method": "LOWEST",
+    //         "adjustment": "0"
+    //     },
+    //     "6": {
+    //         "max": "6",
+    //         "min": "6",
+    //         "count": "2",
+    //         "method": "AVERAGE_OF_LOWEST",
+    //         "adjustment": "-1.0"
+    //     },
+    //     "7": {
+    //         "max": "8",
+    //         "min": "7",
+    //         "count": "2",
+    //         "method": "AVERAGE_OF_LOWEST",
+    //         "adjustment": "0"
+    //     },
+    //     "9": {
+    //         "max": "11",
+    //         "min": "9",
+    //         "count": "3",
+    //         "method": "AVERAGE_OF_LOWEST",
+    //         "adjustment": "0"
+    //     },
+    //     "12": {
+    //         "max": "14",
+    //         "min": "12",
+    //         "count": "4",
+    //         "method": "AVERAGE_OF_LOWEST",
+    //         "adjustment": "0"
+    //     },
+    //     "15": {
+    //         "max": "16",
+    //         "min": "15",
+    //         "count": "5",
+    //         "method": "AVERAGE_OF_LOWEST",
+    //         "adjustment": "0"
+    //     },
+    //     "17": {
+    //         "max": "18",
+    //         "min": "17",
+    //         "count": "6",
+    //         "method": "AVERAGE_OF_LOWEST",
+    //         "adjustment": "0"
+    //     },
+    //     "19": {
+    //         "max": "19",
+    //         "min": "19",
+    //         "count": "7",
+    //         "method": "AVERAGE_OF_LOWEST",
+    //         "adjustment": "0"
+    //     },
+    //     "20": {
+    //         "max": "20",
+    //         "min": "20",
+    //         "count": "8",
+    //         "method": "AVERAGE_OF_LOWEST",
+    //         "adjustment": "0"
+    //     }
+    // };
 
     $result = DB::table('scores')
         ->select(
