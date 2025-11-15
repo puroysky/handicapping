@@ -484,7 +484,23 @@ class ParticipantController extends Controller
         return $participants;
     }
 
-    private function calculateLocalHandicap($whsHandicapIndex, $slopeRating) {}
+    private function calculateLocalHandicap($whsHandicapIndex, $slopeRating)
+    {
+
+        $sql = `SELECT 
+                    user_id, 
+                    FLOOR(SUM(
+                        CASE 
+                            WHEN scores.holes_played = 'F9' OR scores.holes_played = 'B9'
+                                THEN 0.5
+                            ELSE 1
+                        END
+                    )) AS round
+                FROM scores
+                GROUP BY scores.user_id`;
+
+        DB::raw($sql);
+    }
 
     /**
      * Handle course selection for a participant
