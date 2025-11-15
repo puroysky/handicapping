@@ -34,106 +34,199 @@ Route::get('test', function () {
 
 
 
-    //     $bracket = {
-    //     "3": {
-    //         "max": "3",
-    //         "min": "3",
-    //         "count": "1",
-    //         "method": "LOWEST",
-    //         "adjustment": "-2.0"
-    //     },
-    //     "4": {
-    //         "max": "4",
-    //         "min": "4",
-    //         "count": "1",
-    //         "method": "LOWEST",
-    //         "adjustment": "-1.0"
-    //     },
-    //     "5": {
-    //         "max": "5",
-    //         "min": "5",
-    //         "count": "1",
-    //         "method": "LOWEST",
-    //         "adjustment": "0"
-    //     },
-    //     "6": {
-    //         "max": "6",
-    //         "min": "6",
-    //         "count": "2",
-    //         "method": "AVERAGE_OF_LOWEST",
-    //         "adjustment": "-1.0"
-    //     },
-    //     "7": {
-    //         "max": "8",
-    //         "min": "7",
-    //         "count": "2",
-    //         "method": "AVERAGE_OF_LOWEST",
-    //         "adjustment": "0"
-    //     },
-    //     "9": {
-    //         "max": "11",
-    //         "min": "9",
-    //         "count": "3",
-    //         "method": "AVERAGE_OF_LOWEST",
-    //         "adjustment": "0"
-    //     },
-    //     "12": {
-    //         "max": "14",
-    //         "min": "12",
-    //         "count": "4",
-    //         "method": "AVERAGE_OF_LOWEST",
-    //         "adjustment": "0"
-    //     },
-    //     "15": {
-    //         "max": "16",
-    //         "min": "15",
-    //         "count": "5",
-    //         "method": "AVERAGE_OF_LOWEST",
-    //         "adjustment": "0"
-    //     },
-    //     "17": {
-    //         "max": "18",
-    //         "min": "17",
-    //         "count": "6",
-    //         "method": "AVERAGE_OF_LOWEST",
-    //         "adjustment": "0"
-    //     },
-    //     "19": {
-    //         "max": "19",
-    //         "min": "19",
-    //         "count": "7",
-    //         "method": "AVERAGE_OF_LOWEST",
-    //         "adjustment": "0"
-    //     },
-    //     "20": {
-    //         "max": "20",
-    //         "min": "20",
-    //         "count": "8",
-    //         "method": "AVERAGE_OF_LOWEST",
-    //         "adjustment": "0"
-    //     }
-    // };
-
-    $result = DB::table('scores')
-        ->select(
-            'user_id',
-            DB::raw("FLOOR(SUM(
-                CASE 
-                    WHEN holes_played = 'F9' OR holes_played = 'B9'
-                        THEN 0.5
-                    ELSE 1
-                END
-            )) AS round")
-        )
-        ->groupBy('user_id')
-        ->get();
 
 
 
-    echo '<pre>';
-    print_r($result->toArray());
-    echo '</pre>';
+    $testService = new \App\Services\ImportCheckerService();
+    $testService->test('Tournament.xlsx');
+
+
     return;
+
+    $bracket = '{
+        "3": {
+            "max": "3",
+            "min": "3",
+            "count": "1",
+            "method": "LOWEST",
+            "adjustment": "-2.0"
+        },
+        "4": {
+            "max": "4",
+            "min": "4",
+            "count": "1",
+            "method": "LOWEST",
+            "adjustment": "-1.0"
+        },
+        "5": {
+            "max": "5",
+            "min": "5",
+            "count": "1",
+            "method": "LOWEST",
+            "adjustment": "0"
+        },
+        "6": {
+            "max": "6",
+            "min": "6",
+            "count": "2",
+            "method": "AVERAGE_OF_LOWEST",
+            "adjustment": "-1.0"
+        },
+        "7": {
+            "max": "8",
+            "min": "7",
+            "count": "2",
+            "method": "AVERAGE_OF_LOWEST",
+            "adjustment": "0"
+        },
+        "9": {
+            "max": "11",
+            "min": "9",
+            "count": "3",
+            "method": "AVERAGE_OF_LOWEST",
+            "adjustment": "0"
+        },
+        "12": {
+            "max": "14",
+            "min": "12",
+            "count": "4",
+            "method": "AVERAGE_OF_LOWEST",
+            "adjustment": "0"
+        },
+        "15": {
+            "max": "16",
+            "min": "15",
+            "count": "5",
+            "method": "AVERAGE_OF_LOWEST",
+            "adjustment": "0"
+        },
+        "17": {
+            "max": "18",
+            "min": "17",
+            "count": "6",
+            "method": "AVERAGE_OF_LOWEST",
+            "adjustment": "0"
+        },
+        "19": {
+            "max": "19",
+            "min": "19",
+            "count": "7",
+            "method": "AVERAGE_OF_LOWEST",
+            "adjustment": "0"
+        },
+        "20": {
+            "max": "20",
+            "min": "20",
+            "count": "8",
+            "method": "AVERAGE_OF_LOWEST",
+            "adjustment": "0"
+        }
+    }';
+
+    $bracket = json_decode($bracket, true);
+
+
+    //should start from max to min sorting
+    $bracket = collect($bracket)->sortByDesc('max')->toArray();
+
+
+
+
+    $scores = Score::orderBy('date_played')->get();
+
+    $users = [];
+
+
+
+    foreach ($scores as $score) {
+
+        $users[$score->user_id][] = array(
+            'score_id' => $score->score_id,
+            'score_differential' => $score->score_differential,
+            'round' => $score->holes_played == 'F9' || $score->holes_played == 'B9' ? 0.5 : 1,
+        );
+    }
+
+
+    $userLocalHandicapIndexes = [];
+
+    foreach ($users as $userId => $user) {
+
+        //trim the user to max 20 rounds
+        $user = array_slice($user, 0, 20);
+
+        $roundCount = count($user);
+        //roundCount is based on the min and max in the bracket
+        foreach ($bracket as $config) {
+
+            Log::info("Evaluating user $userId with round count $roundCount against bracket min {$config['min']} and max {$config['max']}");
+            if ($roundCount >= (int)$config['min'] && $roundCount <= (int)$config['max']) {
+
+                Log::info("User $userId matches bracket with min {$config['min']} and max {$config['max']}");
+                switch ($config['method']) {
+                    case 'LOWEST':
+                        //get the lowest score differential
+                        usort($user, function ($a, $b) {
+                            return $a['score_differential'] <=> $b['score_differential'];
+                        });
+                        $selectedScores = array_slice($user, 0, (int)$config['count']);
+
+                        $scoreDiff = $selectedScores[0]['score_differential'];
+                        break;
+                    case 'HIGHEST':
+                        //get the highest score differential
+                        usort($user, function ($a, $b) {
+                            return $b['score_differential'] <=> $a['score_differential'];
+                        });
+                        $selectedScores = array_slice($user, 0, (int)$config['count']);
+                        $scoreDiff = $selectedScores[0]['score_differential'];
+
+                        break;
+                    case 'AVERAGE_OF_LOWEST':
+                        //get the lowest score differentials and calculate average
+                        usort($user, function ($a, $b) {
+                            return $a['score_differential'] <=> $b['score_differential'];
+                        });
+                        $selectedScores = array_slice($user, 0, (int)$config['count']);
+                        $average = array_sum(array_column($selectedScores, 'score_differential')) / count($selectedScores);
+                        $scoreDiff = $average;
+                        break;
+                    default:
+                        $selectedScores = [];
+                        $scoreDiff = 0;
+                }
+
+
+                $localHandicapIndex = $scoreDiff + floatval($config['adjustment']);
+
+
+                $userLocalHandicapIndexes[$userId] = [
+                    'local_handicap_index' => round($localHandicapIndex, 2),
+                    'details' => [
+                        'rounds_considered' => $roundCount,
+                        'method' => $config['method'],
+                        'count' => (int)$config['count'],
+                        'adjustment' => floatval($config['adjustment']),
+                        'selected_scores' => $selectedScores,
+                    ]
+                ];
+            }
+        }
+    }
+    // echo '<pre>';
+    // print_r($userLocalHandicapIndexes);
+    // echo '</pre>';
+    // return;
+
+
+
+
+
+
+    // echo '<pre>';
+    // print_r($scores->toArray());
+    // echo '</pre>';
+    // return;
 
 
     // $participants = Participant::with('user.profile', 'user.player', 'tournament', 'participantCourseHandicaps.course', 'participantCourseHandicaps.tee')
@@ -157,9 +250,6 @@ Route::get('test', function () {
 
     // return;
 
-
-    $testService = new \App\Services\ImportCheckerService();
-    $testService->test('Tournament.xlsx');
 })->name('test');
 
 
