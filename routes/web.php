@@ -34,22 +34,40 @@ Route::get('test', function () {
 
 
 
+    $tournaments = Tournament::with(
+        'tournamentCourses.scorecard.scoreDifferentialFormula',
+        'tournamentCourses.scorecard.ratings'
+    )
+        ->get()
+        ->keyBy('tournament_name');
 
+    $tournaments->each(function ($tournament) {
+        // Re-key tournamentCourses by course_id
+        $tournament->setRelation(
+            'tournamentCourses',
+            $tournament->tournamentCourses->keyBy('course_id')
+        );
 
-    $tmts = Tournament::get();
+        // Loop through each tournamentCourse to re-key ratings
+        $tournament->tournamentCourses->each(function ($course) {
+            if ($course->scorecard && $course->scorecard->ratings) {
+                // Format: <course_id>_<tee_id>
+                $keyedRatings = $course->scorecard->ratings->keyBy(function ($rating) {
+                    return $rating->tee_id;
+                });
 
-
-    $tournamentMap = [];
-
-    foreach ($tmts as $tmt) {
-        $tournamentMap[$tmt->tournament_name] = $tmt->tournament_id;
-    }
-
-
+                $course->scorecard->setRelation('ratings', $keyedRatings);
+            }
+        });
+    });
 
     echo '<pre>';
-    print_r($tournamentMap);
+    // print_r($tournaments['ALL JUNIORS 2025'][2]->scorecard->ratings[5]);
+    print_r($tournaments['ALL JUNIORS 2025']->tournamentCourses[2]->scorecard->ratings[5]->toArray());
     echo '</pre>';
+
+
+    return;
 
 
 

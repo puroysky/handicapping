@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Course;
 use App\Models\User;
 use App\Models\UserProfile;
 use App\Models\PlayerProfile;
@@ -24,14 +25,15 @@ class ScoreMigrateService
 {
 
 
-    protected $tournament = null;
+    protected $tournaments;
 
     public function migrate($request = null)
     {
         ini_set('max_execution_time', 300);
 
         try {
-            // $this->loadTournamentData(1);
+
+            $this->loadTournamentData();
 
             $fileValidation = $this->validateImportFile($request);
             if (!$fileValidation['success']) {
@@ -42,8 +44,6 @@ class ScoreMigrateService
             if (!$fileData['success']) {
                 return $fileData;
             }
-
-            Log::debug('Column map', ['columnMap' => $fileData['columnMap']]);
 
             $validationResult = $this->validateImportRows($fileData['data'], $fileData['columnMap']);
             if (!$validationResult['success']) {
@@ -73,26 +73,40 @@ class ScoreMigrateService
     /**
      * Load and setup tournament data with required relationships
      */
-    private function loadTournamentData($tournamentId): void
+    private function loadTournamentData(): void
     {
-        $this->tournament = Tournament::with(
+        $tournaments = Tournament::with(
             'tournamentCourses.scorecard.scoreDifferentialFormula',
             'tournamentCourses.scorecard.ratings'
-        )->find($tournamentId);
+        )
+            ->get()
+            ->keyBy('tournament_name');
 
-        $this->tournament->setRelation(
-            'tournamentCourses',
-            $this->tournament->tournamentCourses->keyBy('course_id')
-        );
+        $tournaments->each(function ($tournament) {
+            // Re-key tournamentCourses by course_id
+            $tournament->setRelation(
+                'tournamentCourses',
+                $tournament->tournamentCourses->keyBy('course_id')
+            );
 
-        foreach ($this->tournament->tournamentCourses as $tournamentCourse) {
-            if ($tournamentCourse->scorecard?->ratings) {
-                $tournamentCourse->scorecard->setRelation(
-                    'ratings',
-                    $tournamentCourse->scorecard->ratings->keyBy('tee_id')
-                );
-            }
-        }
+            // Loop through each tournamentCourse to re-key ratings
+            $tournament->tournamentCourses->each(function ($course) {
+                if ($course->scorecard && $course->scorecard->ratings) {
+                    // Format: <course_id>_<tee_id>
+                    $keyedRatings = $course->scorecard->ratings->keyBy(function ($rating) {
+                        return $rating->tee_id;
+                    });
+
+                    $course->scorecard->setRelation('ratings', $keyedRatings);
+                }
+            });
+        });
+
+        $this->tournaments = $tournaments;
+
+
+
+        Log::debug('Tournaments loaded', ['data' => $tournaments]);
     }
 
     /**
@@ -132,7 +146,7 @@ class ScoreMigrateService
 
         // Extract header and validate required columns
         $header = array_map('strtolower', array_map('trim', $data[0]));
-        $requiredColumns = ['account_no', 'adjusted_gross_score', 'holes_completed', 'date_played', 'tee', 'course', 'tournament_name'];
+        $requiredColumns = ['account_no', 'adjusted_gross_score', 'holes_played', 'date_played', 'tee', 'course', 'tournament_name'];
 
         foreach ($requiredColumns as $column) {
             if (!in_array($column, $header)) {
@@ -161,17 +175,14 @@ class ScoreMigrateService
         for ($i = 1; $i < count($data); $i++) {
             $row = $data[$i];
 
-            try {
-                $rowValidation = $this->validateSingleRow($row, $columnMap, $i + 1, $validRows);
+            $rowValidation = $this->validateSingleRow($row, $columnMap, $i + 1, $validRows);
 
-                if ($rowValidation['success']) {
-                    $validRows[] = $rowValidation['data'];
-                } else {
-                    $errors = array_merge($errors, $rowValidation['errors']);
-                }
-            } catch (Exception $e) {
-                $errors[] = "Row " . ($i + 1) . ": " . $e->getMessage();
+            if ($rowValidation['success']) {
+                $validRows[] = $rowValidation['data'];
+
+                continue;
             }
+            $errors = array_merge($errors, $rowValidation['errors']);
         }
 
         if (empty($validRows)) {
@@ -181,6 +192,15 @@ class ScoreMigrateService
                 'errors' => $errors
             ];
         }
+
+        if (!empty($errors)) {
+            return [
+                'success' => false,
+                'message' => 'Some rows have errors.',
+                'errors' => $errors
+            ];
+        }
+
 
         return [
             'success' => true,
@@ -209,7 +229,7 @@ class ScoreMigrateService
         $rowData = [
             'account_no' => isset($row[$columnMap['account_no']]) ? trim($row[$columnMap['account_no']]) : '',
             'adjusted_gross_score' => isset($row[$columnMap['adjusted_gross_score']]) ? trim($row[$columnMap['adjusted_gross_score']]) : '',
-            'holes_completed' => isset($row[$columnMap['holes_completed']]) ? trim($row[$columnMap['holes_completed']]) : '',
+            'holes_played' => isset($row[$columnMap['holes_played']]) ? trim($row[$columnMap['holes_played']]) : '',
             'date_played' => isset($row[$columnMap['date_played']]) ?
                 (is_numeric($row[$columnMap['date_played']]) ?
                     ExcelDate::excelToDateTimeObject($row[$columnMap['date_played']])->format('Y-m-d') :
@@ -219,12 +239,10 @@ class ScoreMigrateService
             'tournament_name' => isset($row[$columnMap['tournament_name']]) ? trim($row[$columnMap['tournament_name']]) : '',
         ];
 
-        Log::debug('Validating row', ['row_number' => $rowNumber, 'row_data' => $rowData]);
-
         $rowValidator = Validator::make($rowData, [
             'account_no' => 'required|string|max:50',
             'adjusted_gross_score' => 'required|integer|min:1|max:200',
-            'holes_completed' => 'required|string|in:F9,B9,18',
+            'holes_played' => 'required|string|in:F9,B9,18',
             'date_played' => 'required|date',
             'tee' => 'required|in:R,B,W,G',
             'course' => 'required|in:NORTH,SOUTH',
@@ -243,7 +261,7 @@ class ScoreMigrateService
             'data' => [
                 'account_no' => $rowData['account_no'],
                 'adjusted_gross_score' => $rowData['adjusted_gross_score'],
-                'holes_played' => $rowData['holes_completed'],
+                'holes_played' => $rowData['holes_played'],
                 'date_played' => Carbon::parse($rowData['date_played'])->format('Y-m-d'),
                 'course' => $rowData['course'],
                 'tee' => $rowData['tee'],
@@ -258,7 +276,6 @@ class ScoreMigrateService
      */
     private function bulkInsertScores($validRows)
     {
-        Log::info('Starting bulk insert of scores', ['count' => count($validRows)]);
 
         DB::beginTransaction();
 
@@ -266,7 +283,16 @@ class ScoreMigrateService
             $now = now();
 
             $scoresData = $this->prepareScoreData($validRows, $now);
-            Score::insert($scoresData);
+            // Score::insert($scoresData);
+
+
+
+            collect($scoresData)->chunk(500)->each(function ($chunk) {
+                Score::insert($chunk->toArray());
+            });
+
+
+
 
             DB::commit();
 
@@ -295,24 +321,10 @@ class ScoreMigrateService
     {
         $players = PlayerProfile::all()->keyBy('account_no');
 
-        Log::info('Preparing score data for bulk insert', ['count' => count($validRows)]);
         $scoresData = [];
 
 
 
-
-
-
-
-        $courseMap = [
-            'NORTH' => 1,
-            'SOUTH' => 2,
-        ];
-
-        $revesedCoureMap = [
-            1 => 'NORTH',
-            2 => 'SOUTH',
-        ];
 
 
         $teeMap = [];
@@ -320,70 +332,38 @@ class ScoreMigrateService
 
 
 
+
+
+        $courses = Course::get()->keyBy('course_code');
+
+
+
+
         foreach ($tees as $tee) {
-            $teeMap[$revesedCoureMap[$tee->course_id]][$tee->tee_code] = $tee->tee_id;
+            $teeMap[$tee->course->course_code][$tee->tee_code] = $tee->tee_id;
         }
-
-
-
-
-
-        $tmts = Tournament::get();
-
-
-        $tournamentMap = [];
-
-        foreach ($tmts as $tmt) {
-            $tournamentMap[$tmt->tournament_name] = $tmt->tournament_id;
-        }
-
-
 
 
 
         foreach ($validRows as $rowData) {
 
-
-
-
-            Log::debug('Processing row for score preparation', [
-                'row_number' => $rowData['row_number'],
-                'tournament_name' => $rowData['tournament_name'],
-                'tournament_map' => $tournamentMap
-            ]);
-
-
-            $this->loadTournamentData($tournamentMap[$rowData['tournament_name']]);
-
-
-
-            $courseId = $courseMap[$rowData['course']];
-
+            $courseId = $courses[$rowData['course']]->course_id;
             $teeId = $teeMap[$rowData['course']][$rowData['tee']];
 
-            $ratings = $this->extractRatingsByHoles(
-                $rowData['holes_played'],
-                $courseId,
-                $teeId
-            );
 
-            $formulaExpression = $this->tournament->tournamentCourses[$courseId]
-                ->scorecard->scoreDifferentialFormula->formula_expression;
+            if (!isset($this->tournaments[$rowData['tournament_name']])) {
+                throw new Exception("Tournament not found: {$rowData['tournament_name']}");
+            }
 
-            $scoreDifferential = $this->getScoreDifferential(
-                $formulaExpression,
-                $rowData['adjusted_gross_score'],
-                $ratings['courseRating'],
-                $ratings['slopeRating']
-            );
+            $scoreDifferential = $this->getScoreDifferential($rowData, $courseId, $teeId);
 
             $scoresData[] = [
                 'player_profile_id' => $players[$rowData['account_no']]->player_profile_id,
                 'user_profile_id' => $players[$rowData['account_no']]->user_profile_id,
                 'user_id' => $players[$rowData['account_no']]->user_id,
                 'participant_id' => null,
-                'tournament_id' => $this->tournament->tournament_id,
-                'tournament_course_id' => $this->tournament->tournamentCourses[$courseId]->tournament_course_id,
+                'tournament_id' => $this->tournaments[$rowData['tournament_name']]->tournament_id,
+                'tournament_course_id' => $this->tournaments[$rowData['tournament_name']]->tournamentCourses[$courseId]->tournament_course_id,
                 'division_id' => null,
                 'course_id' => $courseId,
                 'tee_id' => $teeId,
@@ -407,8 +387,6 @@ class ScoreMigrateService
                 'updated_at' => $now,
                 'updated_by' => Auth::id()
             ];
-
-            Log::debug('Prepared score for bulk insert', ['score_count' => count($scoresData)]);
         }
 
         return $scoresData;
@@ -418,12 +396,31 @@ class ScoreMigrateService
     /**
      * Get score differential using formula expression and ratings
      */
-    private function getScoreDifferential($formulaExpression, $adjustedGrossScore, $courseRating, $slopeRating): int
+    private function getScoreDifferential($rowData, $courseId, $teeId): int
     {
+
+
+        $ratings = $this->extractRatingsByHoles(
+            $rowData['holes_played'],
+            $courseId,
+            $teeId,
+            $rowData['tournament_name']
+        );
+
+        $formulaExpression = $this->tournaments[$rowData['tournament_name']]->tournamentCourses[$courseId]
+            ->scorecard->scoreDifferentialFormula->formula_expression;
+
+        if (empty($formulaExpression)) {
+            throw new Exception("Missing score differential formula for course_id: {$courseId} in tournament: {$rowData['tournament_name']}");
+        }
+
+
+
+
         $params = [
-            'ADJUSTED_GROSS_SCORE' => $adjustedGrossScore,
-            'COURSE_RATING' => $courseRating,
-            'SLOPE_RATING' => $slopeRating,
+            'ADJUSTED_GROSS_SCORE' => $rowData['adjusted_gross_score'],
+            'COURSE_RATING' => $ratings['courseRating'],
+            'SLOPE_RATING' => $ratings['slopeRating'],
         ];
         return $this->calculateScoreDifferential($params, $formulaExpression);
     }
@@ -431,11 +428,21 @@ class ScoreMigrateService
     /**
      * Extract course and slope ratings based on holes played
      */
-    private function extractRatingsByHoles($holesPlayed, $courseId, $teeId): array
+    private function extractRatingsByHoles($holesPlayed, $courseId, $teeId, $tournamentName): array
     {
-        $rating = $this->tournament->tournamentCourses[$courseId]->scorecard->ratings[$teeId];
+        Log::debug('Extracting ratings', [
+            'holes_played' => $holesPlayed,
+            'course_id' => $courseId,
+            'tee_id' => $teeId,
+            'tournament_name' => $tournamentName,
 
-        return match ($holesPlayed) {
+        ]);
+        $rating = $this->tournaments[$tournamentName]->tournamentCourses[$courseId]->scorecard->ratings[$teeId];
+
+
+        // print_r($this->tournaments[$tournamentName]->tournamentCourses[$courseId]->scorecard->ratings[$teeId]->toArray());
+
+        $result =  match ($holesPlayed) {
             'F9' => [
                 'courseRating' => $rating->f9_course_rating,
                 'slopeRating' => $rating->f9_slope_rating,
@@ -450,6 +457,12 @@ class ScoreMigrateService
             ],
             default => throw new Exception('Invalid holes played value: ' . $holesPlayed),
         };
+
+        if (empty($result['courseRating']) || empty($result['slopeRating'])) {
+            throw new Exception("Missing ratings for course_id: {$courseId}, tee_id: {$teeId}, holes_played: {$holesPlayed}");
+        }
+
+        return $result;
     }
 
     /**
