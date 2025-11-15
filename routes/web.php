@@ -36,15 +36,13 @@ Route::get('test', function () {
 
 
 
-
-
-    $tournaments = Tournament::get();
+    $tmts = Tournament::get();
 
 
     $tournamentMap = [];
 
-    foreach ($tournaments as $tournament) {
-        $tournamentMap[$tournament->tournament_name] = $tournament->tournament_id;
+    foreach ($tmts as $tmt) {
+        $tournamentMap[$tmt->tournament_name] = $tmt->tournament_id;
     }
 
 
@@ -56,7 +54,7 @@ Route::get('test', function () {
 
 
 
-    return;
+    // return;
 
     $testService = new \App\Services\ImportCheckerService();
     $testService->test('Tournament.xlsx');

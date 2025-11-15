@@ -346,6 +346,13 @@ class ScoreMigrateService
 
 
 
+            Log::debug('Processing row for score preparation', [
+                'row_number' => $rowData['row_number'],
+                'tournament_name' => $rowData['tournament_name'],
+                'tournament_map' => $tournamentMap
+            ]);
+
+
             $this->loadTournamentData($tournamentMap[$rowData['tournament_name']]);
 
 
