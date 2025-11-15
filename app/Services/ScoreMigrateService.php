@@ -31,7 +31,7 @@ class ScoreMigrateService
         ini_set('max_execution_time', 300);
 
         try {
-            $this->loadTournamentData($request);
+            // $this->loadTournamentData(1);
 
             $fileValidation = $this->validateImportFile($request);
             if (!$fileValidation['success']) {
@@ -73,12 +73,12 @@ class ScoreMigrateService
     /**
      * Load and setup tournament data with required relationships
      */
-    private function loadTournamentData($request): void
+    private function loadTournamentData($tournamentId): void
     {
         $this->tournament = Tournament::with(
             'tournamentCourses.scorecard.scoreDifferentialFormula',
             'tournamentCourses.scorecard.ratings'
-        )->find($request->tournament_id);
+        )->find($tournamentId);
 
         $this->tournament->setRelation(
             'tournamentCourses',
@@ -132,7 +132,7 @@ class ScoreMigrateService
 
         // Extract header and validate required columns
         $header = array_map('strtolower', array_map('trim', $data[0]));
-        $requiredColumns = ['account_no', 'adjusted_gross_score', 'holes_completed', 'date_played', 'tee', 'course'];
+        $requiredColumns = ['account_no', 'adjusted_gross_score', 'holes_completed', 'date_played', 'tee', 'course', 'tournament_name'];
 
         foreach ($requiredColumns as $column) {
             if (!in_array($column, $header)) {
@@ -216,6 +216,7 @@ class ScoreMigrateService
                     Carbon::parse(trim($row[$columnMap['date_played']]))->format('Y-m-d')) : '',
             'tee' => isset($row[$columnMap['tee']]) ? trim($row[$columnMap['tee']]) : '',
             'course' => isset($row[$columnMap['course']]) ? trim($row[$columnMap['course']]) : '',
+            'tournament_name' => isset($row[$columnMap['tournament_name']]) ? trim($row[$columnMap['tournament_name']]) : '',
         ];
 
         Log::debug('Validating row', ['row_number' => $rowNumber, 'row_data' => $rowData]);
@@ -227,6 +228,7 @@ class ScoreMigrateService
             'date_played' => 'required|date',
             'tee' => 'required|in:R,B,W,G',
             'course' => 'required|in:NORTH,SOUTH',
+            'tournament_name' => 'required|string|max:100',
         ]);
 
         if ($rowValidator->fails()) {
@@ -245,7 +247,8 @@ class ScoreMigrateService
                 'date_played' => Carbon::parse($rowData['date_played'])->format('Y-m-d'),
                 'course' => $rowData['course'],
                 'tee' => $rowData['tee'],
-                'row_number' => $rowNumber
+                'row_number' => $rowNumber,
+                'tournament_name' => $rowData['tournament_name'],
             ]
         ];
     }
@@ -322,7 +325,30 @@ class ScoreMigrateService
         }
 
 
+
+
+
+        $tmts = Tournament::get();
+
+
+        $tournamentMap = [];
+
+        foreach ($tmts as $tmt) {
+            $tournamentMap[$tmt->tournament_name] = $tmt->tournament_id;
+        }
+
+
+
+
+
         foreach ($validRows as $rowData) {
+
+
+
+
+            $this->loadTournamentData($tournamentMap[$rowData['tournament_name']]);
+
+
 
             $courseId = $courseMap[$rowData['course']];
 

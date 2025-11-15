@@ -38,26 +38,19 @@ Route::get('test', function () {
 
 
 
-
-    $reveseCoureMap = [
-        1 => 'NORTH',
-        2 => 'SOUTH',
-    ];
+    $tournaments = Tournament::get();
 
 
-    $teeMap = [];
-    $tees = Tee::get();
+    $tournamentMap = [];
 
-
-
-    foreach ($tees as $tee) {
-        $teeMap[$reveseCoureMap[$tee->course_id]][$tee->tee_code] = $tee->tee_id;
+    foreach ($tournaments as $tournament) {
+        $tournamentMap[$tournament->tournament_name] = $tournament->tournament_id;
     }
 
 
 
     echo '<pre>';
-    print_r($teeMap);
+    print_r($tournamentMap);
     echo '</pre>';
 
 
