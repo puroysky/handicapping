@@ -10,6 +10,7 @@ use App\Models\Tournament;
 use App\Models\Participat;
 use App\Models\Rating;
 use App\Models\WhsHandicapIndex;
+use App\Services\LocalHandicapIndexCalculationService;
 use App\Services\ParticipantImportService;
 use Brick\Math\Exception\MathException;
 use Exception;
@@ -267,7 +268,7 @@ class ParticipantController extends Controller
                 $handicap = $this->calculateTournamentHandicap($tournament);
                 break;
             case 'local':
-                // Example adjustment for local handicap
+                $handicap = $this->calculateLocalHandicap();
 
                 break;
             default:
@@ -484,22 +485,11 @@ class ParticipantController extends Controller
         return $participants;
     }
 
-    private function calculateLocalHandicap($whsHandicapIndex, $slopeRating)
+    private function calculateLocalHandicap()
     {
 
-        $sql = `SELECT 
-                    user_id, 
-                    FLOOR(SUM(
-                        CASE 
-                            WHEN scores.holes_played = 'F9' OR scores.holes_played = 'B9'
-                                THEN 0.5
-                            ELSE 1
-                        END
-                    )) AS round
-                FROM scores
-                GROUP BY scores.user_id`;
-
-        DB::raw($sql);
+        $handicap = new LocalHandicapIndexCalculationService();
+        $handicap->calculate();
     }
 
     /**

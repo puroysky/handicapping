@@ -106,7 +106,7 @@ class TournamentService
 
 
 
-        $tournament->handicap_score_differential_config = json_encode($request['handicap_score_differential_config'] ?? []);
+        $tournament->tournament_handicap_calculation_table = json_encode($request['tournament_handicap_calculation_table'] ?? []);
         $tournament->created_by = Auth::id();
 
         $tournament->save();
@@ -159,7 +159,7 @@ class TournamentService
 
 
 
-        $validConfig =  $this->validateRanges($request['handicap_score_differential_config'] ?? [], [
+        $validConfig =  $this->validateRanges($request['tournament_handicap_calculation_table'] ?? [], [
             'min' => 'min',
             'max' => 'max'
         ]);

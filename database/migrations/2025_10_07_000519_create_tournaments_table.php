@@ -42,7 +42,7 @@ return new class extends Migration
             $table->string('tournament_handicap_formula_desc', 255)->nullable()->default(null);
             $table->string('course_handicap_formula_desc', 255)->nullable()->default(null);
 
-            $table->json('handicap_score_differential_config')->nullable()->default(null);
+            $table->json('tournament_handicap_calculation_table')->nullable()->default(null);
 
             $table->datetime('cancelled_at')->nullable()->default(null);
             $table->unsignedBigInteger('cancelled_by')->nullable()->default(null);

@@ -233,22 +233,22 @@
                                                 <tr>
                                                     <td>
                                                         <div class="d-flex gap-1">
-                                                            <input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[3][min]" value="3" placeholder="Min">
+                                                            <input type="number" class="form-control form-control-sm" name="tournament_handicap_calculation_table[3][min]" value="3" placeholder="Min">
                                                             <span class="text-muted">to</span>
-                                                            <input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[3][max]" value="3" placeholder="Max">
+                                                            <input type="number" class="form-control form-control-sm" name="tournament_handicap_calculation_table[3][max]" value="3" placeholder="Max">
                                                         </div>
                                                     </td>
                                                     <td>
                                                         <div class="d-flex gap-2">
-                                                            <select class="form-control form-control-sm" name="handicap_score_differential_config[3][method]" required>
+                                                            <select class="form-control form-control-sm" name="tournament_handicap_calculation_table[3][method]" required>
                                                                 <option value="LOWEST">Lowest</option>
                                                                 <option value="AVERAGE_OF_LOWEST">Average of Lowest</option>
                                                                 <option value="HIGHEST">Highest</option>
                                                             </select>
-                                                            <input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[3][count]" value="1" min="1" placeholder="Count" style="width: 80px;">
+                                                            <input type="number" class="form-control form-control-sm" name="tournament_handicap_calculation_table[3][count]" value="1" min="1" placeholder="Count" style="width: 80px;">
                                                         </div>
                                                     </td>
-                                                    <td><input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[3][adjustment]" value="-2.0" step="0.1"></td>
+                                                    <td><input type="number" class="form-control form-control-sm" name="tournament_handicap_calculation_table[3][adjustment]" value="-2.0" step="0.1"></td>
                                                     <td style="text-align: center;">
                                                         <button type="button" class="btn btn-sm btn-danger" onclick="removeScoresConfigRow(this)">
                                                             <i class="fas fa-trash-alt"></i>
@@ -259,22 +259,22 @@
                                                 <tr>
                                                     <td>
                                                         <div class="d-flex gap-1">
-                                                            <input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[4][min]" value="4" placeholder="Min">
+                                                            <input type="number" class="form-control form-control-sm" name="tournament_handicap_calculation_table[4][min]" value="4" placeholder="Min">
                                                             <span class="text-muted">to</span>
-                                                            <input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[4][max]" value="4" placeholder="Max">
+                                                            <input type="number" class="form-control form-control-sm" name="tournament_handicap_calculation_table[4][max]" value="4" placeholder="Max">
                                                         </div>
                                                     </td>
                                                     <td>
                                                         <div class="d-flex gap-2">
-                                                            <select class="form-control form-control-sm" name="handicap_score_differential_config[4][method]" required>
+                                                            <select class="form-control form-control-sm" name="tournament_handicap_calculation_table[4][method]" required>
                                                                 <option value="LOWEST">Lowest</option>
                                                                 <option value="AVERAGE_OF_LOWEST">Average of Lowest</option>
                                                                 <option value="HIGHEST">Highest</option>
                                                             </select>
-                                                            <input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[4][count]" value="1" min="1" placeholder="Count" style="width: 80px;">
+                                                            <input type="number" class="form-control form-control-sm" name="tournament_handicap_calculation_table[4][count]" value="1" min="1" placeholder="Count" style="width: 80px;">
                                                         </div>
                                                     </td>
-                                                    <td><input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[4][adjustment]" value="-1.0" step="0.1"></td>
+                                                    <td><input type="number" class="form-control form-control-sm" name="tournament_handicap_calculation_table[4][adjustment]" value="-1.0" step="0.1"></td>
                                                     <td style="text-align: center;">
                                                         <button type="button" class="btn btn-sm btn-danger" onclick="removeScoresConfigRow(this)">
                                                             <i class="fas fa-trash-alt"></i>
@@ -286,22 +286,22 @@
                                                 <tr>
                                                     <td>
                                                         <div class="d-flex gap-1">
-                                                            <input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[5][min]" value="5" placeholder="Min">
+                                                            <input type="number" class="form-control form-control-sm" name="tournament_handicap_calculation_table[5][min]" value="5" placeholder="Min">
                                                             <span class="text-muted">to</span>
-                                                            <input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[5][max]" value="5" placeholder="Max">
+                                                            <input type="number" class="form-control form-control-sm" name="tournament_handicap_calculation_table[5][max]" value="5" placeholder="Max">
                                                         </div>
                                                     </td>
                                                     <td>
                                                         <div class="d-flex gap-2">
-                                                            <select class="form-control form-control-sm" name="handicap_score_differential_config[5][method]" required>
+                                                            <select class="form-control form-control-sm" name="tournament_handicap_calculation_table[5][method]" required>
                                                                 <option value="LOWEST">Lowest</option>
                                                                 <option value="AVERAGE_OF_LOWEST">Average of Lowest</option>
                                                                 <option value="HIGHEST">Highest</option>
                                                             </select>
-                                                            <input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[5][count]" value="1" min="1" placeholder="Count" style="width: 80px;">
+                                                            <input type="number" class="form-control form-control-sm" name="tournament_handicap_calculation_table[5][count]" value="1" min="1" placeholder="Count" style="width: 80px;">
                                                         </div>
                                                     </td>
-                                                    <td><input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[5][adjustment]" value="0" step="0.1"></td>
+                                                    <td><input type="number" class="form-control form-control-sm" name="tournament_handicap_calculation_table[5][adjustment]" value="0" step="0.1"></td>
                                                     <td style="text-align: center;">
                                                         <button type="button" class="btn btn-sm btn-danger" onclick="removeScoresConfigRow(this)">
                                                             <i class="fas fa-trash-alt"></i>
@@ -312,77 +312,22 @@
                                                 <tr>
                                                     <td>
                                                         <div class="d-flex gap-1">
-                                                            <input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[6][min]" value="6" placeholder="Min">
+                                                            <input type="number" class="form-control form-control-sm" name="tournament_handicap_calculation_table[6][min]" value="6" placeholder="Min">
                                                             <span class="text-muted">to</span>
-                                                            <input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[6][max]" value="6" placeholder="Max">
+                                                            <input type="number" class="form-control form-control-sm" name="tournament_handicap_calculation_table[6][max]" value="6" placeholder="Max">
                                                         </div>
                                                     </td>
                                                     <td>
                                                         <div class="d-flex gap-2">
-                                                            <select class="form-control form-control-sm" name="handicap_score_differential_config[6][method]" required>
+                                                            <select class="form-control form-control-sm" name="tournament_handicap_calculation_table[6][method]" required>
                                                                 <option value="LOWEST">Lowest</option>
                                                                 <option value="AVERAGE_OF_LOWEST" selected>Average of Lowest</option>
                                                                 <option value="HIGHEST">Highest</option>
                                                             </select>
-                                                            <input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[6][count]" value="2" min="1" placeholder="Count" style="width: 80px;">
+                                                            <input type="number" class="form-control form-control-sm" name="tournament_handicap_calculation_table[6][count]" value="2" min="1" placeholder="Count" style="width: 80px;">
                                                         </div>
                                                     </td>
-                                                    <td><input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[6][adjustment]" value="-1.0" step="0.1"></td>
-                                                    <td style="text-align: center;">
-                                                        <button type="button" class="btn btn-sm btn-danger" onclick="removeScoresConfigRow(this)">
-                                                            <i class="fas fa-trash-alt"></i>
-                                                        </button>
-                                                    </td>
-                                                </tr>
-
-
-                                                <tr>
-                                                    <td>
-                                                        <div class="d-flex gap-1">
-                                                            <input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[7][min]" value="7" placeholder="Min">
-                                                            <span class="text-muted">to</span>
-                                                            <input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[7][max]" value="8" placeholder="Max">
-                                                        </div>
-                                                    </td>
-                                                    <td>
-                                                        <div class="d-flex gap-2">
-                                                            <select class="form-control form-control-sm" name="handicap_score_differential_config[7][method]" required>
-                                                                <option value="LOWEST">Lowest</option>
-                                                                <option value="AVERAGE_OF_LOWEST" selected>Average of Lowest</option>
-                                                                <option value="HIGHEST">Highest</option>
-                                                            </select>
-                                                            <input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[7][count]" value="2" min="1" placeholder="Count" style="width: 80px;">
-                                                        </div>
-                                                    </td>
-                                                    <td><input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[7][adjustment]" value="0" step="0.1"></td>
-                                                    <td style="text-align: center;">
-                                                        <button type="button" class="btn btn-sm btn-danger" onclick="removeScoresConfigRow(this)">
-                                                            <i class="fas fa-trash-alt"></i>
-                                                        </button>
-                                                    </td>
-                                                </tr>
-
-
-
-                                                <tr>
-                                                    <td>
-                                                        <div class="d-flex gap-1">
-                                                            <input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[9][min]" value="9" placeholder="Min">
-                                                            <span class="text-muted">to</span>
-                                                            <input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[9][max]" value="11" placeholder="Max">
-                                                        </div>
-                                                    </td>
-                                                    <td>
-                                                        <div class="d-flex gap-2">
-                                                            <select class="form-control form-control-sm" name="handicap_score_differential_config[9][method]" required>
-                                                                <option value="LOWEST">Lowest</option>
-                                                                <option value="AVERAGE_OF_LOWEST" selected>Average of Lowest</option>
-                                                                <option value="HIGHEST">Highest</option>
-                                                            </select>
-                                                            <input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[9][count]" value="3" min="1" placeholder="Count" style="width: 80px;">
-                                                        </div>
-                                                    </td>
-                                                    <td><input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[9][adjustment]" value="0" step="0.1"></td>
+                                                    <td><input type="number" class="form-control form-control-sm" name="tournament_handicap_calculation_table[6][adjustment]" value="-1.0" step="0.1"></td>
                                                     <td style="text-align: center;">
                                                         <button type="button" class="btn btn-sm btn-danger" onclick="removeScoresConfigRow(this)">
                                                             <i class="fas fa-trash-alt"></i>
@@ -394,22 +339,22 @@
                                                 <tr>
                                                     <td>
                                                         <div class="d-flex gap-1">
-                                                            <input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[12][min]" value="12" placeholder="Min">
+                                                            <input type="number" class="form-control form-control-sm" name="tournament_handicap_calculation_table[7][min]" value="7" placeholder="Min">
                                                             <span class="text-muted">to</span>
-                                                            <input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[12][max]" value="14" placeholder="Max">
+                                                            <input type="number" class="form-control form-control-sm" name="tournament_handicap_calculation_table[7][max]" value="8" placeholder="Max">
                                                         </div>
                                                     </td>
                                                     <td>
                                                         <div class="d-flex gap-2">
-                                                            <select class="form-control form-control-sm" name="handicap_score_differential_config[12][method]" required>
+                                                            <select class="form-control form-control-sm" name="tournament_handicap_calculation_table[7][method]" required>
                                                                 <option value="LOWEST">Lowest</option>
                                                                 <option value="AVERAGE_OF_LOWEST" selected>Average of Lowest</option>
                                                                 <option value="HIGHEST">Highest</option>
                                                             </select>
-                                                            <input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[12][count]" value="4" min="1" placeholder="Count" style="width: 80px;">
+                                                            <input type="number" class="form-control form-control-sm" name="tournament_handicap_calculation_table[7][count]" value="2" min="1" placeholder="Count" style="width: 80px;">
                                                         </div>
                                                     </td>
-                                                    <td><input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[12][adjustment]" value="0" step="0.1"></td>
+                                                    <td><input type="number" class="form-control form-control-sm" name="tournament_handicap_calculation_table[7][adjustment]" value="0" step="0.1"></td>
                                                     <td style="text-align: center;">
                                                         <button type="button" class="btn btn-sm btn-danger" onclick="removeScoresConfigRow(this)">
                                                             <i class="fas fa-trash-alt"></i>
@@ -422,22 +367,22 @@
                                                 <tr>
                                                     <td>
                                                         <div class="d-flex gap-1">
-                                                            <input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[15][min]" value="15" placeholder="Min">
+                                                            <input type="number" class="form-control form-control-sm" name="tournament_handicap_calculation_table[9][min]" value="9" placeholder="Min">
                                                             <span class="text-muted">to</span>
-                                                            <input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[15][max]" value="16" placeholder="Max">
+                                                            <input type="number" class="form-control form-control-sm" name="tournament_handicap_calculation_table[9][max]" value="11" placeholder="Max">
                                                         </div>
                                                     </td>
                                                     <td>
                                                         <div class="d-flex gap-2">
-                                                            <select class="form-control form-control-sm" name="handicap_score_differential_config[15][method]" required>
+                                                            <select class="form-control form-control-sm" name="tournament_handicap_calculation_table[9][method]" required>
                                                                 <option value="LOWEST">Lowest</option>
                                                                 <option value="AVERAGE_OF_LOWEST" selected>Average of Lowest</option>
                                                                 <option value="HIGHEST">Highest</option>
                                                             </select>
-                                                            <input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[15][count]" value="5" min="1" placeholder="Count" style="width: 80px;">
+                                                            <input type="number" class="form-control form-control-sm" name="tournament_handicap_calculation_table[9][count]" value="3" min="1" placeholder="Count" style="width: 80px;">
                                                         </div>
                                                     </td>
-                                                    <td><input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[15][adjustment]" value="0" step="0.1"></td>
+                                                    <td><input type="number" class="form-control form-control-sm" name="tournament_handicap_calculation_table[9][adjustment]" value="0" step="0.1"></td>
                                                     <td style="text-align: center;">
                                                         <button type="button" class="btn btn-sm btn-danger" onclick="removeScoresConfigRow(this)">
                                                             <i class="fas fa-trash-alt"></i>
@@ -449,22 +394,77 @@
                                                 <tr>
                                                     <td>
                                                         <div class="d-flex gap-1">
-                                                            <input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[17][min]" value="17" placeholder="Min">
+                                                            <input type="number" class="form-control form-control-sm" name="tournament_handicap_calculation_table[12][min]" value="12" placeholder="Min">
                                                             <span class="text-muted">to</span>
-                                                            <input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[17][max]" value="18" placeholder="Max">
+                                                            <input type="number" class="form-control form-control-sm" name="tournament_handicap_calculation_table[12][max]" value="14" placeholder="Max">
                                                         </div>
                                                     </td>
                                                     <td>
                                                         <div class="d-flex gap-2">
-                                                            <select class="form-control form-control-sm" name="handicap_score_differential_config[17][method]" required>
+                                                            <select class="form-control form-control-sm" name="tournament_handicap_calculation_table[12][method]" required>
                                                                 <option value="LOWEST">Lowest</option>
                                                                 <option value="AVERAGE_OF_LOWEST" selected>Average of Lowest</option>
                                                                 <option value="HIGHEST">Highest</option>
                                                             </select>
-                                                            <input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[17][count]" value="6" min="1" placeholder="Count" style="width: 80px;">
+                                                            <input type="number" class="form-control form-control-sm" name="tournament_handicap_calculation_table[12][count]" value="4" min="1" placeholder="Count" style="width: 80px;">
                                                         </div>
                                                     </td>
-                                                    <td><input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[17][adjustment]" value="0" step="0.1"></td>
+                                                    <td><input type="number" class="form-control form-control-sm" name="tournament_handicap_calculation_table[12][adjustment]" value="0" step="0.1"></td>
+                                                    <td style="text-align: center;">
+                                                        <button type="button" class="btn btn-sm btn-danger" onclick="removeScoresConfigRow(this)">
+                                                            <i class="fas fa-trash-alt"></i>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+
+
+
+                                                <tr>
+                                                    <td>
+                                                        <div class="d-flex gap-1">
+                                                            <input type="number" class="form-control form-control-sm" name="tournament_handicap_calculation_table[15][min]" value="15" placeholder="Min">
+                                                            <span class="text-muted">to</span>
+                                                            <input type="number" class="form-control form-control-sm" name="tournament_handicap_calculation_table[15][max]" value="16" placeholder="Max">
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="d-flex gap-2">
+                                                            <select class="form-control form-control-sm" name="tournament_handicap_calculation_table[15][method]" required>
+                                                                <option value="LOWEST">Lowest</option>
+                                                                <option value="AVERAGE_OF_LOWEST" selected>Average of Lowest</option>
+                                                                <option value="HIGHEST">Highest</option>
+                                                            </select>
+                                                            <input type="number" class="form-control form-control-sm" name="tournament_handicap_calculation_table[15][count]" value="5" min="1" placeholder="Count" style="width: 80px;">
+                                                        </div>
+                                                    </td>
+                                                    <td><input type="number" class="form-control form-control-sm" name="tournament_handicap_calculation_table[15][adjustment]" value="0" step="0.1"></td>
+                                                    <td style="text-align: center;">
+                                                        <button type="button" class="btn btn-sm btn-danger" onclick="removeScoresConfigRow(this)">
+                                                            <i class="fas fa-trash-alt"></i>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+
+
+                                                <tr>
+                                                    <td>
+                                                        <div class="d-flex gap-1">
+                                                            <input type="number" class="form-control form-control-sm" name="tournament_handicap_calculation_table[17][min]" value="17" placeholder="Min">
+                                                            <span class="text-muted">to</span>
+                                                            <input type="number" class="form-control form-control-sm" name="tournament_handicap_calculation_table[17][max]" value="18" placeholder="Max">
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="d-flex gap-2">
+                                                            <select class="form-control form-control-sm" name="tournament_handicap_calculation_table[17][method]" required>
+                                                                <option value="LOWEST">Lowest</option>
+                                                                <option value="AVERAGE_OF_LOWEST" selected>Average of Lowest</option>
+                                                                <option value="HIGHEST">Highest</option>
+                                                            </select>
+                                                            <input type="number" class="form-control form-control-sm" name="tournament_handicap_calculation_table[17][count]" value="6" min="1" placeholder="Count" style="width: 80px;">
+                                                        </div>
+                                                    </td>
+                                                    <td><input type="number" class="form-control form-control-sm" name="tournament_handicap_calculation_table[17][adjustment]" value="0" step="0.1"></td>
                                                     <td style="text-align: center;">
                                                         <button type="button" class="btn btn-sm btn-danger" onclick="removeScoresConfigRow(this)">
                                                             <i class="fas fa-trash-alt"></i>
@@ -475,22 +475,22 @@
                                                 <tr>
                                                     <td>
                                                         <div class="d-flex gap-1">
-                                                            <input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[19][min]" value="19" placeholder="Min">
+                                                            <input type="number" class="form-control form-control-sm" name="tournament_handicap_calculation_table[19][min]" value="19" placeholder="Min">
                                                             <span class="text-muted">to</span>
-                                                            <input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[19][max]" value="19" placeholder="Max">
+                                                            <input type="number" class="form-control form-control-sm" name="tournament_handicap_calculation_table[19][max]" value="19" placeholder="Max">
                                                         </div>
                                                     </td>
                                                     <td>
                                                         <div class="d-flex gap-2">
-                                                            <select class="form-control form-control-sm" name="handicap_score_differential_config[19][method]" required>
+                                                            <select class="form-control form-control-sm" name="tournament_handicap_calculation_table[19][method]" required>
                                                                 <option value="LOWEST">Lowest</option>
                                                                 <option value="AVERAGE_OF_LOWEST" selected>Average of Lowest</option>
                                                                 <option value="HIGHEST">Highest</option>
                                                             </select>
-                                                            <input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[19][count]" value="7" min="1" placeholder="Count" style="width: 80px;">
+                                                            <input type="number" class="form-control form-control-sm" name="tournament_handicap_calculation_table[19][count]" value="7" min="1" placeholder="Count" style="width: 80px;">
                                                         </div>
                                                     </td>
-                                                    <td><input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[19][adjustment]" value="0" step="0.1"></td>
+                                                    <td><input type="number" class="form-control form-control-sm" name="tournament_handicap_calculation_table[19][adjustment]" value="0" step="0.1"></td>
                                                     <td style="text-align: center;">
                                                         <button type="button" class="btn btn-sm btn-danger" onclick="removeScoresConfigRow(this)">
                                                             <i class="fas fa-trash-alt"></i>
@@ -502,22 +502,22 @@
                                                 <tr>
                                                     <td>
                                                         <div class="d-flex gap-1">
-                                                            <input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[20][min]" value="20" placeholder="Min">
+                                                            <input type="number" class="form-control form-control-sm" name="tournament_handicap_calculation_table[20][min]" value="20" placeholder="Min">
                                                             <span class="text-muted">to</span>
-                                                            <input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[20][max]" value="20" placeholder="Max">
+                                                            <input type="number" class="form-control form-control-sm" name="tournament_handicap_calculation_table[20][max]" value="20" placeholder="Max">
                                                         </div>
                                                     </td>
                                                     <td>
                                                         <div class="d-flex gap-2">
-                                                            <select class="form-control form-control-sm" name="handicap_score_differential_config[20][method]" required>
+                                                            <select class="form-control form-control-sm" name="tournament_handicap_calculation_table[20][method]" required>
                                                                 <option value="LOWEST">Lowest</option>
                                                                 <option value="AVERAGE_OF_LOWEST" selected>Average of Lowest</option>
                                                                 <option value="HIGHEST">Highest</option>
                                                             </select>
-                                                            <input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[20][count]" value="8" min="1" placeholder="Count" style="width: 80px;">
+                                                            <input type="number" class="form-control form-control-sm" name="tournament_handicap_calculation_table[20][count]" value="8" min="1" placeholder="Count" style="width: 80px;">
                                                         </div>
                                                     </td>
-                                                    <td><input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[20][adjustment]" value="0" step="0.1"></td>
+                                                    <td><input type="number" class="form-control form-control-sm" name="tournament_handicap_calculation_table[20][adjustment]" value="0" step="0.1"></td>
                                                     <td style="text-align: center;">
                                                         <button type="button" class="btn btn-sm btn-danger" onclick="removeScoresConfigRow(this)">
                                                             <i class="fas fa-trash-alt"></i>
@@ -2059,22 +2059,22 @@
             newRow.innerHTML = `
                 <td>
                     <div class="d-flex gap-1">
-                        <input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[${newRowIndex}][min]" value="1" placeholder="Min">
+                        <input type="number" class="form-control form-control-sm" name="tournament_handicap_calculation_table[${newRowIndex}][min]" value="1" placeholder="Min">
                         <span class="text-muted">to</span>
-                        <input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[${newRowIndex}][max]" value="${newRowIndex}" placeholder="Max">
+                        <input type="number" class="form-control form-control-sm" name="tournament_handicap_calculation_table[${newRowIndex}][max]" value="${newRowIndex}" placeholder="Max">
                     </div>
                 </td>
                 <td>
                     <div class="d-flex gap-2">
-                        <select class="form-control form-control-sm" name="handicap_score_differential_config[${newRowIndex}][method]" required>
+                        <select class="form-control form-control-sm" name="tournament_handicap_calculation_table[${newRowIndex}][method]" required>
                             <option value="LOWEST">Lowest</option>
                             <option value="AVERAGE_OF_LOWEST">Average of Lowest</option>
                             <option value="HIGHEST">Highest</option>
                         </select>
-                        <input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[${newRowIndex}][count]" value="1" min="1" placeholder="Count" style="width: 80px;">
+                        <input type="number" class="form-control form-control-sm" name="tournament_handicap_calculation_table[${newRowIndex}][count]" value="1" min="1" placeholder="Count" style="width: 80px;">
                     </div>
                 </td>
-                <td><input type="number" class="form-control form-control-sm" name="handicap_score_differential_config[${newRowIndex}][adjustment]" value="0" step="0.1"></td>
+                <td><input type="number" class="form-control form-control-sm" name="tournament_handicap_calculation_table[${newRowIndex}][adjustment]" value="0" step="0.1"></td>
                 <td style="text-align: center;">
                     <button type="button" class="btn btn-sm btn-danger" onclick="removeScoresConfigRow(this)">
                         <i class="fas fa-trash-alt"></i>

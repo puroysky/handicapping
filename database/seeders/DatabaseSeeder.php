@@ -149,6 +149,7 @@ class DatabaseSeeder extends Seeder
 
 
             TournamentSeeder::class,
+            SystemSettingSeeder::class,
 
             // ParticipantSeeder::class,
             // ParticipantCourseHandicapSeeder::class,
