@@ -4,13 +4,11 @@ namespace App\Services;
 
 use App\Models\Course;
 use App\Models\User;
-use App\Models\UserProfile;
 use App\Models\PlayerProfile;
 use App\Models\Score;
 use App\Models\Tee;
 use App\Models\Tournament;
 use Exception;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -23,7 +21,6 @@ use NXP\MathExecutor;
 
 class ScoreMigrateService
 {
-
 
     protected $tournaments;
 
