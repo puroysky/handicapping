@@ -17,7 +17,7 @@ class LocalHandicapIndexCalculationService
     private $tournamentId;
     private $nullHandicapCount = 0;
     private const CHUNK_SIZE = 100;
-    private const MAX_SCORES_PER_USER = 40;
+    private $maxScoresPerUser;
 
     /**
      * Calculate local handicap index for all participants in a tournament
@@ -34,6 +34,12 @@ class LocalHandicapIndexCalculationService
             $handicaps = $this->calculateHandicapsForUsers($scores);
             $updated = $this->updateParticipantHandicaps($handicaps);
 
+
+
+            // echo '<pre>';
+            // print_r($scores);
+
+            // echo '</pre>';
             Log::info('Local handicap calculation completed', [
                 'tournament_id' => $this->tournamentId,
                 'participants_updated' => $updated,
@@ -101,6 +107,8 @@ class LocalHandicapIndexCalculationService
             ->values()
             ->toArray();
 
+        $this->maxScoresPerUser = max(array_column($this->bracket, 'max'));
+
         if (empty($this->bracket)) {
             throw new HandicapCalculationException('Handicap calculation table is empty');
         }
@@ -118,7 +126,7 @@ class LocalHandicapIndexCalculationService
 
         $scores = DB::table(DB::raw("({$subquery->toSql()}) as ranked_scores"))
             ->mergeBindings($subquery)
-            ->where('rn', '<=', self::MAX_SCORES_PER_USER)
+            ->where('rn', '<=', $this->maxScoresPerUser)
             ->orderBy('user_id')
             ->orderBy('date_played')
             ->get();
@@ -187,11 +195,17 @@ class LocalHandicapIndexCalculationService
      */
     private function calculateUserHandicap($userId, $scores)
     {
-        $roundCount = count($scores);
+        // $roundCount = count($scores);
+
+        $roundCount = floor(array_sum(array_column($scores, 'round')));
 
         // Find matching bracket based on round count
         foreach ($this->bracket as $config) {
-            if ($roundCount >= (int)$config['min'] && $roundCount <= (int)$config['max']) {
+
+            $minRoundCount = min($roundCount, (int)$config['max']);
+
+
+            if ($roundCount >= (int)$config['min'] && $minRoundCount <= (int)$config['max']) {
                 return $this->applyCalculationMethod($userId, $scores, $config, $roundCount);
             }
         }

@@ -157,14 +157,130 @@ class PlayerController extends Controller
     }
 
 
-    public function handicap($player_id)
+    public function handicap(Request $request)
     {
+
 
         $playerLocalHandicapService = new PlayerLocalHandicapService();
 
 
 
+        return $playerLocalHandicapService->calculate($request->player_id);
+    }
 
-        return $playerLocalHandicapService->calculate($player_id);
+    /**
+     * Get handicap information for a specific player
+     */
+    public function getHandicapInfo($playerId)
+    {
+        try {
+            $player = \App\Models\User::find($playerId);
+
+            if (!$player) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Player not found'
+                ], 404);
+            }
+
+            // Get recent scores for this player (up to 40 for calculation)
+            $recentScores = \App\Models\Score::where('user_id', $playerId)
+                ->orderBy('date_played', 'desc')
+                ->limit(40)
+                ->get()
+                ->map(function ($score) {
+                    return [
+                        'score_id' => $score->id,
+                        'user_id' => $score->user_id,
+                        'score_differential' => $score->score_differential,
+                        'holes_played' => $score->holes_played,
+                        'date_played' => $score->date_played,
+                        'adjusted_gross_score' => $score->adjusted_gross_score
+                    ];
+                })
+                ->toArray();
+
+            // Get latest local handicap index from participant
+            $participant = \App\Models\Participant::where('user_id', $playerId)
+                ->orderBy('updated_at', 'desc')
+                ->first();
+
+            // Build formula label from tournament calculation table
+            $formulaLabel = 'N/A';
+            $methodName = 'Unknown';
+            $usedScores = 0;
+            $totalRecentScores = count($recentScores);
+            $configBracket = null;
+
+            if ($participant && $participant->tournament) {
+                $calculationTable = json_decode($participant->tournament->tournament_handicap_calculation_table, true);
+                if ($calculationTable && is_array($calculationTable)) {
+                    // Try to match the bracket based on score count
+                    foreach ($calculationTable as $bracket) {
+                        $scoreCount = $totalRecentScores;
+                        if ($scoreCount >= (int)$bracket['min'] && $scoreCount <= (int)$bracket['max']) {
+                            $method = $bracket['method'] ?? 'UNKNOWN';
+                            $count = $bracket['count'] ?? 1;
+                            $usedScores = (int)$count;
+                            $methodName = $method;
+                            $configBracket = $bracket; // Store the matched bracket
+
+                            // Format the formula label
+                            if ($method === 'LOWEST') {
+                                $formulaLabel = "Lowest {$count} for score {$bracket['min']} to {$bracket['max']}";
+                            } elseif ($method === 'HIGHEST') {
+                                $formulaLabel = "Highest {$count} for score {$bracket['min']} to {$bracket['max']}";
+                            } elseif ($method === 'AVERAGE_OF_LOWEST') {
+                                $formulaLabel = "Average of Lowest {$count} for score {$bracket['min']} to {$bracket['max']}";
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+
+            // If no handicap information, return with null handicaps but include config and scores
+            if (!$participant || $participant->local_handicap_index === null) {
+                return response()->json([
+                    'success' => true,
+                    'handicaps' => null,
+                    'message' => 'No handicap information available for this player',
+                    'config' => $configBracket ?? [
+                        'max' => 'N/A',
+                        'min' => 'N/A',
+                        'count' => 'N/A',
+                        'method' => 'N/A',
+                        'adjustment' => 'N/A'
+                    ],
+                    'recent_scores' => $recentScores
+                ], 200);
+            }
+
+            return response()->json([
+                'success' => true,
+                'handicaps' => [
+                    'local_handicap_index' => $participant->local_handicap_index,
+                    'details' => [
+                        'recent_scores' => $totalRecentScores,
+                        'used_scores' => $usedScores,
+                        'method' => $methodName,
+                        'adjustment' => 0
+                    ]
+                ],
+                'config' => $configBracket ?? [
+                    'max' => 'N/A',
+                    'min' => 'N/A',
+                    'count' => 'N/A',
+                    'method' => 'N/A',
+                    'adjustment' => 'N/A'
+                ],
+                'recent_scores' => $recentScores
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error retrieving handicap information: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

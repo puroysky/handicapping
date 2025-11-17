@@ -171,6 +171,12 @@
                                 </td>
                                 <td class="action-cell text-center">
                                     <div class="action-wrapper">
+                                        <button class="btn btn-outline-info btn-sm btn-handicap-info"
+                                            type="button"
+                                            onclick="openHandicapModal({{ $player->id }})"
+                                            title="Handicap Info">
+                                            <i class="fas fa-golf-ball"></i>
+                                        </button>
                                         <button class="btn btn-outline-secondary btn-context-menu"
                                             type="button"
                                             onclick="showUserContextMenu({{ $player->id }}, '{{ ($player->profile->first_name ?? '') . ' ' . ($player->profile->last_name ?? '') }}', event)"
@@ -186,6 +192,26 @@
                             @endforeach
                         </tbody>
                     </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Handicap Info Modal -->
+<div class="modal fade" id="handicapInfoModal" tabindex="-1" aria-labelledby="handicapInfoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold" id="handicapInfoModalLabel">
+                    <i class="fas fa-golf-ball me-2 text-primary"></i>Handicap Information
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body pt-2" id="handicapInfoBody">
+                <div class="text-center text-muted py-5">
+                    <i class="fas fa-spinner fa-spin fa-2x"></i>
+                    <p class="mt-2">Loading handicap information...</p>
                 </div>
             </div>
         </div>
@@ -433,7 +459,7 @@
                     "description": "Check current handicap status",
                     "icon": "golf-ball",
                     "action": function(id) {
-                        window.location.href = `/admin/players/${id}/handicap`;
+                        window.location.href = BASE_URL + `/admin/players/${id}/handicap`;
                     }
                 },
                 {
@@ -448,6 +474,279 @@
                     }
                 }
             ]
+        });
+    }
+
+    // Open Handicap Info Modal
+    function openHandicapModal(playerId) {
+        const modalElement = document.getElementById('handicapInfoModal');
+        const modalBody = document.getElementById('handicapInfoBody');
+        
+        // Clear old content and show loading state
+        modalBody.innerHTML = `
+            <div class="text-center py-5">
+                <div class="spinner-border" role="status" style="color: #6b8e4e; width: 2.5rem; height: 2.5rem;">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-3 mb-0" style="color: #6b8e4e; font-weight: 500;">Loading handicap information...</p>
+            </div>
+        `;
+        
+        // Show modal
+        if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+            const modal = new bootstrap.Modal(modalElement);
+            modal.show();
+        } else if (typeof $ !== 'undefined' && $.fn.modal) {
+            $('#handicapInfoModal').modal('show');
+        } else {
+            modalElement.style.display = 'block';
+            modalElement.classList.add('show');
+            document.body.classList.add('modal-open');
+        }
+
+        // Fetch handicap info
+        fetch(BASE_URL + `/admin/players/${playerId}/handicap`, {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const handicap = data.handicaps;
+                const config = data.config || {};
+                const scores = data.recent_scores || [];
+                const player = data.player || {};
+                
+                // Handle score period - show dates or "No scores" message
+                let periodDisplay = '';
+                if (scores.length > 0) {
+                    const recentStart = scores[scores.length - 1].date_played;
+                    const recentEnd = scores[0].date_played;
+                    periodDisplay = `
+                        <span class="badge-period">${recentStart}</span>
+                        <span style="margin: 0 8px; color: #adb5bd;">to</span>
+                        <span class="badge-period">${recentEnd}</span>
+                    `;
+                } else {
+                    periodDisplay = '<span style="color: #6c757d; font-style: italic;">No scores available</span>';
+                }
+                
+                // Use config data to build formula label
+                let methodLabel = '';
+                if (config && config.method) {
+                    const method = config.method;
+                    const count = config.count || 0;
+                    const min = config.min || 'N/A';
+                    const max = config.max || 'N/A';
+                    
+                    // Format method label with config details based on WHS standards
+                    if (method === 'LOWEST') {
+                        methodLabel = `Lowest ${count} of ${min}-${max} score differentials`;
+                    } else if (method === 'HIGHEST') {
+                        methodLabel = `Highest ${count} of ${min}-${max} score differentials`;
+                    } else if (method === 'AVERAGE_OF_LOWEST') {
+                        methodLabel = `Average of lowest ${count} from ${min}-${max} score differentials`;
+                    } else {
+                        methodLabel = `${method} calculation method`;
+                    }
+                }
+
+                // Build recent scores table
+                let scoresTableHtml = '';
+                if (scores.length > 0) {
+                    scoresTableHtml = `
+                        <div class="mt-4">
+                            <h6 class="mb-3" style="color: #304c40; font-weight: 600;">Recent Scores (${scores.length})</h6>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-hover" style="border: 1px solid #d4e5d9; border-radius: 6px; overflow: hidden;">
+                                    <thead style="background: linear-gradient(135deg, #f0f5f2 0%, #e8ede8 100%);">
+                                        <tr>
+                                            <th style="color: #304c40; font-weight: 600; border-bottom: 2px solid #d4e5d9; padding: 12px;">Date</th>
+                                            <th style="color: #304c40; font-weight: 600; border-bottom: 2px solid #d4e5d9; padding: 12px;">Score Diff</th>
+                                            <th style="color: #304c40; font-weight: 600; border-bottom: 2px solid #d4e5d9; padding: 12px;">Gross Score</th>
+                                            <th style="color: #304c40; font-weight: 600; border-bottom: 2px solid #d4e5d9; padding: 12px;">Holes</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${scores.map((score, index) => `
+                                            <tr style="background: ${index % 2 === 0 ? '#ffffff' : '#f9faf8'}; transition: background 0.2s ease;">
+                                                <td style="color: #304c40; padding: 12px; border-bottom: 1px solid #e8ede8;">${new Date(score.date_played).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</td>
+                                                <td style="color: #6b8e4e; font-weight: 600; padding: 12px; border-bottom: 1px solid #e8ede8;">${parseFloat(score.score_differential).toFixed(2)}</td>
+                                                <td style="color: #212529; padding: 12px; border-bottom: 1px solid #e8ede8;">${score.adjusted_gross_score}</td>
+                                                <td style="color: #212529; padding: 12px; border-bottom: 1px solid #e8ede8; text-align: center;">${score.holes_played}</td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    scoresTableHtml = `
+                        <div class="alert alert-info border-0 mt-4 mb-0">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>No Scores Available</strong> - This player has not yet recorded any scores.
+                        </div>
+                    `;
+                }
+
+                modalBody.innerHTML = `
+                    <style>
+                        .handicap-card {
+                            background: linear-gradient(135deg, #f5f7f4 0%, #ffffff 100%);
+                            border: 1.5px solid #d4e5d9;
+                            border-radius: 8px;
+                            padding: 16px;
+                            margin-bottom: 12px;
+                            transition: all 0.3s ease;
+                        }
+                        .handicap-card:hover {
+                            box-shadow: 0 4px 12px rgba(48, 76, 64, 0.1);
+                            border-color: #6b8e4e;
+                        }
+                        .handicap-label {
+                            font-size: 0.75rem;
+                            color: #304c40;
+                            text-transform: uppercase;
+                            letter-spacing: 0.5px;
+                            margin-bottom: 8px;
+                            display: block;
+                            font-weight: 600;
+                        }
+                        .handicap-value {
+                            font-size: 1.75rem;
+                            font-weight: 700;
+                            color: ${handicap !== null ? '#6b8e4e' : '#304c40'};
+                            line-height: 1;
+                        }
+                        .info-row {
+                            display: flex;
+                            align-items: center;
+                            padding: 12px 0;
+                            border-bottom: 1px solid #e8ede8;
+                        }
+                        .info-row:last-child {
+                            border-bottom: none;
+                        }
+                        .info-label {
+                            font-weight: 600;
+                            color: #304c40;
+                            min-width: 140px;
+                        }
+                        .info-value {
+                            color: #212529;
+                        }
+                        .badge-period {
+                            background: #e8f3e6;
+                            color: #304c40;
+                            padding: 6px 12px;
+                            border-radius: 20px;
+                            font-size: 0.85rem;
+                            font-weight: 500;
+                        }
+                        .player-info-header {
+                            background: linear-gradient(135deg, #304c40 0%, #3d5c4f 100%);
+                            color: white;
+                            padding: 16px;
+                            margin: -16px -16px 16px -16px;
+                            border-radius: 8px 8px 0 0;
+                        }
+                        .player-info-header .player-name {
+                            font-size: 1.25rem;
+                            font-weight: 700;
+                            margin-bottom: 8px;
+                        }
+                        .player-info-detail {
+                            font-size: 0.9rem;
+                            opacity: 0.95;
+                            margin-bottom: 4px;
+                        }
+                        .player-info-detail span {
+                            opacity: 0.8;
+                            margin-right: 16px;
+                        }
+                    </style>
+                    <div class="handicap-info-container">
+                        <!-- Player Info Header -->
+                        <div class="player-info-header">
+                            <div class="player-name">
+                                <i class="fas fa-user-circle me-2"></i>${player.name || 'Player'}
+                            </div>
+                            <div class="player-info-detail">
+                                <span><i class="fas fa-golf-ball me-1"></i>WHS No: <strong>${player.whs_no}</strong></span>
+                                <span><i class="fas fa-id-card me-1"></i>Account: <strong>${player.account_no}</strong></span>
+                            </div>
+                        </div>
+
+                        <!-- Primary Info Cards -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="handicap-card">
+                                    <span class="handicap-label">Local Handicap Index</span>
+                                    <div class="handicap-value">${handicap !== null ? parseFloat(handicap.local_handicap_index).toFixed(2) : 'Pending'}</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="handicap-card">
+                                    <span class="handicap-label">Scores Used</span>
+                                    <div class="handicap-value">${handicap && handicap.details && handicap.details.used_scores ? handicap.details.used_scores : 0}<span style="font-size: 0.9rem; color: #6c757d;">/${handicap && handicap.details && handicap.details.recent_scores ? handicap.details.recent_scores : scores.length}</span></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        ${handicap === null ? `<div class="alert alert-info border-0 mb-3">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Calculation Pending</strong> - More scores are needed to calculate the handicap.
+                        </div>` : ''}
+
+                        <!-- Score Period (Always Visible) -->
+                        <div class="handicap-card">
+                            <div class="info-row">
+                                <span class="info-label">Score Period</span>
+                                <div class="info-value">
+                                    ${periodDisplay}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Calculation Details -->
+                        <div class="handicap-card">
+                            <div class="info-row">
+                                <span class="info-label">Formula</span>
+                                <div class="info-value">
+                                    <code style="background: #f8f9fa; padding: 6px 10px; border-radius: 4px; font-size: 0.9rem;">${methodLabel || 'N/A'}</code>
+                                </div>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Adjustment</span>
+                                <div class="info-value">${config && config.adjustment !== undefined ? (parseFloat(config.adjustment) >= 0 ? '+' : '') + parseFloat(config.adjustment) : 'N/A'}</div>
+                            </div>
+                        </div>
+
+                        <!-- Recent Scores Table -->
+                        ${scoresTableHtml}
+                    </div>
+                `;
+            } else if (!data.success) {
+                modalBody.innerHTML = `
+                    <div class="alert alert-danger border-0">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Error</strong> - ${data.message || 'Failed to load handicap information.'}
+                    </div>
+                `;
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching handicap info:', error);
+            modalBody.innerHTML = `
+                <div class="alert alert-danger border-0">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Connection Error</strong> - Failed to load handicap information. Please try again.
+                </div>
+            `;
         });
     }
 

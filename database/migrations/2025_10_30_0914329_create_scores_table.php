@@ -44,12 +44,17 @@ return new class extends Migration
             $table->decimal('handicap_index', 4, 1)->nullable()->default(NULL)->comment('Actual handicap index of the player at time of round');
             $table->enum('handicap_index_source', ['tournament', 'whs', 'local', 'legacy'])->nullable()->comment('Type of handicap index used: tournament, WHS official, local club, or unknown');
             $table->unsignedSmallInteger('course_handicap')->nullable()->comment('Course handicap for the player at time of round');
-
             $table->unsignedSmallInteger('gross_score')->nullable()->comment('Total strokes taken');
             $table->unsignedSmallInteger('adjusted_gross_score')->comment('Score after adjustments');
             $table->unsignedSmallInteger('net_score')->nullable()->default(NULL)->comment('Score after applying handicap');
             $table->decimal('score_differential', 5, 2)->comment('Calculated score differential for the round');
 
+            //slope and rating
+            $table->decimal('course_rating', 5, 2)->comment('Course rating for the tees played')->nullable();
+            $table->decimal('slope_rating', 5, 2)->comment('Slope rating for the tees played')->nullable();
+
+            $table->string('course_code', 10)->comment('Course code at time of round')->nullable();
+            $table->string('tee_code', 10)->comment('Tee code at time of round')->nullable();
 
 
             // Status and audit

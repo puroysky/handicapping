@@ -8,6 +8,7 @@ class Score extends Model
 {
     // Primary key
     protected $primaryKey = 'score_id';
+    protected $table = 'scores';
 
     //Fillable fields
     protected $fillable = [

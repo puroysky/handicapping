@@ -30,6 +30,7 @@ class PlayerService
             ->join('user_profiles', 'users.id', '=', 'user_profiles.user_id')
             ->orderBy('user_profiles.last_name', 'desc')
             ->select('users.*')
+            ->limit(100)
             ->get();
 
 

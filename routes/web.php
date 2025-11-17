@@ -25,6 +25,7 @@ use App\Http\Controllers\WhsHandicapIndexController;
 use App\Models\Participant;
 use App\Models\Score;
 use App\Models\SystemSetting;
+use App\Services\SystemSettingService;
 use Illuminate\Support\Facades\DB;
 
 Route::get('/', function () {
@@ -34,13 +35,19 @@ Route::get('/', function () {
 Route::get('test', function () {
 
 
+    $scores = Score::select('score_id', 'course_id', 'date_played')   // only fields you need from scores
+        ->with(['course:course_id,course_name'])                   // only load course_name, must include course_id
+        ->where('user_id', 428)
+        ->orderBy('date_played', 'desc')
+        ->limit(40)
+        ->get();
 
 
 
 
-
-
-
+    echo '<pre>';
+    print_r($scores->toArray());
+    echo '</pre>';
 
 
 
