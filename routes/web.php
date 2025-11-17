@@ -84,6 +84,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     // Player search route must come before resource routes to avoid conflicts
     Route::get('players/available', [PlayerController::class, 'getAvailablePlayers'])->name('players.available');
     Route::get('players/search', [PlayerController::class, 'search'])->name('players.search');
+    Route::get('players/{player_id}/handicap', [PlayerController::class, 'handicap'])->name('players.handicap');
     Route::get('players/{player_id}/recent-scores', [PlayerController::class, 'getRecentScores'])->name('players.recent-scores');
     Route::post('players/import', [PlayerController::class, 'import'])->name('players.import');
     Route::resource('players', PlayerController::class);

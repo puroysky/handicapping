@@ -1273,10 +1273,11 @@
             }
         })
         .catch(error => {
+
             console.error('Error calculating local handicap:', error);
             Swal.fire({
                 title: 'Error',
-                text: 'Error calculating handicaps. Please try again.',
+                text: error.message || 'Error calculating local handicap. Please try again.',
                 icon: 'error',
                 confirmButtonText: 'Close'
             });

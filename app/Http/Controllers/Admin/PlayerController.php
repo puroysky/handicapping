@@ -4,6 +4,7 @@ namespace App\Http\Controllers\admin;
 
 use App\Http\Controllers\Controller;
 use App\Services\PlayerImportService;
+use App\Services\PlayerLocalHandicapService;
 use Illuminate\Http\Request;
 use App\Services\PlayerService;
 
@@ -153,5 +154,17 @@ class PlayerController extends Controller
     public function getAvailablePlayers(Request $request)
     {
         return $this->playerService->getAvailablePlayers($request);
+    }
+
+
+    public function handicap($player_id)
+    {
+
+        $playerLocalHandicapService = new PlayerLocalHandicapService();
+
+
+
+
+        return $playerLocalHandicapService->calculate($player_id);
     }
 }

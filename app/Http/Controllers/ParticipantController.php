@@ -489,7 +489,7 @@ class ParticipantController extends Controller
     {
 
         $handicap = new LocalHandicapIndexCalculationService();
-        $handicap->calculate();
+        return $handicap->calculate();
     }
 
     /**
