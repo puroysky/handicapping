@@ -11,7 +11,7 @@ use App\Services\PlayerService;
 class PlayerController extends Controller
 {
 
-    protected $playerService;
+    protected PlayerService $playerService;
 
 
     public function __construct(PlayerService $playerService)

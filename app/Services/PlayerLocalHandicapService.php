@@ -134,7 +134,9 @@ class PlayerLocalHandicapService
     private function fetchLatestScoresPerUser()
     {
 
-        $scores = Score::select('score_id', 'user_id', 'score_differential', 'holes_played', 'date_played', 'adjusted_gross_score')->where('user_id', $this->playerProfile->user_id)->limit($this->maxScorePerUser)->orderBy('date_played', 'desc')->get();
+        $scores = Score::select('score_id', 'user_id', 'score_differential', 'holes_played', 'date_played', 'adjusted_gross_score', 'course_id')
+            ->where('user_id', $this->playerProfile->user_id)
+            ->limit($this->maxScorePerUser)->orderBy('date_played', 'desc')->get();
 
         $this->scores = $scores;
         return $this->groupScoresByUser($scores);
@@ -147,13 +149,52 @@ class PlayerLocalHandicapService
     private function groupScoresByUser($scores): array
     {
         $grouped = [];
+        $halfFullRounds = [];
 
         foreach ($scores as $score) {
+
+            $oppositeHole = $score->holes_played === 'F9' ? 'B9' : 'F9';
+
+            if ($score->holes_played === 'F9' || $score->holes_played === 'B9') {
+                if (isset($halfFullRounds[$score->course_id])) {
+                    if (isset($halfFullRounds[$score->course_id][$oppositeHole])) {
+                        $grouped[$score->user_id][] = [
+                            'score_id' => 'combined_' . $halfFullRounds[$score->course_id][$oppositeHole][0]['score_id'] . '_' . $score->score_id,
+                            'score_differential' => (float)$score->score_differential + (float)$halfFullRounds[$score->course_id][$oppositeHole][0]['score_differential'],
+                            'round' => 1,
+                        ];
+
+                        unset($halfFullRounds[$score->course_id][$oppositeHole][0]);
+                        $halfFullRounds[$score->course_id][$oppositeHole] = array_values($halfFullRounds[$score->course_id][$oppositeHole]);
+
+                        continue;
+                    }
+                }
+
+                $halfFullRounds[$score->course_id][$score->holes_played][] = $score->toArray();
+
+                continue;
+            }
+
             $grouped[$score->user_id][] = [
                 'score_id' => $score->score_id,
                 'score_differential' => (float)$score->score_differential,
                 'round' => ($score->holes_played === 'F9' || $score->holes_played === 'B9') ? 0.5 : 1,
             ];
+        }
+
+
+
+        foreach ($halfFullRounds as $courses) {
+            foreach ($courses as $scoresArray) {
+                foreach ($scoresArray as $sc) {
+                    $grouped[$this->playerProfile->user_id][] = [
+                        'score_id' => $sc['score_id'],
+                        'score_differential' => (float)$sc['score_differential'],
+                        'round' => 0.5
+                    ];
+                }
+            }
         }
 
         return $grouped;
@@ -181,6 +222,30 @@ class PlayerLocalHandicapService
         $userId = $this->playerProfile->user_id;
 
         $roundCount = floor(array_sum(array_column($scores, 'round')));
+        $wholeRound = count(array_filter($scores, fn($score) => $score['round'] === 1));
+
+
+        if ($wholeRound >= $this->minScoresPerUser) {
+
+            foreach ($scores as $sc) {
+
+                if ($sc['round'] < 1) {
+                    $sc['round'] = 1;
+                    $sc['score_differential'] = $sc['score_differential'] * 2;
+                }
+
+                Log::debug("Insufficient whole rounds for user {$userId}", [
+                    'required_whole_rounds' => $this->minScoresPerUser,
+                    'found_whole_rounds' => $wholeRound,
+                    'score_id' => $sc['score_id'],
+                    'score_differential' => $sc['score_differential'],
+                    'round' => $sc['round']
+                ]);
+            }
+        }
+
+
+
 
         // Find matching bracket based on round count
         foreach ($this->bracket as $config) {
