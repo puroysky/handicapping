@@ -158,10 +158,13 @@ class PlayerLocalHandicapService
             if ($score->holes_played === 'F9' || $score->holes_played === 'B9') {
                 if (isset($halfFullRounds[$score->course_id])) {
                     if (isset($halfFullRounds[$score->course_id][$oppositeHole])) {
+
+                        $firstHalf = (float)$score->score_differential;
+                        $secondHalf = (float)$halfFullRounds[$score->course_id][$oppositeHole][0]['score_differential'];
                         $grouped[$score->user_id][] = [
                             'score_id' => 'combined_' . $halfFullRounds[$score->course_id][$oppositeHole][0]['score_id'] . '_' . $score->score_id,
-                            'score_differential' => (float)$score->score_differential + (float)$halfFullRounds[$score->course_id][$oppositeHole][0]['score_differential'],
-                            'round' => 1,
+                            'score_differential' => $firstHalf + $secondHalf,
+                            'round' => 1
                         ];
 
                         unset($halfFullRounds[$score->course_id][$oppositeHole][0]);
@@ -204,7 +207,7 @@ class PlayerLocalHandicapService
      * Calculate handicap indices for all users
      */
     private function calculateHandicapsForUsers($userScores): array
-    {;
+    {
         $scores = array_first($userScores);
 
 
@@ -219,35 +222,62 @@ class PlayerLocalHandicapService
     private function calculateUserHandicap($scores)
     {
 
-        $userId = $this->playerProfile->user_id;
-
         $roundCount = floor(array_sum(array_column($scores, 'round')));
-        $wholeRound = count(array_filter($scores, fn($score) => $score['round'] === 1));
+        $differentialsCount = count($scores);
 
 
-        if ($wholeRound >= $this->minScoresPerUser) {
+        $mathingBracket = $this->getMatchingBracket($roundCount);
 
-            foreach ($scores as $sc) {
+        if ($mathingBracket !== null) {
+            $handicap = $this->applyCalculationMethod($scores, $mathingBracket, $roundCount);
 
-                if ($sc['round'] < 1) {
-                    $sc['round'] = 1;
-                    $sc['score_differential'] = $sc['score_differential'] * 2;
+
+            $halfRoundNoPair = count(array_filter($scores, fn($score) => $score['round'] < 1));
+
+
+            if ($halfRoundNoPair > 0) {
+
+
+                $scoreWithConvertedhalfRounds = [];
+                foreach ($scores as $sc) {
+                    if ($sc['round'] < 1) {
+
+                        Log::debug('Adjusting half round score differential for unpaired half round', [
+                            'score_id' => $sc['score_id'],
+                            'original_score_differential' => $sc['score_differential'],
+                            'adjusted_score_differential' => $sc['score_differential'] * 2
+                        ]);
+                        $sc['round'] = 1;
+                        $sc['score_differential'] = $sc['score_differential'] * 2;
+
+
+                        $scoreWithConvertedhalfRounds[] = [
+                            'score_id' => 'converted_' . $sc['score_id'],
+                            'score_differential' => $sc['score_differential'],
+                            'round' => 1
+                        ];
+                    } else {
+                        $scoreWithConvertedhalfRounds[] = $sc;
+                    }
+                }
+                $mathingBracket = $this->getMatchingBracket($differentialsCount);
+
+                if ($mathingBracket !== null) {
+                    $handicap = $this->applyCalculationMethod($scoreWithConvertedhalfRounds, $mathingBracket, $differentialsCount);
                 }
 
-                Log::debug("Insufficient whole rounds for user {$userId}", [
-                    'required_whole_rounds' => $this->minScoresPerUser,
-                    'found_whole_rounds' => $wholeRound,
-                    'score_id' => $sc['score_id'],
-                    'score_differential' => $sc['score_differential'],
-                    'round' => $sc['round']
-                ]);
+                // $handicap = $this->applyCalculationMethod($scores, $mathingBracket, $roundCount);
             }
+
+            return $handicap;
         }
 
+        return null;
+    }
 
 
-
-        // Find matching bracket based on round count
+    private function getMatchingBracket($roundCount)
+    {
         foreach ($this->bracket as $config) {
 
             $minRoundCount = min($roundCount, (int)$config['max']);
@@ -255,18 +285,17 @@ class PlayerLocalHandicapService
             if ($roundCount >= (int)$config['min'] && $minRoundCount <= (int)$config['max']) {
 
                 $this->handicapConfig = $config;
-                return $this->applyCalculationMethod($userId, $scores, $config, $roundCount);
+                return $config;
             }
         }
 
-        Log::debug("No bracket match for user {$userId} with {$roundCount} rounds");
         return null;
     }
 
     /**
      * Apply the configured calculation method (LOWEST, HIGHEST, AVERAGE_OF_LOWEST)
      */
-    private function applyCalculationMethod($userId, $scores, $config, $roundCount)
+    private function applyCalculationMethod($scores, $config, $roundCount)
     {
         $count = (int)$config['count'];
         $method = $config['method'];
@@ -282,6 +311,11 @@ class PlayerLocalHandicapService
 
         $selected = array_slice($sorted, 0, $count);
 
+
+        // echo '<pre>';
+        // print_r($selected);
+        // echo '</pre>';
+
         // Calculate score differential based on method
         $scoreDiff = match ($method) {
             'LOWEST' => $selected[0]['score_differential'] ?? 0,
@@ -294,13 +328,6 @@ class PlayerLocalHandicapService
 
         $handicapIndex = round($scoreDiff + $adjustment, 2);
 
-        Log::debug("Calculated handicap for user {$userId}", [
-            'recent_scores' => $roundCount,
-            'method' => $method,
-            'handicap_index' => $handicapIndex,
-            'selected_count' => count($selected)
-        ]);
-
         return [
             'local_handicap_index' => $handicapIndex,
             'details' => [
@@ -308,6 +335,8 @@ class PlayerLocalHandicapService
                 'used_scores' => $count,
                 'method' => $method,
                 'adjustment' => $adjustment,
+                'selected_scores' => $selected,
+                'score_differential' => $sorted
             ]
         ];
     }

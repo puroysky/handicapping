@@ -35,6 +35,8 @@ Route::get('/', function () {
 Route::get('test', function () {
 
 
+
+    SystemSettingService::refreshCache();
     $scores = Score::select('score_id', 'course_id', 'date_played')   // only fields you need from scores
         ->with(['course:course_id,course_name'])                   // only load course_name, must include course_id
         ->where('user_id', 428)
