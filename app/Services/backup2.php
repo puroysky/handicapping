@@ -289,7 +289,9 @@ class LocalHandicapIndexService
                         'adjusted_gross_score' => $score['adjusted_gross_score'],
                         'holes_played' => $score['holes_played'],
                         'course_id' => $score['course_id'],
+                        'course_name' => $score['course_name'],
                         'tee_id' => $score['tee_id'],
+                        'tee_name' => $score['tee_name'],
                         'course_rating' => $score['course_rating'],
                         'slope_rating' => $score['slope_rating'],
                     ];
@@ -306,7 +308,9 @@ class LocalHandicapIndexService
                 'adjusted_gross_score' => $score['adjusted_gross_score'],
                 'holes_played' => $holesPlayed,
                 'course_id' => $score['course_id'],
+                'course_name' => $score['course_name'],
                 'tee_id' => $score['tee_id'],
+                'tee_name' => $score['tee_name'],
                 'slope_rating' => $score['slope_rating'],
                 'course_rating' => $score['course_rating']
             ];
@@ -344,7 +348,9 @@ class LocalHandicapIndexService
             'adjusted_gross_score' => $matchingScore['adjusted_gross_score'] + $score['adjusted_gross_score'],
             'holes_played' => 'combined',
             'course_id' => $courseId,
+            'course_name' => $matchingScore['course_name'],
             'tee_id' => $teeId,
+            'tee_name' => $matchingScore['tee_name'],
             'course_rating' => $matchingScore['course_rating'],
             'slope_rating' => $matchingScore['slope_rating'],
         ];
@@ -371,7 +377,9 @@ class LocalHandicapIndexService
                         'adjusted_gross_score' => $halfRoundScore['adjusted_gross_score'],
                         'holes_played' => $halfRoundScore['holes_played'],
                         'course_id' => $halfRoundScore['course_id'],
+                        'course_name' => $halfRoundScore['course_name'],
                         'tee_id' => $halfRoundScore['tee_id'],
+                        'tee_name' => $halfRoundScore['tee_name'],
                         'course_rating' => $halfRoundScore['course_rating'],
                         'slope_rating' => $halfRoundScore['slope_rating'],
                     ];

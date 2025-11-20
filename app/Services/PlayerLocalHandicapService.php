@@ -33,9 +33,13 @@ class PlayerLocalHandicapService
         $config = $this->loadBracketConfiguration();
 
 
-        $scores = Score::select('score_id', 'user_id', 'score_differential', 'holes_played', 'date_played', 'adjusted_gross_score', 'course_id', 'tee_id', 'slope_rating', 'course_rating')
+        $scores = Score::select('score_id', 'user_id', 'score_differential', 'holes_played', 'date_played', 'adjusted_gross_score', 'scores.course_id', 'tees.tee_id', 'slope_rating', 'course_rating', 'courses.course_name', 'tees.tee_name')
+            ->leftJoin('courses', 'scores.course_id', '=', 'courses.course_id')
+            ->leftJoin('tees', 'scores.tee_id', '=', 'tees.tee_id')
+            ->whereBetween('date_played', [$config['score_date']['start'], $config['score_date']['end']])
             ->where('user_id', $this->playerProfile->user_id)
-            ->limit($this->maxScorePerUser * 2)->orderBy('date_played', 'desc')->get();
+            ->limit($this->maxScorePerUser * 2)
+            ->orderBy('date_played', 'desc')->get();
 
 
 

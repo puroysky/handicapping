@@ -566,71 +566,55 @@
 
                 // Build considered differentials table
                 let consideredTableHtml = '';
-                if (consideredDifferentials.length > 0) {
-                    consideredTableHtml = `
-                        <div class="mt-4">
-                            <h6 class="mb-3" style="color: #304c40; font-weight: 600;">Considered Differentials (${consideredDifferentials.length})</h6>
-                            <div class="table-responsive">
-                                <table class="table table-sm table-hover" style="border: 1px solid #d4e5d9; border-radius: 6px; overflow: hidden;">
-                                    <thead style="background: linear-gradient(135deg, #f0f5f2 0%, #e8ede8 100%);">
+
+                // Build all recent scores table (reference only)
+                let recentTableHtml = '';
+                if (recentScores.length > 0) {
+                    // Create a set of score IDs that are in considered differentials for quick lookup
+                    const consideredScoreIds = new Set();
+                    consideredDifferentials.forEach(diff => {
+                        const scoreIds = diff.score_ids || [];
+                        scoreIds.forEach(id => consideredScoreIds.add(id));
+                    });
+
+                    recentTableHtml = `
+                        <div class="mt-2">
+                            <h6 class="mb-2" style="color: #304c40; font-weight: 600; font-size: 0.85rem;">All Recent Scores (${recentScores.length})</h6>
+                            <div class="table-responsive" style="max-height: 250px; overflow-y: auto;">
+                                <table class="table table-sm mb-0" style="border: 1px solid #d4e5d9; border-radius: 4px; overflow: hidden; font-size: 0.8rem;">
+                                    <thead style="background: linear-gradient(135deg, #f0f5f2 0%, #e8ede8 100%); position: sticky; top: 0;">
                                         <tr>
-                                            <th style="color: #304c40; font-weight: 600; border-bottom: 2px solid #d4e5d9; padding: 12px;">Date</th>
-                                            <th style="color: #304c40; font-weight: 600; border-bottom: 2px solid #d4e5d9; padding: 12px;">Differential</th>
-                                            <th style="color: #304c40; font-weight: 600; border-bottom: 2px solid #d4e5d9; padding: 12px;">Score</th>
-                                            <th style="color: #304c40; font-weight: 600; border-bottom: 2px solid #d4e5d9; padding: 12px;">Holes</th>
+                                            <th style="color: #304c40; font-weight: 600; border-bottom: 1px solid #d4e5d9; padding: 6px 6px; font-size: 0.75rem;">Date</th>
+                                            <th style="color: #304c40; font-weight: 600; border-bottom: 1px solid #d4e5d9; padding: 6px 6px; font-size: 0.75rem;">Diff</th>
+                                            <th style="color: #304c40; font-weight: 600; border-bottom: 1px solid #d4e5d9; padding: 6px 6px; font-size: 0.75rem;">AGS</th>
+                                            <th style="color: #304c40; font-weight: 600; border-bottom: 1px solid #d4e5d9; padding: 6px 6px; font-size: 0.75rem;">H</th>
+                                            <th style="color: #304c40; font-weight: 600; border-bottom: 1px solid #d4e5d9; padding: 6px 6px; font-size: 0.75rem;">SR/CR</th>
+                                            <th style="color: #304c40; font-weight: 600; border-bottom: 1px solid #d4e5d9; padding: 6px 6px; font-size: 0.75rem;">Course</th>
+                                           <th style="color: #304c40; font-weight: 600; border-bottom: 1px solid #d4e5d9; padding: 6px 6px; font-size: 0.75rem;">Tee</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        ${consideredDifferentials.map((diff, index) => {
-                                            // Find the original score(s) for this differential
-                                            const scoreIds = diff.score_ids || [];
-                                            const originalScores = selectedScores.filter(s => scoreIds.includes(s.score_id));
-                                            const scoreDate = originalScores.length > 0 ? originalScores[0].date_played : 'N/A';
+                                        ${recentScores.map((score, index) => {
+                                            const isConsidered = consideredScoreIds.has(score.score_id);
+                                            const scoreMark = isConsidered ? ' <span style="color: #6b8e4e; font-weight: bold;">*</span>' : '';
+                                            const rowBackground = isConsidered ? '#e8f3e6' : (index % 2 === 0 ? '#ffffff' : '#f9faf8');
                                             
                                             return `
-                                                <tr style="background: ${index % 2 === 0 ? '#ffffff' : '#f9faf8'}; transition: background 0.2s ease;">
-                                                    <td style="color: #304c40; padding: 12px; border-bottom: 1px solid #e8ede8;">${scoreDate}</td>
-                                                    <td style="color: #6b8e4e; font-weight: 600; padding: 12px; border-bottom: 1px solid #e8ede8;">${parseFloat(diff.score_differential).toFixed(2)}</td>
-                                                    <td style="color: #212529; padding: 12px; border-bottom: 1px solid #e8ede8;">${diff.adjusted_gross_score}</td>
-                                                    <td style="color: #212529; padding: 12px; border-bottom: 1px solid #e8ede8; text-align: center;">${diff.holes_played}</td>
+                                                <tr style="background: ${rowBackground};">
+                                                    <td style="color: #304c40; padding: 5px 6px; border-bottom: 1px solid #e8ede8; font-size: 0.75rem;">${score.date_played}</td>
+                                                    <td style="color: #6b8e4e; font-weight: 600; padding: 5px 6px; border-bottom: 1px solid #e8ede8; font-size: 0.75rem;">${parseFloat(score.score_differential).toFixed(2)}</td>
+                                                    <td style="color: #212529; padding: 5px 6px; border-bottom: 1px solid #e8ede8; font-size: 0.75rem;">${score.adjusted_gross_score}${scoreMark}</td>
+                                                    <td style="color: #212529; padding: 5px 6px; border-bottom: 1px solid #e8ede8; text-align: center; font-size: 0.75rem;">${score.holes_played}</td>
+                                                    <td style="color: #212529; padding: 5px 6px; border-bottom: 1px solid #e8ede8; font-size: 0.75rem;">${parseInt(score.slope_rating)}/${score.course_rating}</td>
+                                                    <td style="color: #212529; padding: 5px 6px; border-bottom: 1px solid #e8ede8; font-size: 0.75rem;">${score.course_name}</td>
+                                                    <td style="color: #212529; padding: 5px 6px; border-bottom: 1px solid #e8ede8; font-size: 0.75rem;">${score.tee_name}</td>
                                                 </tr>
                                             `;
                                         }).join('')}
                                     </tbody>
                                 </table>
                             </div>
-                        </div>
-                    `;
-                }
-
-                // Build all recent scores table (reference only)
-                let recentTableHtml = '';
-                if (recentScores.length > 0) {
-                    recentTableHtml = `
-                        <div class="mt-4">
-                            <h6 class="mb-3" style="color: #304c40; font-weight: 600;">All Recent Scores (${recentScores.length})</h6>
-                            <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
-                                <table class="table table-sm table-hover" style="border: 1px solid #d4e5d9; border-radius: 6px; overflow: hidden;">
-                                    <thead style="background: linear-gradient(135deg, #f0f5f2 0%, #e8ede8 100%); position: sticky; top: 0;">
-                                        <tr>
-                                            <th style="color: #304c40; font-weight: 600; border-bottom: 2px solid #d4e5d9; padding: 12px;">Date</th>
-                                            <th style="color: #304c40; font-weight: 600; border-bottom: 2px solid #d4e5d9; padding: 12px;">Differential</th>
-                                            <th style="color: #304c40; font-weight: 600; border-bottom: 2px solid #d4e5d9; padding: 12px;">Score</th>
-                                            <th style="color: #304c40; font-weight: 600; border-bottom: 2px solid #d4e5d9; padding: 12px;">Holes</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        ${recentScores.map((score, index) => `
-                                            <tr style="background: ${index % 2 === 0 ? '#ffffff' : '#f9faf8'}; transition: background 0.2s ease;">
-                                                <td style="color: #304c40; padding: 12px; border-bottom: 1px solid #e8ede8;">${score.date_played}</td>
-                                                <td style="color: #6b8e4e; font-weight: 600; padding: 12px; border-bottom: 1px solid #e8ede8;">${parseFloat(score.score_differential).toFixed(2)}</td>
-                                                <td style="color: #212529; padding: 12px; border-bottom: 1px solid #e8ede8;">${score.adjusted_gross_score}</td>
-                                                <td style="color: #212529; padding: 12px; border-bottom: 1px solid #e8ede8; text-align: center;">${score.holes_played}</td>
-                                            </tr>
-                                        `).join('')}
-                                    </tbody>
-                                </table>
-                            </div>
+                            <small style="color: #6c757d; margin-top: 4px; display: block;"><span style="color: #6b8e4e; font-weight: bold;">*</span> = Considered in calculation</small>
                         </div>
                     `;
                 }
@@ -639,27 +623,27 @@
                     <style>
                         .handicap-card {
                             background: linear-gradient(135deg, #f5f7f4 0%, #ffffff 100%);
-                            border: 1.5px solid #d4e5d9;
-                            border-radius: 8px;
-                            padding: 16px;
-                            margin-bottom: 12px;
+                            border: 1px solid #d4e5d9;
+                            border-radius: 6px;
+                            padding: 10px;
+                            margin-bottom: 6px;
                             transition: all 0.3s ease;
                         }
                         .handicap-card:hover {
-                            box-shadow: 0 4px 12px rgba(48, 76, 64, 0.1);
+                            box-shadow: 0 2px 6px rgba(48, 76, 64, 0.08);
                             border-color: #6b8e4e;
                         }
                         .handicap-label {
-                            font-size: 0.75rem;
+                            font-size: 0.65rem;
                             color: #304c40;
                             text-transform: uppercase;
-                            letter-spacing: 0.5px;
-                            margin-bottom: 8px;
+                            letter-spacing: 0.4px;
+                            margin-bottom: 4px;
                             display: block;
                             font-weight: 600;
                         }
                         .handicap-value {
-                            font-size: 1.75rem;
+                            font-size: 1.5rem;
                             font-weight: 700;
                             color: #6b8e4e;
                             line-height: 1;
@@ -667,8 +651,9 @@
                         .info-row {
                             display: flex;
                             align-items: center;
-                            padding: 12px 0;
+                            padding: 6px 0;
                             border-bottom: 1px solid #e8ede8;
+                            font-size: 0.85rem;
                         }
                         .info-row:last-child {
                             border-bottom: none;
@@ -676,39 +661,45 @@
                         .info-label {
                             font-weight: 600;
                             color: #304c40;
-                            min-width: 140px;
+                            min-width: 100px;
+                            font-size: 0.8rem;
                         }
                         .info-value {
                             color: #212529;
+                            font-size: 0.8rem;
                         }
                         .badge-period {
                             background: #e8f3e6;
                             color: #304c40;
-                            padding: 6px 12px;
-                            border-radius: 20px;
-                            font-size: 0.85rem;
+                            padding: 3px 8px;
+                            border-radius: 16px;
+                            font-size: 0.75rem;
                             font-weight: 500;
                         }
                         .player-info-header {
                             background: linear-gradient(135deg, #304c40 0%, #3d5c4f 100%);
                             color: white;
-                            padding: 16px;
-                            margin: -16px -16px 16px -16px;
-                            border-radius: 8px 8px 0 0;
+                            padding: 10px;
+                            margin: -16px -16px 8px -16px;
+                            border-radius: 6px 6px 0 0;
                         }
                         .player-info-header .player-name {
-                            font-size: 1.25rem;
+                            font-size: 1rem;
                             font-weight: 700;
-                            margin-bottom: 8px;
+                            margin-bottom: 6px;
                         }
                         .player-info-detail {
-                            font-size: 0.9rem;
+                            font-size: 0.75rem;
                             opacity: 0.95;
-                            margin-bottom: 4px;
+                            margin-bottom: 0;
+                            display: flex;
+                            flex-wrap: wrap;
+                            gap: 12px;
                         }
                         .player-info-detail span {
-                            opacity: 0.8;
-                            margin-right: 16px;
+                            opacity: 0.9;
+                            margin-right: 0;
+                            white-space: nowrap;
                         }
                     </style>
                     <div class="handicap-info-container">
@@ -718,8 +709,8 @@
                                 <i class="fas fa-user-circle me-2"></i>${profile.name || 'Player'}
                             </div>
                             <div class="player-info-detail">
-                                <span><i class="fas fa-golf-ball me-1"></i>WHS No: <strong>${profile.whs_no || 'N/A'}</strong></span>
-                                <span><i class="fas fa-id-card me-1"></i>Account: <strong>${profile.account_no || 'N/A'}</strong></span>
+                                <span><i class="fas fa-golf-ball me-1"></i>WHS: <strong>${profile.whs_no || 'N/A'}</strong></span>
+                                <span><i class="fas fa-id-card me-1"></i>Acct: <strong>${profile.account_no || 'N/A'}</strong></span>
                             </div>
                         </div>
 
@@ -744,7 +735,7 @@
                             <div class="info-row">
                                 <span class="info-label">Method</span>
                                 <div class="info-value">
-                                    <code style="background: #f8f9fa; padding: 6px 10px; border-radius: 4px; font-size: 0.9rem;">${methodLabel}</code>
+                                    <code style="background: #f8f9fa; padding: 4px 6px; border-radius: 3px; font-size: 0.75rem;">${methodLabel}</code>
                                 </div>
                             </div>
                             <div class="info-row">

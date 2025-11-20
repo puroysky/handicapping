@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Exceptions\HandicapCalculationException;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\Rules\In;
 
 class LocalHandicapIndexService
 {
@@ -29,7 +30,6 @@ class LocalHandicapIndexService
 
     private function handleInsufficientScoresResponse()
     {
-
         return [
             'success' => true,
             'local_handicap_index' => null,
@@ -50,17 +50,13 @@ class LocalHandicapIndexService
 
     private function performHandicapCalculation()
     {
-
         $wholeRoundsCount = count(array_filter($this->scores, fn($score) => $score['round'] == 1));
         $totalRoundsCount = count($this->scores);
         $mathingBracket = $this->getMatchingBracket($wholeRoundsCount);
 
-
         if ($mathingBracket !== null) {
-
             $fullRoundScores = $this->filterScoresByRound(1);
             $initialHandicap = $this->applyCalculationMethod($fullRoundScores);
-
             $finalHandicap = $this->recalculateWithConvertedRounds($totalRoundsCount, $initialHandicap);
 
             return $finalHandicap;
@@ -86,7 +82,6 @@ class LocalHandicapIndexService
     private function recalculateWithConvertedRounds($availableRoundsCount, $initialHandicap)
     {
 
-        // 9-hole differentials that were not paired need to be converted to 18-hole differentials
         $halfRoundNoPair = count(array_filter($this->scores, fn($score) => $score['round'] < 1));
 
         if ($halfRoundNoPair > 0) {
@@ -96,18 +91,21 @@ class LocalHandicapIndexService
             foreach ($this->scores as $sc) {
 
                 if ($sc['round'] < 1) {
+                    $initialHandicapIndex = $initialHandicap['local_handicap_index'];
+                    $initialHandicapAdjustment = $initialHandicap['details']['adjustment'];
+                    $convertedDifferential = $sc['score_differential'] + $initialHandicapIndex + $initialHandicapAdjustment;
 
                     $scoreWithConvertedhalfRounds[] = [
                         'score_ids' => [$sc['score_ids']],
                         'original_score_differential' => $sc['score_differential'],
-                        'score_differential' => $sc['score_differential'] + $initialHandicap['local_handicap_index'] + $initialHandicap['details']['adjustment'],
-                        'round' => 1, // 1 since we are converting to full round
+                        'score_differential' => $convertedDifferential,
+                        'round' => 1, // converted to full round
                         'adjusted_gross_score' => $sc['adjusted_gross_score'],
                         'holes_played' => 'converted',
                         'course_id' => $sc['course_id'],
                         'tee_id' => $sc['tee_id'],
-                        'slope_rating' => $sc['slope_rating'],
-                        'course_rating' => $sc['course_rating'],
+                        'slope_rating' => (int)$sc['slope_rating'],
+                        'course_rating' => (float) $sc['course_rating'],
                     ];
                 } else {
                     $scoreWithConvertedhalfRounds[] = $sc;
@@ -115,7 +113,6 @@ class LocalHandicapIndexService
             }
 
             $mathingBracket = $this->getMatchingBracket($availableRoundsCount);
-
 
             if ($mathingBracket !== null) {
                 return $this->applyCalculationMethod($scoreWithConvertedhalfRounds);
@@ -159,8 +156,8 @@ class LocalHandicapIndexService
 
 
         $consideredDifferentials =  match ($method) {
-            'LOWEST' => array_first($selectedScores),
-            'HIGHEST' => array_first($selectedScores),
+            'LOWEST' => [array_first($selectedScores)],
+            'HIGHEST' => [array_first($selectedScores)],
             'AVERAGE_OF_LOWEST' => $selectedScores,
             default => null,
         };
@@ -232,6 +229,14 @@ class LocalHandicapIndexService
 
             if ($holesPlayed === 'F9' || $holesPlayed === 'B9') {
 
+                Log::debug('Attempting to pair half round', [
+                    'score_id' => $score->score_id,
+                    'course_id' => $score->course_id,
+                    'tee_id' => $score->tee_id,
+                    'holes_played' => $holesPlayed,
+                    'date_played' => $score->date_played
+                ]);
+
                 $wasPaired = $this->tryPairHalfRound($score, $mergedScores, $unpairedHalfRounds);
 
                 if (!$wasPaired) {
@@ -245,7 +250,7 @@ class LocalHandicapIndexService
                         'holes_played' => $score->holes_played,
                         'course_id' => $score->course_id,
                         'tee_id' => $score->tee_id,
-                        'slope_rating' => (float)$score->slope_rating,
+                        'slope_rating' => (int)$score->slope_rating,
                         'course_rating' => (float)$score->course_rating
                     ];
                 }
@@ -264,7 +269,7 @@ class LocalHandicapIndexService
                 'holes_played' => $score->holes_played,
                 'course_id' => $score->course_id,
                 'tee_id' => $score->tee_id,
-                'slope_rating' => (float)$score->slope_rating,
+                'slope_rating' => (int)$score->slope_rating,
                 'course_rating' => (float)$score->course_rating
             ];
         }
@@ -278,11 +283,10 @@ class LocalHandicapIndexService
 
     private function addUnpairedHalfRounds(&$mergedScores, $unpairedHalfRounds)
     {
-
         foreach ($unpairedHalfRounds as $courses) {
             foreach ($courses as $tees) {
                 foreach ($tees as $unpairedHalfRound) {
-                    foreach ($unpairedHalfRound as $halfRoundScore) {
+                    foreach ($unpairedHalfRound as $halfRoundScore) {;
                         $mergedScores[] = [
                             'score_ids' => $halfRoundScore['score_ids'],
                             'score_differential' => (float)$halfRoundScore['score_differential'],
@@ -291,7 +295,7 @@ class LocalHandicapIndexService
                             'holes_played' => $halfRoundScore['holes_played'],
                             'course_id' => $halfRoundScore['course_id'],
                             'tee_id' => $halfRoundScore['tee_id'],
-                            'slope_rating' => (float)$halfRoundScore['slope_rating'],
+                            'slope_rating' => (int)$halfRoundScore['slope_rating'],
                             'course_rating' => (float)$halfRoundScore['course_rating']
                         ];
                     }
@@ -321,15 +325,15 @@ class LocalHandicapIndexService
             'holes_played' => 'combined',
             'course_id' => $score->course_id,
             'tee_id' => $score->tee_id,
-            'slope_rating' => (float)$score->slope_rating + (float)$mathingcScore['slope_rating'],
+            'slope_rating' => (int)$score->slope_rating + (int)$mathingcScore['slope_rating'],
             'course_rating' => (float)$score->course_rating + (float)$mathingcScore['course_rating'],
 
         ];
 
-        unset($mathingcScore);
+        unset($unpairedHalfRounds[$score->course_id][$score->tee_id][$oppositeHole][0]);
 
 
-        $unpairedHalfRounds[$score->course_id][$score->tee_id][$oppositeHole][0] = array_values($unpairedHalfRounds[$score->course_id][$score->tee_id][$oppositeHole][0]); //reset array keys
+        $unpairedHalfRounds[$score->course_id][$score->tee_id][$oppositeHole] = array_values($unpairedHalfRounds[$score->course_id][$score->tee_id][$oppositeHole]); //reset array keys
 
         return true;
     }
