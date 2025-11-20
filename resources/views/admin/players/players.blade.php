@@ -173,7 +173,7 @@
                                     <div class="action-wrapper">
                                         <button class="btn btn-outline-info btn-sm btn-handicap-info"
                                             type="button"
-                                            onclick="openHandicapModal({{ $player->id }})"
+                                            onclick="openHandicapModal({{ $player->player->player_profile_id }})"
                                             title="Handicap Info">
                                             <i class="fas fa-golf-ball"></i>
                                         </button>
@@ -515,16 +515,34 @@
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                const handicap = data.handicaps;
+                const localIndex = data.local_handicap_index;
+                const details = data.details || {};
+                const profile = data.profile || {};
                 const config = data.config || {};
-                const scores = data.recent_scores || [];
-                const player = data.player || {};
+                const recentScores = details.recent_scores || [];
+                const selectedScores = details.selected_scores || [];
+                const scoreDifferentials = details.score_differentials || [];
+                const consideredDifferentials = details.considered_differentials || [];
+                const method = details.method || 'N/A';
+                const count = details.count || 0;
+                const adjustment = details.adjustment || 0;
                 
-                // Handle score period - show dates or "No scores" message
+                // Get score period from config or from recent scores
                 let periodDisplay = '';
-                if (scores.length > 0) {
-                    const recentStart = scores[scores.length - 1].date_played;
-                    const recentEnd = scores[0].date_played;
+                let scorePeriodStart = '';
+                let scorePeriodEnd = '';
+                
+                if (config.score_date && config.score_date.start && config.score_date.end) {
+                    scorePeriodStart = config.score_date.start;
+                    scorePeriodEnd = config.score_date.end;
+                    periodDisplay = `
+                        <span class="badge-period">${scorePeriodStart}</span>
+                        <span style="margin: 0 8px; color: #adb5bd;">to</span>
+                        <span class="badge-period">${scorePeriodEnd}</span>
+                    `;
+                } else if (recentScores.length > 0) {
+                    const recentStart = recentScores[recentScores.length - 1].date_played;
+                    const recentEnd = recentScores[0].date_played;
                     periodDisplay = `
                         <span class="badge-period">${recentStart}</span>
                         <span style="margin: 0 8px; color: #adb5bd;">to</span>
@@ -534,46 +552,77 @@
                     periodDisplay = '<span style="color: #6c757d; font-style: italic;">No scores available</span>';
                 }
                 
-                // Use config data to build formula label
+                // Build formula label
                 let methodLabel = '';
-                if (config && config.method) {
-                    const method = config.method;
-                    const count = config.count || 0;
-                    const min = config.min || 'N/A';
-                    const max = config.max || 'N/A';
-                    
-                    // Format method label with config details based on WHS standards
-                    if (method === 'LOWEST') {
-                        methodLabel = `Lowest ${count} of ${min}-${max} score differentials`;
-                    } else if (method === 'HIGHEST') {
-                        methodLabel = `Highest ${count} of ${min}-${max} score differentials`;
-                    } else if (method === 'AVERAGE_OF_LOWEST') {
-                        methodLabel = `Average of lowest ${count} from ${min}-${max} score differentials`;
-                    } else {
-                        methodLabel = `${method} calculation method`;
-                    }
+                if (method === 'LOWEST') {
+                    methodLabel = `Lowest ${count} score differentials`;
+                } else if (method === 'HIGHEST') {
+                    methodLabel = `Highest ${count} score differentials`;
+                } else if (method === 'AVERAGE_OF_LOWEST') {
+                    methodLabel = `Average of lowest ${count} score differentials`;
+                } else {
+                    methodLabel = `${method} (${count} scores)`;
                 }
 
-                // Build recent scores table
-                let scoresTableHtml = '';
-                if (scores.length > 0) {
-                    scoresTableHtml = `
+                // Build considered differentials table
+                let consideredTableHtml = '';
+                if (consideredDifferentials.length > 0) {
+                    consideredTableHtml = `
                         <div class="mt-4">
-                            <h6 class="mb-3" style="color: #304c40; font-weight: 600;">Recent Scores (${scores.length})</h6>
+                            <h6 class="mb-3" style="color: #304c40; font-weight: 600;">Considered Differentials (${consideredDifferentials.length})</h6>
                             <div class="table-responsive">
                                 <table class="table table-sm table-hover" style="border: 1px solid #d4e5d9; border-radius: 6px; overflow: hidden;">
                                     <thead style="background: linear-gradient(135deg, #f0f5f2 0%, #e8ede8 100%);">
                                         <tr>
                                             <th style="color: #304c40; font-weight: 600; border-bottom: 2px solid #d4e5d9; padding: 12px;">Date</th>
-                                            <th style="color: #304c40; font-weight: 600; border-bottom: 2px solid #d4e5d9; padding: 12px;">Score Diff</th>
-                                            <th style="color: #304c40; font-weight: 600; border-bottom: 2px solid #d4e5d9; padding: 12px;">Gross Score</th>
+                                            <th style="color: #304c40; font-weight: 600; border-bottom: 2px solid #d4e5d9; padding: 12px;">Differential</th>
+                                            <th style="color: #304c40; font-weight: 600; border-bottom: 2px solid #d4e5d9; padding: 12px;">Score</th>
                                             <th style="color: #304c40; font-weight: 600; border-bottom: 2px solid #d4e5d9; padding: 12px;">Holes</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        ${scores.map((score, index) => `
+                                        ${consideredDifferentials.map((diff, index) => {
+                                            // Find the original score(s) for this differential
+                                            const scoreIds = diff.score_ids || [];
+                                            const originalScores = selectedScores.filter(s => scoreIds.includes(s.score_id));
+                                            const scoreDate = originalScores.length > 0 ? originalScores[0].date_played : 'N/A';
+                                            
+                                            return `
+                                                <tr style="background: ${index % 2 === 0 ? '#ffffff' : '#f9faf8'}; transition: background 0.2s ease;">
+                                                    <td style="color: #304c40; padding: 12px; border-bottom: 1px solid #e8ede8;">${scoreDate}</td>
+                                                    <td style="color: #6b8e4e; font-weight: 600; padding: 12px; border-bottom: 1px solid #e8ede8;">${parseFloat(diff.score_differential).toFixed(2)}</td>
+                                                    <td style="color: #212529; padding: 12px; border-bottom: 1px solid #e8ede8;">${diff.adjusted_gross_score}</td>
+                                                    <td style="color: #212529; padding: 12px; border-bottom: 1px solid #e8ede8; text-align: center;">${diff.holes_played}</td>
+                                                </tr>
+                                            `;
+                                        }).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                // Build all recent scores table (reference only)
+                let recentTableHtml = '';
+                if (recentScores.length > 0) {
+                    recentTableHtml = `
+                        <div class="mt-4">
+                            <h6 class="mb-3" style="color: #304c40; font-weight: 600;">All Recent Scores (${recentScores.length})</h6>
+                            <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
+                                <table class="table table-sm table-hover" style="border: 1px solid #d4e5d9; border-radius: 6px; overflow: hidden;">
+                                    <thead style="background: linear-gradient(135deg, #f0f5f2 0%, #e8ede8 100%); position: sticky; top: 0;">
+                                        <tr>
+                                            <th style="color: #304c40; font-weight: 600; border-bottom: 2px solid #d4e5d9; padding: 12px;">Date</th>
+                                            <th style="color: #304c40; font-weight: 600; border-bottom: 2px solid #d4e5d9; padding: 12px;">Differential</th>
+                                            <th style="color: #304c40; font-weight: 600; border-bottom: 2px solid #d4e5d9; padding: 12px;">Score</th>
+                                            <th style="color: #304c40; font-weight: 600; border-bottom: 2px solid #d4e5d9; padding: 12px;">Holes</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${recentScores.map((score, index) => `
                                             <tr style="background: ${index % 2 === 0 ? '#ffffff' : '#f9faf8'}; transition: background 0.2s ease;">
-                                                <td style="color: #304c40; padding: 12px; border-bottom: 1px solid #e8ede8;">${new Date(score.date_played).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</td>
+                                                <td style="color: #304c40; padding: 12px; border-bottom: 1px solid #e8ede8;">${score.date_played}</td>
                                                 <td style="color: #6b8e4e; font-weight: 600; padding: 12px; border-bottom: 1px solid #e8ede8;">${parseFloat(score.score_differential).toFixed(2)}</td>
                                                 <td style="color: #212529; padding: 12px; border-bottom: 1px solid #e8ede8;">${score.adjusted_gross_score}</td>
                                                 <td style="color: #212529; padding: 12px; border-bottom: 1px solid #e8ede8; text-align: center;">${score.holes_played}</td>
@@ -582,13 +631,6 @@
                                     </tbody>
                                 </table>
                             </div>
-                        </div>
-                    `;
-                } else {
-                    scoresTableHtml = `
-                        <div class="alert alert-info border-0 mt-4 mb-0">
-                            <i class="fas fa-info-circle me-2"></i>
-                            <strong>No Scores Available</strong> - This player has not yet recorded any scores.
                         </div>
                     `;
                 }
@@ -619,7 +661,7 @@
                         .handicap-value {
                             font-size: 1.75rem;
                             font-weight: 700;
-                            color: ${handicap !== null ? '#6b8e4e' : '#304c40'};
+                            color: #6b8e4e;
                             line-height: 1;
                         }
                         .info-row {
@@ -673,34 +715,19 @@
                         <!-- Player Info Header -->
                         <div class="player-info-header">
                             <div class="player-name">
-                                <i class="fas fa-user-circle me-2"></i>${player.name || 'Player'}
+                                <i class="fas fa-user-circle me-2"></i>${profile.name || 'Player'}
                             </div>
                             <div class="player-info-detail">
-                                <span><i class="fas fa-golf-ball me-1"></i>WHS No: <strong>${player.whs_no}</strong></span>
-                                <span><i class="fas fa-id-card me-1"></i>Account: <strong>${player.account_no}</strong></span>
+                                <span><i class="fas fa-golf-ball me-1"></i>WHS No: <strong>${profile.whs_no || 'N/A'}</strong></span>
+                                <span><i class="fas fa-id-card me-1"></i>Account: <strong>${profile.account_no || 'N/A'}</strong></span>
                             </div>
                         </div>
 
-                        <!-- Primary Info Cards -->
-                        <div class="row mb-4">
-                            <div class="col-md-6">
-                                <div class="handicap-card">
-                                    <span class="handicap-label">Local Handicap Index</span>
-                                    <div class="handicap-value">${handicap !== null ? parseFloat(handicap.local_handicap_index).toFixed(2) : 'Pending'}</div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="handicap-card">
-                                    <span class="handicap-label">Scores Used</span>
-                                    <div class="handicap-value">${handicap && handicap.details && handicap.details.used_scores ? handicap.details.used_scores : 0}<span style="font-size: 0.9rem; color: #6c757d;">/${handicap && handicap.details && handicap.details.recent_scores ? handicap.details.recent_scores : scores.length}</span></div>
-                                </div>
-                            </div>
+                        <!-- Primary Info Card -->
+                        <div class="handicap-card">
+                            <span class="handicap-label">Local Handicap Index</span>
+                            <div class="handicap-value">${localIndex !== null ? parseFloat(localIndex).toFixed(2) : 'Pending'}</div>
                         </div>
-
-                        ${handicap === null ? `<div class="alert alert-info border-0 mb-3">
-                            <i class="fas fa-info-circle me-2"></i>
-                            <strong>Calculation Pending</strong> - More scores are needed to calculate the handicap.
-                        </div>` : ''}
 
                         <!-- Score Period (Always Visible) -->
                         <div class="handicap-card">
@@ -715,19 +742,26 @@
                         <!-- Calculation Details -->
                         <div class="handicap-card">
                             <div class="info-row">
-                                <span class="info-label">Formula</span>
+                                <span class="info-label">Method</span>
                                 <div class="info-value">
-                                    <code style="background: #f8f9fa; padding: 6px 10px; border-radius: 4px; font-size: 0.9rem;">${methodLabel || 'N/A'}</code>
+                                    <code style="background: #f8f9fa; padding: 6px 10px; border-radius: 4px; font-size: 0.9rem;">${methodLabel}</code>
                                 </div>
                             </div>
                             <div class="info-row">
                                 <span class="info-label">Adjustment</span>
-                                <div class="info-value">${config && config.adjustment !== undefined ? (parseFloat(config.adjustment) >= 0 ? '+' : '') + parseFloat(config.adjustment) : 'N/A'}</div>
+                                <div class="info-value">${parseFloat(adjustment) >= 0 ? '+' : ''}${parseFloat(adjustment)}</div>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Scores Used</span>
+                                <div class="info-value">${count} of ${recentScores.length}</div>
                             </div>
                         </div>
 
-                        <!-- Recent Scores Table -->
-                        ${scoresTableHtml}
+                        <!-- Considered Differentials Table -->
+                        ${consideredTableHtml}
+
+                        <!-- All Recent Scores Table -->
+                        ${recentTableHtml}
                     </div>
                 `;
             } else if (!data.success) {

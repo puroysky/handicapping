@@ -36,6 +36,18 @@ Route::get('test', function () {
 
 
 
+
+    $playerHandicapService = new \App\Services\PlayerHandicapService();
+    $scores = $playerHandicapService->calculate();
+
+    echo '<pre>';
+    print_r($scores);
+    echo '</pre>';
+
+
+
+    return;
+
     SystemSettingService::refreshCache();
     $scores = Score::select('score_id', 'course_id', 'date_played')   // only fields you need from scores
         ->with(['course:course_id,course_name'])                   // only load course_name, must include course_id

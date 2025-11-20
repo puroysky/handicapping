@@ -14,94 +14,51 @@ use Illuminate\Support\Facades\Log;
 
 class PlayerLocalHandicapService
 {
-    private $bracket = [];
-    private $nullHandicapCount = 0;
-    private const CHUNK_SIZE = 100;
-    private $maxScorePerUser = 40;
-    private $minScoresPerUser = 6;
-    private PlayerProfile $playerProfile;
-    private $scores = [];
-    private $handicapConfig = [];
+    protected $bracket = [];
+    protected $maxScorePerUser;
+    protected $minScoresPerUser;
+
+    protected $handicapConfig;
+    protected PlayerProfile $playerProfile;
 
 
 
-    /**
-     * Calculate local handicap index for all participants in a tournament
-     */
-    public function calculate($userId = null)
+    public function calculate($playerid)
     {
 
-        $this->playerProfile = PlayerProfile::with('user')->where('user_id', $userId)
+        $this->playerProfile = PlayerProfile::with('user')->where('player_profile_id', $playerid)
             ->first();
 
-        try {
+
+        $config = $this->loadBracketConfiguration();
 
 
-            $this->loadBracketConfiguration();
-            $scores = $this->fetchLatestScoresPerUser();
+        $scores = Score::select('score_id', 'user_id', 'score_differential', 'holes_played', 'date_played', 'adjusted_gross_score', 'course_id', 'tee_id', 'slope_rating', 'course_rating')
+            ->where('user_id', $this->playerProfile->user_id)
+            ->limit($this->maxScorePerUser * 2)->orderBy('date_played', 'desc')->get();
 
 
 
-            $player = [
+        $handicapService = new LocalHandicapIndexService();
+        $scores = $handicapService->calculate($scores, $config);
 
-                'name' => $this->playerProfile->user->profile->first_name . ' ' . $this->playerProfile->user->profile->last_name,
+
+        return array_merge($scores, [
+            'profile' => [
+                'name' => $this->playerProfile->userProfile->first_name . ' ' . $this->playerProfile->userProfile->last_name,
                 'whs_no' => $this->playerProfile->whs_no,
                 'account_no' => $this->playerProfile->account_no,
-            ];
-
-            if (count($this->scores) < $this->minScoresPerUser) {
-                return [
-                    'success' => true,
-                    'message' => 'Local handicap calculation requires at least ' . $this->minScoresPerUser . ' recent score differentials, ' . count($this->scores) . ' were found.',
-                    'handicaps' => null,
-                    'config' => $this->handicapConfig,
-                    'recent_scores' => $this->scores,
-                    'score_date' =>  [
-                        'start' => SystemSettingService::get('local_handicap.calculation_start_date'),
-                        'end' => SystemSettingService::get('local_handicap.calculation_end_date'),
-                    ],
-                    'player' => $player
-                ];
-            }
-
-            $handicaps = $this->calculateHandicapsForUsers($scores);
-
-            return [
-                'success' => true,
-                'handicaps' => $handicaps,
-                'config' => $this->handicapConfig,
-                'recent_scores' => $this->scores,
-                'score_date' =>  [
-                    'start' => SystemSettingService::get('local_handicap.calculation_start_date'),
-                    'end' => SystemSettingService::get('local_handicap.calculation_end_date'),
-                ],
-                'player' => $player
-            ];
-        } catch (HandicapCalculationException $e) {
-
-
-
-            Log::error('Local handicap calculation failed', [
-
-                'error' => $e->getUserMessage(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine()
-            ]);
-            return response()->json([
-                'success' => false,
-                'error' => $e->getUserMessage()
-            ], 400);
-        }
+            ]
+        ]);
     }
 
-    /**
-     * Load bracket configuration from tournament
-     */
-    private function loadBracketConfiguration(): void
+    private function loadBracketConfiguration(): array
     {
 
 
         $handicapIndexCalTable = SystemSettingService::get('local_handicap.calculation_table');
+
+
 
         Log::debug('Loaded handicap index calculation table', [
             'table' => $handicapIndexCalTable
@@ -120,224 +77,22 @@ class PlayerLocalHandicapService
             ->values()
             ->toArray();
 
-        $this->maxScorePerUser = max(array_column($this->bracket, 'max')) * 2;
+        $this->maxScorePerUser = max(array_column($this->bracket, 'max'));
         $this->minScoresPerUser = min(array_column($this->bracket, 'min'));
 
         if (empty($this->bracket)) {
             throw new HandicapCalculationException('Handicap calculation table is empty');
         }
-    }
-
-    /**
-     * Fetch latest 20 scores per user using optimized SQL window function
-     */
-    private function fetchLatestScoresPerUser()
-    {
-
-        $scores = Score::select('score_id', 'user_id', 'score_differential', 'holes_played', 'date_played', 'adjusted_gross_score', 'course_id')
-            ->where('user_id', $this->playerProfile->user_id)
-            ->limit($this->maxScorePerUser)->orderBy('date_played', 'desc')->get();
-
-        $this->scores = $scores;
-        return $this->groupScoresByUser($scores);
-    }
 
 
-    /**
-     * Group scores by user ID
-     */
-    private function groupScoresByUser($scores): array
-    {
-        $grouped = [];
-        $halfFullRounds = [];
-
-        foreach ($scores as $score) {
-
-            $oppositeHole = $score->holes_played === 'F9' ? 'B9' : 'F9';
-
-            if ($score->holes_played === 'F9' || $score->holes_played === 'B9') {
-                if (isset($halfFullRounds[$score->course_id])) {
-                    if (isset($halfFullRounds[$score->course_id][$oppositeHole])) {
-
-                        $firstHalf = (float)$score->score_differential;
-                        $secondHalf = (float)$halfFullRounds[$score->course_id][$oppositeHole][0]['score_differential'];
-                        $grouped[$score->user_id][] = [
-                            'score_id' => 'combined_' . $halfFullRounds[$score->course_id][$oppositeHole][0]['score_id'] . '_' . $score->score_id,
-                            'score_differential' => $firstHalf + $secondHalf,
-                            'round' => 1
-                        ];
-
-                        unset($halfFullRounds[$score->course_id][$oppositeHole][0]);
-                        $halfFullRounds[$score->course_id][$oppositeHole] = array_values($halfFullRounds[$score->course_id][$oppositeHole]);
-
-                        continue;
-                    }
-                }
-
-                $halfFullRounds[$score->course_id][$score->holes_played][] = $score->toArray();
-
-                continue;
-            }
-
-            $grouped[$score->user_id][] = [
-                'score_id' => $score->score_id,
-                'score_differential' => (float)$score->score_differential,
-                'round' => ($score->holes_played === 'F9' || $score->holes_played === 'B9') ? 0.5 : 1,
-            ];
-        }
-
-
-
-        foreach ($halfFullRounds as $courses) {
-            foreach ($courses as $scoresArray) {
-                foreach ($scoresArray as $sc) {
-                    $grouped[$this->playerProfile->user_id][] = [
-                        'score_id' => $sc['score_id'],
-                        'score_differential' => (float)$sc['score_differential'],
-                        'round' => 0.5
-                    ];
-                }
-            }
-        }
-
-        return $grouped;
-    }
-
-    /**
-     * Calculate handicap indices for all users
-     */
-    private function calculateHandicapsForUsers($userScores): array
-    {
-        $scores = array_first($userScores);
-
-
-        $handicap = $this->calculateUserHandicap($scores);
-
-        return $handicap;
-    }
-
-    /**
-     * Calculate handicap for a single user
-     */
-    private function calculateUserHandicap($scores)
-    {
-
-        $roundCount = floor(array_sum(array_column($scores, 'round')));
-        $differentialsCount = count($scores);
-
-
-        $mathingBracket = $this->getMatchingBracket($roundCount);
-
-        if ($mathingBracket !== null) {
-            $handicap = $this->applyCalculationMethod($scores, $mathingBracket, $roundCount);
-
-
-            $halfRoundNoPair = count(array_filter($scores, fn($score) => $score['round'] < 1));
-
-
-            if ($halfRoundNoPair > 0) {
-
-
-                $scoreWithConvertedhalfRounds = [];
-                foreach ($scores as $sc) {
-                    if ($sc['round'] < 1) {
-
-                        Log::debug('Adjusting half round score differential for unpaired half round', [
-                            'score_id' => $sc['score_id'],
-                            'original_score_differential' => $sc['score_differential'],
-                            'adjusted_score_differential' => $sc['score_differential'] * 2
-                        ]);
-                        $sc['round'] = 1;
-                        $sc['score_differential'] = $sc['score_differential'] * 2;
-
-
-                        $scoreWithConvertedhalfRounds[] = [
-                            'score_id' => 'converted_' . $sc['score_id'],
-                            'score_differential' => $sc['score_differential'],
-                            'round' => 1
-                        ];
-                    } else {
-                        $scoreWithConvertedhalfRounds[] = $sc;
-                    }
-                }
-                $mathingBracket = $this->getMatchingBracket($differentialsCount);
-
-                if ($mathingBracket !== null) {
-                    $handicap = $this->applyCalculationMethod($scoreWithConvertedhalfRounds, $mathingBracket, $differentialsCount);
-                }
-
-                // $handicap = $this->applyCalculationMethod($scores, $mathingBracket, $roundCount);
-            }
-
-            return $handicap;
-        }
-
-        return null;
-    }
-
-
-    private function getMatchingBracket($roundCount)
-    {
-        foreach ($this->bracket as $config) {
-
-            $minRoundCount = min($roundCount, (int)$config['max']);
-
-            if ($roundCount >= (int)$config['min'] && $minRoundCount <= (int)$config['max']) {
-
-                $this->handicapConfig = $config;
-                return $config;
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * Apply the configured calculation method (LOWEST, HIGHEST, AVERAGE_OF_LOWEST)
-     */
-    private function applyCalculationMethod($scores, $config, $roundCount)
-    {
-        $count = (int)$config['count'];
-        $method = $config['method'];
-        $adjustment = (float)$config['adjustment'];
-
-        // Sort based on method
-        $sorted = $scores;
-        if ($method === 'HIGHEST') {
-            usort($sorted, fn($a, $b) => $b['score_differential'] <=> $a['score_differential']);
-        } else {
-            usort($sorted, fn($a, $b) => $a['score_differential'] <=> $b['score_differential']);
-        }
-
-        $selected = array_slice($sorted, 0, $count);
-
-
-        // echo '<pre>';
-        // print_r($selected);
-        // echo '</pre>';
-
-        // Calculate score differential based on method
-        $scoreDiff = match ($method) {
-            'LOWEST' => $selected[0]['score_differential'] ?? 0,
-            'HIGHEST' => $selected[0]['score_differential'] ?? 0,
-            'AVERAGE_OF_LOWEST' => count($selected) > 0
-                ? array_sum(array_column($selected, 'score_differential')) / count($selected)
-                : 0,
-            default => 0,
-        };
-
-        $handicapIndex = round($scoreDiff + $adjustment, 2);
-
-        return [
-            'local_handicap_index' => $handicapIndex,
-            'details' => [
-                'recent_scores' => $roundCount,
-                'used_scores' => $count,
-                'method' => $method,
-                'adjustment' => $adjustment,
-                'selected_scores' => $selected,
-                'score_differential' => $sorted
-            ]
-        ];
+        return array(
+            'bracket' => $this->bracket,
+            'min_scores_per_user' => $this->minScoresPerUser,
+            'max_scores_per_user' => $this->maxScorePerUser,
+            'score_date' =>  [
+                'start' => SystemSettingService::get('local_handicap.calculation_start_date'),
+                'end' => SystemSettingService::get('local_handicap.calculation_end_date'),
+            ],
+        );
     }
 }

@@ -347,7 +347,9 @@ class ScoreMigrateService
                 'gross_score' => null,
                 'adjusted_gross_score' => $rowData['adjusted_gross_score'],
                 'net_score' => null,
-                'score_differential' => $scoreDifferential,
+                'score_differential' => $scoreDifferential['score_differential'],
+                'course_rating' => $scoreDifferential['course_rating'],
+                'slope_rating' => $scoreDifferential['slope_rating'],
                 'is_verified' => true,
                 'verified_by' => $this->authId,
                 'verified_at' => $now,
@@ -365,7 +367,7 @@ class ScoreMigrateService
     /**
      * Get score differential using formula expression and ratings
      */
-    private function getScoreDifferential($rowData, $courseId, $teeId): int
+    private function getScoreDifferential($rowData, $courseId, $teeId)
     {
         $tournament = $this->tournaments[$rowData['tournament_name']];
         $ratings = $this->extractRatingsByHoles(
@@ -382,11 +384,17 @@ class ScoreMigrateService
             throw new Exception("Missing score differential formula for course_id: {$courseId}");
         }
 
-        return $this->calculateScoreDifferential([
+        $scoreDifferential = $this->calculateScoreDifferential([
             'ADJUSTED_GROSS_SCORE' => $rowData['adjusted_gross_score'],
             'COURSE_RATING' => $ratings['courseRating'],
             'SLOPE_RATING' => $ratings['slopeRating'],
         ], $formulaExpression);
+
+        return array(
+            'score_differential' => $scoreDifferential,
+            'course_rating' => $ratings['courseRating'],
+            'slope_rating' => $ratings['slopeRating'],
+        );
     }
 
     /**

@@ -21,7 +21,6 @@ class LocalHandicapIndexService
         $this->scores = $this->mergeHalfRounds($rawScores);
 
         if (count($this->scores) < $this->config['min_scores_per_user']) {
-
             return $this->handleInsufficientScoresResponse();
         }
 
@@ -45,10 +44,8 @@ class LocalHandicapIndexService
                 'count'                   => null,
                 'adjustment'              => null,
             ],
-
         ];
     }
-
 
 
     private function performHandicapCalculation()
@@ -56,7 +53,6 @@ class LocalHandicapIndexService
 
         $wholeRoundsCount = count(array_filter($this->scores, fn($score) => $score['round'] == 1));
         $totalRoundsCount = count($this->scores);
-
         $mathingBracket = $this->getMatchingBracket($wholeRoundsCount);
 
 
@@ -89,7 +85,6 @@ class LocalHandicapIndexService
      */
     private function recalculateWithConvertedRounds($availableRoundsCount, $initialHandicap)
     {
-
 
         // 9-hole differentials that were not paired need to be converted to 18-hole differentials
         $halfRoundNoPair = count(array_filter($this->scores, fn($score) => $score['round'] < 1));
@@ -175,13 +170,6 @@ class LocalHandicapIndexService
         }
 
         $handicapIndex = round($scoreDiff + $adjustment, 2);
-
-
-
-
-
-
-
 
         return [
             'success' => true,
