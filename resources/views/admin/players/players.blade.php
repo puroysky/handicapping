@@ -202,12 +202,12 @@
 <div class="modal fade" id="handicapInfoModal" tabindex="-1" aria-labelledby="handicapInfoModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg">
-            <div class="modal-header border-0 pb-0">
+            {{-- <div class="modal-header border-0 pb-0">
                 <h5 class="modal-title fw-bold" id="handicapInfoModalLabel">
                     <i class="fas fa-golf-ball me-2 text-primary"></i>Handicap Information
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
+            </div> --}}
             <div class="modal-body pt-2" id="handicapInfoBody">
                 <div class="text-center text-muted py-5">
                     <i class="fas fa-spinner fa-spin fa-2x"></i>
@@ -577,6 +577,20 @@
                         scoreIds.forEach(id => consideredScoreIds.add(id));
                     });
 
+
+                    // Map score IDs to their corresponding considered differential
+                    let convertedTo8Holes = {};
+                    scoreDifferentials.forEach(diff => {
+                        const scoreIds = diff.score_ids || [];  
+                        scoreIds.forEach(id => {
+                            convertedTo8Holes[id] = diff;
+                        });
+                    });
+
+
+                    console.log('Converted to 8 Holes Mapping:', convertedTo8Holes);
+                    
+
                     recentTableHtml = `
                         <div class="mt-2">
                             <h6 class="mb-2" style="color: #304c40; font-weight: 600; font-size: 0.85rem;">All Recent Scores (${recentScores.length})</h6>
@@ -598,11 +612,20 @@
                                             const isConsidered = consideredScoreIds.has(score.score_id);
                                             const scoreMark = isConsidered ? ' <span style="color: #6b8e4e; font-weight: bold;">*</span>' : '';
                                             const rowBackground = isConsidered ? '#e8f3e6' : (index % 2 === 0 ? '#ffffff' : '#f9faf8');
+                                            let scoreDiff = score.score_differential;
+
+
+                                            if(convertedTo8Holes[score.score_id]){
+                                                if(convertedTo8Holes[score.score_id].holes_played === 'converted'){
+                                                    scoreDiff =  scoreDiff + '->' + convertedTo8Holes[score.score_id].score_differential;
+                                                }
+                                            }
+                                            
                                             
                                             return `
                                                 <tr style="background: ${rowBackground};">
                                                     <td style="color: #304c40; padding: 5px 6px; border-bottom: 1px solid #e8ede8; font-size: 0.75rem;">${score.date_played}</td>
-                                                    <td style="color: #6b8e4e; font-weight: 600; padding: 5px 6px; border-bottom: 1px solid #e8ede8; font-size: 0.75rem;">${parseFloat(score.score_differential).toFixed(2)}</td>
+                                                    <td style="color: #6b8e4e; font-weight: 600; padding: 5px 6px; border-bottom: 1px solid #e8ede8; font-size: 0.75rem;">${scoreDiff}</td>
                                                     <td style="color: #212529; padding: 5px 6px; border-bottom: 1px solid #e8ede8; font-size: 0.75rem;">${score.adjusted_gross_score}${scoreMark}</td>
                                                     <td style="color: #212529; padding: 5px 6px; border-bottom: 1px solid #e8ede8; text-align: center; font-size: 0.75rem;">${score.holes_played}</td>
                                                     <td style="color: #212529; padding: 5px 6px; border-bottom: 1px solid #e8ede8; font-size: 0.75rem;">${parseInt(score.slope_rating)}/${score.course_rating}</td>

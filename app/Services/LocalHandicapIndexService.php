@@ -17,6 +17,7 @@ class LocalHandicapIndexService
 
     public function calculate($rawScores, $config)
     {
+
         $this->config = $config;
         $this->recentScores = $rawScores;
         $this->scores = $this->mergeHalfRounds($rawScores);
@@ -96,7 +97,7 @@ class LocalHandicapIndexService
                     $convertedDifferential = $sc['score_differential'] + $initialHandicapIndex + $initialHandicapAdjustment;
 
                     $scoreWithConvertedhalfRounds[] = [
-                        'score_ids' => [$sc['score_ids']],
+                        'score_ids' => $sc['score_ids'],
                         'original_score_differential' => $sc['score_differential'],
                         'score_differential' => $convertedDifferential,
                         'round' => 1, // converted to full round

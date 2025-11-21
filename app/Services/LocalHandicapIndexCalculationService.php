@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Exceptions\HandicapCalculationException;
 use App\Models\Participant;
+use App\Models\PlayerProfile;
 use App\Models\Score;
 use App\Models\Tournament;
 use Exception;
@@ -13,11 +14,28 @@ use Illuminate\Support\Facades\Log;
 
 class LocalHandicapIndexCalculationService
 {
-    private $bracket = [];
+
     private $tournamentId;
     private $nullHandicapCount = 0;
     private const CHUNK_SIZE = 100;
     private $maxScoresPerUser;
+
+
+
+
+    protected $bracket = [];
+    protected $maxScorePerUser;
+    protected $minScoresPerUser;
+
+    protected $handicapConfig;
+    protected PlayerProfile $playerProfile;
+
+    
+
+
+    //////////////////////////
+
+
 
     /**
      * Calculate local handicap index for all participants in a tournament
@@ -29,8 +47,26 @@ class LocalHandicapIndexCalculationService
         try {
             Log::info('Starting local handicap calculation', ['tournament_id' => $this->tournamentId]);
 
-            $this->loadBracketConfiguration();
-            $scores = $this->fetchLatestScoresPerUser();
+            $config = $this->loadBracketConfiguration();
+
+
+            echo '<pre>';
+            print_r($config);
+            echo '</pre>';
+
+
+
+
+
+            $scores = $this->fetchLatestScoresPerUser($config);
+
+
+
+            echo '<pre>';
+            print_r($scores->toArray());
+            echo '</pre>';
+
+            return;
             $handicaps = $this->calculateHandicapsForUsers($scores);
             $updated = $this->updateParticipantHandicaps($handicaps);
 
@@ -74,7 +110,7 @@ class LocalHandicapIndexCalculationService
     /**
      * Load bracket configuration from tournament
      */
-    private function loadBracketConfiguration(): void
+    private function loadBracketConfiguration(): array
     {
         $tournament = Tournament::find($this->tournamentId);
 
@@ -107,32 +143,48 @@ class LocalHandicapIndexCalculationService
             ->values()
             ->toArray();
 
-        $this->maxScoresPerUser = max(array_column($this->bracket, 'max'));
+        $this->maxScorePerUser = max(array_column($this->bracket, 'max'));
+        $this->minScoresPerUser = min(array_column($this->bracket, 'min'));
 
         if (empty($this->bracket)) {
             throw new HandicapCalculationException('Handicap calculation table is empty');
         }
+
+        return array(
+            'bracket' => $this->bracket,
+            'min_scores_per_user' => $this->minScoresPerUser,
+            'max_scores_per_user' => $this->maxScorePerUser,
+            'score_date' =>  [
+                'start' => $tournament->score_diff_start_date,
+                'end' => $tournament->score_diff_end_date,
+            ],
+        );
     }
 
     /**
      * Fetch latest 20 scores per user using optimized SQL window function
      */
-    private function fetchLatestScoresPerUser()
+    private function fetchLatestScoresPerUser($config)
     {
         $subquery = DB::table('scores')
-            ->select('score_id', 'user_id', 'score_differential', 'holes_played', 'date_played')
+            ->leftJoin('courses', 'scores.course_id', '=', 'courses.course_id')
+            ->leftJoin('tees', 'scores.tee_id', '=', 'tees.tee_id')
+            ->select('score_id', 'user_id', 'score_differential', 'holes_played', 'date_played', 'adjusted_gross_score', 'scores.course_id', 'tees.tee_id', 'slope_rating', 'course_rating', 'courses.course_name', 'tees.tee_name')
+            // ->whereBetween('date_played', [
+            //     $config['score_date']['start'],
+            //     $config['score_date']['end']
+            // ])
             ->selectRaw('ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY date_played DESC) as rn')
             ->whereIn('user_id', $this->getParticipantUserIds());
 
         $scores = DB::table(DB::raw("({$subquery->toSql()}) as ranked_scores"))
             ->mergeBindings($subquery)
-            ->where('rn', '<=', $this->maxScoresPerUser)
+            ->where('rn', '<=', $this->maxScorePerUser)
             ->orderBy('user_id')
             ->orderBy('date_played')
             ->get();
 
-
-        return $this->groupScoresByUser($scores);
+        return $scores;
     }
 
     /**

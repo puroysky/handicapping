@@ -59,7 +59,7 @@ class FormulaSeeder extends Seeder
                 'formula_name' => 'Score Differential - USGA Standard',
                 'formula_code' => 'SD-USGA-001',
                 'formula_desc' => 'Calculates score differential using USGA formula with slope rating adjustment',
-                'formula_expression' => '(113 / SLOPE_RATING) * (ADJUSTED_GROSS_SCORE - COURSE_RATING)',
+                'formula_expression' => 'ROUND((113 / SLOPE_RATING) * (ADJUSTED_GROSS_SCORE - COURSE_RATING))',
                 'system_variables' => json_encode([
                     'ADJUSTED_GROSS_SCORE',
                     'COURSE_RATING',
