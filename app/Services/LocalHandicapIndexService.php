@@ -221,10 +221,28 @@ class LocalHandicapIndexService
         $unpairedHalfRounds = [];
         $maxScores = $this->config['max_scores_per_user'];
 
+
+
+        Log::debug('type of', [
+            'scores' => gettype($scores),
+            'instancceof' => get_class($scores)
+        ]);
+
+        Log::debug('scores', [
+            'scores' => $scores
+        ]);
+
         $scoresArray = $scores->slice(0, $maxScores); // Limit to max scores per user
+
+
         $this->selectedScores = $scoresArray;
 
         foreach ($scoresArray as $score) {
+
+
+
+
+
 
             $holesPlayed = $score->holes_played;
 

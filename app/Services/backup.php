@@ -44,7 +44,7 @@
                         <div class="col-md-6 text-end">
                             <div class="table-info">
                                 <small class="text-muted">
-                                    Showing <span id="showing-count">{{ count($players) }}</span> of <span id="total-count">{{ count($players) }}</span> players
+                                    Showing <span id="showing-count">0</span> of <span id="total-count">0</span> players
                                 </small>
                             </div>
                         </div>
@@ -53,55 +53,47 @@
 
                 <!-- Table -->
                 <div class="table-responsive">
-                    <table class="table table-modern mb-0">
+                    <table class="table table-modern mb-0" id="mainTable">
                         <thead class="table-modern-header">
                             <tr>
                                 <th class="sortable" data-column="0">
                                     <div class="d-flex align-items-center justify-content-between">
                                         <span></i>Name</span>
-                                        <i class="fas fa-sort sort-icon"></i>
                                     </div>
                                 </th>
                                 <th class="sortable" data-column="1">
                                     <div class="d-flex align-items-center justify-content-between">
                                         <span>WHS No</span>
-                                        <i class="fas fa-sort sort-icon"></i>
                                     </div>
                                 </th>
                                 <th class="sortable" data-column="2">
                                     <div class="d-flex align-items-center justify-content-between">
                                         <span>Account No</span>
-                                        <i class="fas fa-sort sort-icon"></i>
                                     </div>
                                 </th>
                                 <th class="sortable" data-column="3">
                                     <div class="d-flex align-items-center justify-content-between">
                                         <span>Email</span>
-                                        <i class="fas fa-sort sort-icon"></i>
                                     </div>
                                 </th>
                                 <th class="sortable" data-column="4">
                                     <div class="d-flex align-items-center justify-content-between">
                                         <span>Birthdate</span>
-                                        <i class="fas fa-sort sort-icon"></i>
                                     </div>
                                 </th>
                                 <th class="sortable" data-column="5">
                                     <div class="d-flex align-items-center justify-content-between">
                                         <span>Sex</span>
-                                        <i class="fas fa-sort sort-icon"></i>
                                     </div>
                                 </th>
                                 <th class="sortable" data-column="6">
                                     <div class="d-flex align-items-center justify-content-between">
                                         <span>Status</span>
-                                        <i class="fas fa-sort sort-icon"></i>
                                     </div>
                                 </th>
                                 <th class="sortable" data-column="7">
                                     <div class="d-flex align-items-center justify-content-between">
                                         <span>Created At</span>
-                                        <i class="fas fa-sort sort-icon"></i>
                                     </div>
                                 </th>
                                 <th class="text-center">
@@ -110,86 +102,7 @@
                             </tr>
                         </thead>
                         <tbody id="mainTableBody">
-                            @foreach ($players as $player)
-                            <tr class="table-row">
-                                <td class="name-cell">
-                                    <div class="d-flex align-items-center">
-                                        <div class="user-avatar me-3">
-                                            @if($player->profile->avatar !== null)
-                                            <img src="{{ $player->profile->avatar }}" alt="Avatar" class="avatar-img">
-                                            @else
-                                            <div class="avatar-placeholder">
-                                                {{ strtoupper(
-                                                    (isset($player->profile->first_name) ? substr($player->profile->first_name, 0, 1) : '') . 
-                                                    (isset($player->profile->last_name) ? substr($player->profile->last_name, 0, 1) : '')
-                                                ) ?: 'U' }}
-                                            </div>
-                                            @endif
-                                            <!-- Status Indicator -->
-                                            <div class="status-indicator {{ $player->active ? 'status-online' : 'status-offline' }}"
-                                                title="{{ $player->active ? 'Active Player' : 'Inactive Player' }}">
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <div class="user-name">{{ ($player->profile->last_name ?? '') . ', ' . ($player->profile->first_name ?? '') }}</div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="whs-no-cell">
-                                    <span class="whs-no-text fw-semibold">{{ $player->player->whs_no ?? 'N/A' }}</span>
-                                </td>
-                                <td class="account-cell">
-                                    <span class="account-number">
-                                        {{ $player->player->account_no ?? 'Not Set' }}
-                                    </span>
-                                </td>
-                                <td class="email-cell">
-                                    <span class="user-email">{{ $player->email }}</span>
-                                </td>
-                                <td class="birthdate-cell">
-                                    <span class="birthdate-text">{{ $player->profile->birthdate ? \Carbon\Carbon::parse($player->profile->birthdate)->format('M d, Y') : 'N/A' }}</span>
-                                </td>
-                                <td class="sex-cell">
-                                    <span class="badge {{ $player->profile->sex === 'M' ? 'bg-primary' : 'bg-danger' }}">
-                                        {{ $player->profile->sex === 'M' ? 'Male' : ($player->profile->sex === 'F' ? 'Female' : 'N/A') }}
-                                    </span>
-                                </td>
-                                <td class="status-cell">
-                                    @if ($player->active)
-                                    <span class="status-badge status-active">
-                                        <i class="fas fa-check-circle me-1"></i>Active
-                                    </span>
-                                    @else
-                                    <span class="status-badge status-inactive">
-                                        <i class="fas fa-times-circle me-1"></i>Inactive
-                                    </span>
-                                    @endif
-                                </td>
-                                <td class="date-cell">
-                                    <span class="cell-text-date">{{ \Carbon\Carbon::parse($player->created_at)->format('M d, Y') }}</span>
-                                    <small class="cell-text-time d-block">{{ \Carbon\Carbon::parse($player->created_at)->format('g:i A') }}</small>
-                                </td>
-                                <td class="action-cell text-center">
-                                    <div class="action-wrapper">
-                                        <button class="btn btn-outline-info btn-sm btn-handicap-info"
-                                            type="button"
-                                            onclick="openHandicapModal({{ $player->player->player_profile_id }})"
-                                            title="Handicap Info">
-                                            <i class="fas fa-golf-ball"></i>
-                                        </button>
-                                        <button class="btn btn-outline-secondary btn-context-menu"
-                                            type="button"
-                                            onclick="showUserContextMenu({{ $player->id }}, '{{ ($player->profile->first_name ?? '') . ' ' . ($player->profile->last_name ?? '') }}', event)"
-                                            title="Actions"
-                                            data-label="Actions">
-                                            <i class="fas fa-ellipsis-v me-1"></i>
-                                            <span class="action-text">Actions</span>
-                                        </button>
-                                        <span class="action-label">Actions</span>
-                                    </div>
-                                </td>
-                            </tr>
-                            @endforeach
+
                         </tbody>
                     </table>
                 </div>
@@ -202,12 +115,12 @@
 <div class="modal fade" id="handicapInfoModal" tabindex="-1" aria-labelledby="handicapInfoModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg">
-            <div class="modal-header border-0 pb-0">
+            {{-- <div class="modal-header border-0 pb-0">
                 <h5 class="modal-title fw-bold" id="handicapInfoModalLabel">
                     <i class="fas fa-golf-ball me-2 text-primary"></i>Handicap Information
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
+            </div> --}}
             <div class="modal-body pt-2" id="handicapInfoBody">
                 <div class="text-center text-muted py-5">
                     <i class="fas fa-spinner fa-spin fa-2x"></i>
@@ -566,77 +479,98 @@
 
                     // Build considered differentials table
                     let consideredTableHtml = '';
-                    if (consideredDifferentials.length > 0) {
-                        consideredTableHtml = `
-                        <div class="mt-4">
-                            <h6 class="mb-3" style="color: #304c40; font-weight: 600;">Considered Differentials (${consideredDifferentials.length})</h6>
-                            <div class="table-responsive">
-                                <table class="table table-sm table-hover" style="border: 1px solid #d4e5d9; border-radius: 6px; overflow: hidden;">
-                                    <thead style="background: linear-gradient(135deg, #f0f5f2 0%, #e8ede8 100%);">
-                                        <tr>
-                                            <th style="color: #304c40; font-weight: 600; border-bottom: 2px solid #d4e5d9; padding: 12px;">Date</th>
-                                            <th style="color: #304c40; font-weight: 600; border-bottom: 2px solid #d4e5d9; padding: 12px;">Differential</th>
-                                            <th style="color: #304c40; font-weight: 600; border-bottom: 2px solid #d4e5d9; padding: 12px;">Score</th>
-                                            <th style="color: #304c40; font-weight: 600; border-bottom: 2px solid #d4e5d9; padding: 12px;">Holes</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        ${consideredDifferentials.map((diff, index) => {
-                                            // Find the original score(s) for this differential
-                                            const scoreIds = diff.score_ids || [];
-                                            const originalScores = selectedScores.filter(s => scoreIds.includes(s.score_id));
-                                            const scoreDate = originalScores.length > 0 ? originalScores[0].date_played : 'N/A';
-                                            
-                                            return `
-                                                <tr style="background: ${index % 2 === 0 ? '#ffffff' : '#f9faf8'}; transition: background 0.2s ease;">
-                                                    <td style="color: #304c40; padding: 12px; border-bottom: 1px solid #e8ede8;">${scoreDate}</td>
-                                                    <td style="color: #6b8e4e; font-weight: 600; padding: 12px; border-bottom: 1px solid #e8ede8;">${parseFloat(diff.score_differential).toFixed(2)}</td>
-                                                    <td style="color: #212529; padding: 12px; border-bottom: 1px solid #e8ede8;">${diff.adjusted_gross_score}</td>
-                                                    <td style="color: #212529; padding: 12px; border-bottom: 1px solid #e8ede8; text-align: center;">${diff.holes_played}</td>
-                                                </tr>
-                                            `;
-                                        }).join('')}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    `;
-                    }
 
                     // Build all recent scores table (reference only)
                     let recentTableHtml = '';
                     if (recentScores.length > 0) {
+                        // Create a set of score IDs that are in considered differentials for quick lookup
+                        const consideredScoreIds = new Set();
+                        consideredDifferentials.forEach(diff => {
+                            const scoreIds = diff.score_ids || [];
+                            scoreIds.forEach(id => consideredScoreIds.add(id));
+                        });
+
+
+                        // Map score IDs to their corresponding considered differential
+                        let convertedTo8Holes = {};
+                        scoreDifferentials.forEach(diff => {
+                            const scoreIds = diff.score_ids || [];
+                            scoreIds.forEach(id => {
+                                convertedTo8Holes[id] = diff;
+                            });
+                        });
+
+
+                        console.log('Converted to 8 Holes Mapping:', convertedTo8Holes);
+
+
                         recentTableHtml = `
-                        <div class="mt-4">
-                            <h6 class="mb-3" style="color: #304c40; font-weight: 600;">All Recent Scores (${recentScores.length})</h6>
-                            <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
-                                <table class="table table-sm table-hover" style="border: 1px solid #d4e5d9; border-radius: 6px; overflow: hidden;">
+                        <div class="mt-2">
+                            <h6 class="mb-2" style="color: #304c40; font-weight: 600; font-size: 0.85rem;">All Recent Scores (${recentScores.length})</h6>
+                            <div class="table-responsive" style="max-height: 250px; overflow-y: auto;">
+                                <table class="table table-sm mb-0" style="border: 1px solid #d4e5d9; border-radius: 4px; overflow: hidden; font-size: 0.8rem;">
                                     <thead style="background: linear-gradient(135deg, #f0f5f2 0%, #e8ede8 100%); position: sticky; top: 0;">
                                         <tr>
-                                            <th style="color: #304c40; font-weight: 600; border-bottom: 2px solid #d4e5d9; padding: 12px;">Date</th>
-                                            <th style="color: #304c40; font-weight: 600; border-bottom: 2px solid #d4e5d9; padding: 12px;">Differential</th>
-                                            <th style="color: #304c40; font-weight: 600; border-bottom: 2px solid #d4e5d9; padding: 12px;">AGS</th>
-                                            <th style="color: #304c40; font-weight: 600; border-bottom: 2px solid #d4e5d9; padding: 12px;">Holes</th>
-                                            <th style="color: #304c40; font-weight: 600; border-bottom: 2px solid #d4e5d9; padding: 12px;">Slope Rating/Course Rating</th>
-                                            <th style="color: #304c40; font-weight: 600; border-bottom: 2px solid #d4e5d9; padding: 12px;">Course</th>
-                                           <th style="color: #304c40; font-weight: 600; border-bottom: 2px solid #d4e5d9; padding: 12px;">Tee Played</th>
+                                            <th style="color: #304c40; font-weight: 600; border-bottom: 1px solid #d4e5d9; padding: 6px 6px; font-size: 0.75rem;">Date</th>
+                                            <th style="color: #304c40; font-weight: 600; border-bottom: 1px solid #d4e5d9; padding: 6px 6px; font-size: 0.75rem;">Diff</th>
+                                            <th style="color: #304c40; font-weight: 600; border-bottom: 1px solid #d4e5d9; padding: 6px 6px; font-size: 0.75rem;">AGS</th>
+                                            <th style="color: #304c40; font-weight: 600; border-bottom: 1px solid #d4e5d9; padding: 6px 6px; font-size: 0.75rem;">H</th>
+                                            <th style="color: #304c40; font-weight: 600; border-bottom: 1px solid #d4e5d9; padding: 6px 6px; font-size: 0.75rem;">SR/CR</th>
+                                            <th style="color: #304c40; font-weight: 600; border-bottom: 1px solid #d4e5d9; padding: 6px 6px; font-size: 0.75rem;">Course</th>
+                                           <th style="color: #304c40; font-weight: 600; border-bottom: 1px solid #d4e5d9; padding: 6px 6px; font-size: 0.75rem;">Tee</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        ${recentScores.map((score, index) => `
-                                            <tr style="background: ${index % 2 === 0 ? '#ffffff' : '#f9faf8'}; transition: background 0.2s ease;">
-                                                <td style="color: #304c40; padding: 12px; border-bottom: 1px solid #e8ede8;">${score.date_played}</td>
-                                                <td style="color: #6b8e4e; font-weight: 600; padding: 12px; border-bottom: 1px solid #e8ede8;">${parseFloat(score.score_differential).toFixed(2)}</td>
-                                                <td style="color: #212529; padding: 12px; border-bottom: 1px solid #e8ede8;">${score.adjusted_gross_score}</td>
-                                                <td style="color: #212529; padding: 12px; border-bottom: 1px solid #e8ede8; text-align: center;">${score.holes_played}</td>
-                                                <td style="color: #212529; padding: 12px; border-bottom: 1px solid #e8ede8;">${score.slope_rating}/${score.course_rating}</td>
-                                                <td style="color: #212529; padding: 12px; border-bottom: 1px solid #e8ede8;">${score.course_name}</td>
-                                                <td style="color: #212529; padding: 12px; border-bottom: 1px solid #e8ede8;">${score.tee_name}</td>
-                                            </tr>
-                                        `).join('')}
+                                        ${recentScores.map((score, index) => {
+                                            const isConsidered = consideredScoreIds.has(score.score_id);
+                                            const scoreMark = isConsidered ? ' <span style="color: #6b8e4e; font-weight: bold;">*</span>' : '';
+                                            const rowBackground = isConsidered ? '#e8f3e6' : (index % 2 === 0 ? '#ffffff' : '#f9faf8');
+                                            let scoreDiff = score.score_differential;
+
+
+                                            if(convertedTo8Holes[score.score_id]){
+                                                if(convertedTo8Holes[score.score_id].holes_played === 'converted'){
+                                                    scoreDiff =  scoreDiff + '->' + convertedTo8Holes[score.score_id].score_differential;
+                                                }
+                                            }
+                                            
+                                            
+                                            return ` <
+                            tr style = "background: ${rowBackground};" >
+                            <
+                            td style = "color: #304c40; padding: 5px 6px; border-bottom: 1px solid #e8ede8; font-size: 0.75rem;" > $ {
+                                score.date_played
+                            } < /td> <
+                            td style = "color: #6b8e4e; font-weight: 600; padding: 5px 6px; border-bottom: 1px solid #e8ede8; font-size: 0.75rem;" > $ {
+                                scoreDiff
+                            } < /td> <
+                            td style = "color: #212529; padding: 5px 6px; border-bottom: 1px solid #e8ede8; font-size: 0.75rem;" > $ {
+                                score.adjusted_gross_score
+                            }
+                        $ {
+                            scoreMark
+                        } < /td> <
+                        td style = "color: #212529; padding: 5px 6px; border-bottom: 1px solid #e8ede8; text-align: center; font-size: 0.75rem;" > $ {
+                                score.holes_played
+                            } < /td> <
+                            td style = "color: #212529; padding: 5px 6px; border-bottom: 1px solid #e8ede8; font-size: 0.75rem;" > $ {
+                                parseInt(score.slope_rating)
+                            }
+                        /${score.course_rating}</td >
+                        <
+                        td style = "color: #212529; padding: 5px 6px; border-bottom: 1px solid #e8ede8; font-size: 0.75rem;" > $ {
+                                score.course_name
+                            } < /td> <
+                            td style = "color: #212529; padding: 5px 6px; border-bottom: 1px solid #e8ede8; font-size: 0.75rem;" > $ {
+                                score.tee_name
+                            } < /td> <
+                            /tr>
+                        `;
+                                        }).join('')}
                                     </tbody>
                                 </table>
                             </div>
+                            <small style="color: #6c757d; margin-top: 4px; display: block;"><span style="color: #6b8e4e; font-weight: bold;">*</span> = Considered in calculation</small>
                         </div>
                     `;
                     }
@@ -645,27 +579,27 @@
                     <style>
                         .handicap-card {
                             background: linear-gradient(135deg, #f5f7f4 0%, #ffffff 100%);
-                            border: 1.5px solid #d4e5d9;
-                            border-radius: 8px;
-                            padding: 16px;
-                            margin-bottom: 12px;
+                            border: 1px solid #d4e5d9;
+                            border-radius: 6px;
+                            padding: 10px;
+                            margin-bottom: 6px;
                             transition: all 0.3s ease;
                         }
                         .handicap-card:hover {
-                            box-shadow: 0 4px 12px rgba(48, 76, 64, 0.1);
+                            box-shadow: 0 2px 6px rgba(48, 76, 64, 0.08);
                             border-color: #6b8e4e;
                         }
                         .handicap-label {
-                            font-size: 0.75rem;
+                            font-size: 0.65rem;
                             color: #304c40;
                             text-transform: uppercase;
-                            letter-spacing: 0.5px;
-                            margin-bottom: 8px;
+                            letter-spacing: 0.4px;
+                            margin-bottom: 4px;
                             display: block;
                             font-weight: 600;
                         }
                         .handicap-value {
-                            font-size: 1.75rem;
+                            font-size: 1.5rem;
                             font-weight: 700;
                             color: #6b8e4e;
                             line-height: 1;
@@ -673,8 +607,9 @@
                         .info-row {
                             display: flex;
                             align-items: center;
-                            padding: 12px 0;
+                            padding: 6px 0;
                             border-bottom: 1px solid #e8ede8;
+                            font-size: 0.85rem;
                         }
                         .info-row:last-child {
                             border-bottom: none;
@@ -682,39 +617,45 @@
                         .info-label {
                             font-weight: 600;
                             color: #304c40;
-                            min-width: 140px;
+                            min-width: 100px;
+                            font-size: 0.8rem;
                         }
                         .info-value {
                             color: #212529;
+                            font-size: 0.8rem;
                         }
                         .badge-period {
                             background: #e8f3e6;
                             color: #304c40;
-                            padding: 6px 12px;
-                            border-radius: 20px;
-                            font-size: 0.85rem;
+                            padding: 3px 8px;
+                            border-radius: 16px;
+                            font-size: 0.75rem;
                             font-weight: 500;
                         }
                         .player-info-header {
                             background: linear-gradient(135deg, #304c40 0%, #3d5c4f 100%);
                             color: white;
-                            padding: 16px;
-                            margin: -16px -16px 16px -16px;
-                            border-radius: 8px 8px 0 0;
+                            padding: 10px;
+                            margin: -16px -16px 8px -16px;
+                            border-radius: 6px 6px 0 0;
                         }
                         .player-info-header .player-name {
-                            font-size: 1.25rem;
+                            font-size: 1rem;
                             font-weight: 700;
-                            margin-bottom: 8px;
+                            margin-bottom: 6px;
                         }
                         .player-info-detail {
-                            font-size: 0.9rem;
+                            font-size: 0.75rem;
                             opacity: 0.95;
-                            margin-bottom: 4px;
+                            margin-bottom: 0;
+                            display: flex;
+                            flex-wrap: wrap;
+                            gap: 12px;
                         }
                         .player-info-detail span {
-                            opacity: 0.8;
-                            margin-right: 16px;
+                            opacity: 0.9;
+                            margin-right: 0;
+                            white-space: nowrap;
                         }
                     </style>
                     <div class="handicap-info-container">
@@ -724,8 +665,8 @@
                                 <i class="fas fa-user-circle me-2"></i>${profile.name || 'Player'}
                             </div>
                             <div class="player-info-detail">
-                                <span><i class="fas fa-golf-ball me-1"></i>WHS No: <strong>${profile.whs_no || 'N/A'}</strong></span>
-                                <span><i class="fas fa-id-card me-1"></i>Account: <strong>${profile.account_no || 'N/A'}</strong></span>
+                                <span><i class="fas fa-golf-ball me-1"></i>WHS: <strong>${profile.whs_no || 'N/A'}</strong></span>
+                                <span><i class="fas fa-id-card me-1"></i>Acct: <strong>${profile.account_no || 'N/A'}</strong></span>
                             </div>
                         </div>
 
@@ -750,7 +691,7 @@
                             <div class="info-row">
                                 <span class="info-label">Method</span>
                                 <div class="info-value">
-                                    <code style="background: #f8f9fa; padding: 6px 10px; border-radius: 4px; font-size: 0.9rem;">${methodLabel}</code>
+                                    <code style="background: #f8f9fa; padding: 4px 6px; border-radius: 3px; font-size: 0.75rem;">${methodLabel}</code>
                                 </div>
                             </div>
                             <div class="info-row">
@@ -829,27 +770,167 @@
         // Implement export logic here
     }
 
-    // Search functionality
+    // Search functionality - triggers server-side search
     document.getElementById('tableSearch').addEventListener('input', function() {
-        const searchTerm = this.value.toLowerCase();
-        const rows = document.querySelectorAll('#mainTableBody tr');
-        let visibleCount = 0;
-
-        rows.forEach(row => {
-            const text = row.textContent.toLowerCase();
-            if (text.includes(searchTerm)) {
-                row.style.display = '';
-                visibleCount++;
-            } else {
-                row.style.display = 'none';
-            }
-        });
-
-        document.getElementById('showing-count').textContent = visibleCount;
+        if (typeof table !== 'undefined') {
+            table.draw();
+        }
     });
 
     // Enhanced context menu button functionality
     document.addEventListener('DOMContentLoaded', function() {
+
+        table = $('#mainTable').DataTable({
+
+            processing: true,
+            serverSide: true,
+            responsive: true,
+            ajax: {
+                url: '{{ route("admin.players.datatable") }}',
+                type: 'GET',
+                data: function(d) {
+                    d.search.value = $('#tableSearch').val();
+                }
+            },
+            columns: [{
+                    data: 'first_name',
+                    name: 'name',
+                    render: function(data, type, row) {
+                        const firstInitial = row.first_name ? row.first_name.charAt(0).toUpperCase() : '';
+                        const lastInitial = row.last_name ? row.last_name.charAt(0).toUpperCase() : '';
+                        const initials = firstInitial + lastInitial || 'U';
+                        const fullName = `${row.last_name || ''}, ${row.first_name || ''}`.replace(/(^, |, $)/g, '');
+
+                        const avatar = row.avatar ?
+                            `<img src="${row.avatar}" alt="Avatar" class="avatar-img">` :
+                            `<div class="avatar-placeholder">${initials}</div>`;
+
+                        // Check if player is active (status is 1 or "1" or true)
+                        const isActive = row.active == 1 || row.active === true || row.active === '1';
+                        const statusClass = isActive ? 'status-online' : 'status-offline';
+                        const statusTitle = isActive ? 'Active Player' : 'Inactive Player';
+
+                        return `
+                            <div class="d-flex align-items-center">
+                                <div class="user-avatar me-3">
+                                    ${avatar}
+                                    <div class="status-indicator ${statusClass}" title="${statusTitle}"></div>
+                                </div>
+                                <div>
+                                    <div class="user-name">${fullName}</div>
+                                </div>
+                            </div>
+                        `;
+                    }
+                },
+                {
+                    data: 'whs_no',
+                    name: 'whs_no',
+                    render: function(data, type, row) {
+                        return `<span class="whs-no-text fw-semibold">${data || 'N/A'}</span>`;
+                    }
+                },
+                {
+                    data: 'account_no',
+                    name: 'account_no',
+                    render: function(data, type, row) {
+                        return `<span class="account-no-text fw-semibold">${data || 'N/A'}</span>`;
+                    }
+                },
+                {
+                    data: 'email',
+                    name: 'email',
+                    render: function(data, type, row) {
+                        return `<a href="mailto:${data}" class="email-link">${data || 'N/A'}</a>`;
+                    }
+                },
+                {
+                    data: 'birthdate',
+                    name: 'birthdate',
+                    render: function(data, type, row) {
+                        return data;
+                    }
+                },
+                {
+                    data: 'sex',
+                    name: 'sex',
+                    render: function(data, type, row) {
+
+                        return data === 'M' ? '<span class="badge bg-primary">Male</span>' : (data === 'F' ? '<span class="badge bg-danger">Female</span>' : '<span class="badge bg-secondary">N/A</span>');
+                    }
+                },
+                {
+                    data: 'status',
+                    name: 'status',
+                    render: function(data, type, row) {
+                        return data === 1 ? '<span class="badge bg-success">Active</span>' : '<span class="badge bg-secondary">Inactive</span>';
+                    }
+                },
+                {
+                    data: 'created_at',
+                    name: 'created_at'
+                },
+                {
+                    data: 'actions',
+                    name: 'actions',
+                    orderable: false,
+                    searchable: false,
+                    render: function(data, type, row) {
+
+
+                        let playerId = row.player_profile_id;
+                        let fullName = `${row.first_name ?? ''} ${row.last_name ?? ''}`.trim();
+                        return `
+                    <div class="action-wrapper">
+                        <button class="btn btn-outline-info btn-sm btn-handicap-info"
+                            type="button"
+                            onclick="openHandicapModal(${playerId})"
+                            title="Handicap Info">
+                            <i class="fas fa-golf-ball"></i>
+                        </button>
+                        <button class="btn btn-outline-secondary btn-context-menu"
+                            type="button"
+                            onclick="showUserContextMenu(${playerId}, '${fullName}', event)"
+                            title="Actions"
+                            data-label="Actions">
+                            <i class="fas fa-ellipsis-v me-1"></i>
+                            <span class="action-text">Actions</span>
+                        </button>
+                        <span class="action-label">Actions</span>
+                    </div>
+                        `;
+
+
+
+                    }
+                },
+            ],
+            pageLength: 10,
+            order: [
+                [6, 'desc']
+            ],
+            language: {
+                search: "Search formulas:",
+                lengthMenu: "Show _MENU_ entries",
+                info: "Showing _START_ to _END_ of _TOTAL_ formulas"
+            },
+            dom: 'rtp',
+            drawCallback: function(settings) {
+                // updateRecordCounts();
+            }
+        });
+
+
+        //  "paging": true,
+        //     "lengthChange": false,
+        //     "searching": false,
+        //     "ordering": false,
+        //     "info": false,
+        //     "autoWidth": false,
+        //     "responsive": true,
+
+
+
         // Add keyboard navigation for context menu buttons
         document.querySelectorAll('.btn-context-menu').forEach(button => {
             button.addEventListener('keydown', function(e) {

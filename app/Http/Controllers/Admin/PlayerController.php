@@ -27,6 +27,11 @@ class PlayerController extends Controller
         return $this->playerService->index();
     }
 
+    public function datatable(Request $request)
+    {
+        return $this->playerService->datatable($request);
+    }
+
     /**
      * Show the form for creating a new resource.
      */
@@ -161,11 +166,9 @@ class PlayerController extends Controller
     {
 
 
-        $playerLocalHandicapService = new PlayerLocalHandicapService();
 
 
-
-        return $playerLocalHandicapService->calculate($request->player_id);
+        return $this->playerService->getHandicap($request->player_id);
     }
 
     /**

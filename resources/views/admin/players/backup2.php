@@ -44,7 +44,7 @@
                         <div class="col-md-6 text-end">
                             <div class="table-info">
                                 <small class="text-muted">
-                                    Showing <span id="showing-count">0</span> of <span id="total-count">0</span> players
+                                    Showing <span id="showing-count">{{ count($players) }}</span> of <span id="total-count">{{ count($players) }}</span> players
                                 </small>
                             </div>
                         </div>
@@ -91,13 +91,7 @@
                                         <span>Status</span>
                                     </div>
                                 </th>
-                        
                                 <th class="sortable" data-column="7">
-                                    <div class="d-flex align-items-center justify-content-between">
-                                        <span>No. of Scores</span>
-                                    </div>
-                                </th>
-                                <th class="sortable" data-column="8">
                                     <div class="d-flex align-items-center justify-content-between">
                                         <span>Created At</span>
                                     </div>
@@ -108,7 +102,86 @@
                             </tr>
                         </thead>
                         <tbody id="mainTableBody">
-                      
+                            @foreach ($players as $player)
+                            <tr class="table-row">
+                                <td class="name-cell">
+                                    <div class="d-flex align-items-center">
+                                        <div class="user-avatar me-3">
+                                            @if($player->profile->avatar !== null)
+                                            <img src="{{ $player->profile->avatar }}" alt="Avatar" class="avatar-img">
+                                            @else
+                                            <div class="avatar-placeholder">
+                                                {{ strtoupper(
+                                                    (isset($player->profile->first_name) ? substr($player->profile->first_name, 0, 1) : '') . 
+                                                    (isset($player->profile->last_name) ? substr($player->profile->last_name, 0, 1) : '')
+                                                ) ?: 'U' }}
+                                            </div>
+                                            @endif
+                                            <!-- Status Indicator -->
+                                            <div class="status-indicator {{ $player->active ? 'status-online' : 'status-offline' }}"
+                                                title="{{ $player->active ? 'Active Player' : 'Inactive Player' }}">
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div class="user-name">{{ ($player->profile->last_name ?? '') . ', ' . ($player->profile->first_name ?? '') }}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="whs-no-cell">
+                                    <span class="whs-no-text fw-semibold">{{ $player->player->whs_no ?? 'N/A' }}</span>
+                                </td>
+                                <td class="account-cell">
+                                    <span class="account-number">
+                                        {{ $player->player->account_no ?? 'Not Set' }}
+                                    </span>
+                                </td>
+                                <td class="email-cell">
+                                    <span class="user-email">{{ $player->email }}</span>
+                                </td>
+                                <td class="birthdate-cell">
+                                    <span class="birthdate-text">{{ $player->profile->birthdate ? \Carbon\Carbon::parse($player->profile->birthdate)->format('M d, Y') : 'N/A' }}</span>
+                                </td>
+                                <td class="sex-cell">
+                                    <span class="badge {{ $player->profile->sex === 'M' ? 'bg-primary' : 'bg-danger' }}">
+                                        {{ $player->profile->sex === 'M' ? 'Male' : ($player->profile->sex === 'F' ? 'Female' : 'N/A') }}
+                                    </span>
+                                </td>
+                                <td class="status-cell">
+                                    @if ($player->active)
+                                    <span class="status-badge status-active">
+                                        <i class="fas fa-check-circle me-1"></i>Active
+                                    </span>
+                                    @else
+                                    <span class="status-badge status-inactive">
+                                        <i class="fas fa-times-circle me-1"></i>Inactive
+                                    </span>
+                                    @endif
+                                </td>
+                                <td class="date-cell">
+                                    <span class="cell-text-date">{{ \Carbon\Carbon::parse($player->created_at)->format('M d, Y') }}</span>
+                                    <small class="cell-text-time d-block">{{ \Carbon\Carbon::parse($player->created_at)->format('g:i A') }}</small>
+                                </td>
+                                <td class="action-cell text-center">
+                                    <div class="action-wrapper">
+                                        <button class="btn btn-outline-info btn-sm btn-handicap-info"
+                                            type="button"
+                                            onclick="openHandicapModal({{ $player->player->player_profile_id }})"
+                                            title="Handicap Info">
+                                            <i class="fas fa-golf-ball"></i>
+                                        </button>
+                                        <button class="btn btn-outline-secondary btn-context-menu"
+                                            type="button"
+                                            onclick="showUserContextMenu({{ $player->id }}, '{{ ($player->profile->first_name ?? '') . ' ' . ($player->profile->last_name ?? '') }}', event)"
+                                            title="Actions"
+                                            data-label="Actions">
+                                            <i class="fas fa-ellipsis-v me-1"></i>
+                                            <span class="action-text">Actions</span>
+                                        </button>
+                                        <span class="action-label">Actions</span>
+                                    </div>
+                                </td>
+                            </tr>
+                            @endforeach
                         </tbody>
                     </table>
                 </div>
@@ -121,7 +194,12 @@
 <div class="modal fade" id="handicapInfoModal" tabindex="-1" aria-labelledby="handicapInfoModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg">
-            
+            {{-- <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold" id="handicapInfoModalLabel">
+                    <i class="fas fa-golf-ball me-2 text-primary"></i>Handicap Information
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div> --}}
             <div class="modal-body pt-2" id="handicapInfoBody">
                 <div class="text-center text-muted py-5">
                     <i class="fas fa-spinner fa-spin fa-2x"></i>
@@ -395,7 +473,7 @@
     function openHandicapModal(playerId) {
         const modalElement = document.getElementById('handicapInfoModal');
         const modalBody = document.getElementById('handicapInfoBody');
-        
+
         // Clear old content and show loading state
         modalBody.innerHTML = `
             <div class="text-center py-5">
@@ -405,7 +483,7 @@
                 <p class="mt-3 mb-0" style="color: #6b8e4e; font-weight: 500;">Loading handicap information...</p>
             </div>
         `;
-        
+
         // Show modal
         if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
             const modal = new bootstrap.Modal(modalElement);
@@ -420,89 +498,92 @@
 
         // Fetch handicap info
         fetch(BASE_URL + `/admin/players/${playerId}/handicap`, {
-            method: 'GET',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'Accept': 'application/json'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                const localIndex = data.local_handicap_index;
-                const details = data.details || {};
-                const profile = data.profile || {};
-                const config = data.config || {};
-                const recentScores = details.recent_scores || [];
-                const selectedScores = details.selected_scores || [];
-                const scoreDifferentials = details.score_differentials || [];
-                const consideredDifferentials = details.considered_differentials || [];
-                const method = details.method || 'N/A';
-                const count = details.count || 0;
-                const adjustment = details.adjustment || 0;
-                
-                // Get score period from config or from recent scores
-                let periodDisplay = '';
-                let scorePeriodStart = '';
-                let scorePeriodEnd = '';
-                
-                if (config.score_date && config.score_date.start && config.score_date.end) {
-                    scorePeriodStart = config.score_date.start;
-                    scorePeriodEnd = config.score_date.end;
-                    periodDisplay = `
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const localIndex = data.local_handicap_index;
+                    const details = data.details || {};
+                    const profile = data.profile || {};
+                    const config = data.config || {};
+                    const recentScores = details.recent_scores || [];
+                    const selectedScores = details.selected_scores || [];
+                    const scoreDifferentials = details.score_differentials || [];
+                    const consideredDifferentials = details.considered_differentials || [];
+                    const method = details.method || 'N/A';
+                    const count = details.count || 0;
+                    const adjustment = details.adjustment || 0;
+
+                    // Get score period from config or from recent scores
+                    let periodDisplay = '';
+                    let scorePeriodStart = '';
+                    let scorePeriodEnd = '';
+
+                    if (config.score_date && config.score_date.start && config.score_date.end) {
+                        scorePeriodStart = config.score_date.start;
+                        scorePeriodEnd = config.score_date.end;
+                        periodDisplay = `
                         <span class="badge-period">${scorePeriodStart}</span>
                         <span style="margin: 0 8px; color: #adb5bd;">to</span>
                         <span class="badge-period">${scorePeriodEnd}</span>
                     `;
-                } else if (recentScores.length > 0) {
-                    const recentStart = recentScores[recentScores.length - 1].date_played;
-                    const recentEnd = recentScores[0].date_played;
-                    periodDisplay = `
+                    } else if (recentScores.length > 0) {
+                        const recentStart = recentScores[recentScores.length - 1].date_played;
+                        const recentEnd = recentScores[0].date_played;
+                        periodDisplay = `
                         <span class="badge-period">${recentStart}</span>
                         <span style="margin: 0 8px; color: #adb5bd;">to</span>
                         <span class="badge-period">${recentEnd}</span>
                     `;
-                } else {
-                    periodDisplay = '<span style="color: #6c757d; font-style: italic;">No scores available</span>';
-                }
-                
-                // Build formula label
-                let methodLabel = '';
-                if (method === 'LOWEST') {
-                    methodLabel = `Lowest ${count} score differentials`;
-                } else if (method === 'HIGHEST') {
-                    methodLabel = `Highest ${count} score differentials`;
-                } else if (method === 'AVERAGE_OF_LOWEST') {
-                    methodLabel = `Average of lowest ${count} score differentials`;
-                } else {
-                    methodLabel = `${method} (${count} scores)`;
-                }
+                    } else {
+                        periodDisplay = '<span style="color: #6c757d; font-style: italic;">No scores available</span>';
+                    }
 
-                // Build considered differentials table
-                let consideredTableHtml = '';
+                    // Build formula label
+                    let methodLabel = '';
+                    if (method === 'LOWEST') {
+                        methodLabel = `Lowest ${count} score differentials`;
+                    } else if (method === 'HIGHEST') {
+                        methodLabel = `Highest ${count} score differentials`;
+                    } else if (method === 'AVERAGE_OF_LOWEST') {
+                        methodLabel = `Average of lowest ${count} score differentials`;
+                    } else {
+                        methodLabel = `${method} (${count} scores)`;
+                    }
 
-                // Build all recent scores table (reference only)
-                let recentTableHtml = '';
-                if (recentScores.length > 0) {
-                    // Create a set of score IDs that are in considered differentials for quick lookup
-                    const consideredScoreIds = new Set();
-                    consideredDifferentials.forEach(diff => {
-                        const scoreIds = diff.score_ids || [];
-                        scoreIds.forEach(id => consideredScoreIds.add(id));
-                    });
+                    // Build considered differentials table
+                    let consideredTableHtml = '';
 
-
-                    // Map score IDs to their corresponding considered differential
-                    let convertedTo8Holes = {};
-                    scoreDifferentials.forEach(diff => {
-                        const scoreIds = diff.score_ids || [];  
-                        scoreIds.forEach(id => {
-                            convertedTo8Holes[id] = diff;
+                    // Build all recent scores table (reference only)
+                    let recentTableHtml = '';
+                    if (recentScores.length > 0) {
+                        // Create a set of score IDs that are in considered differentials for quick lookup
+                        const consideredScoreIds = new Set();
+                        consideredDifferentials.forEach(diff => {
+                            const scoreIds = diff.score_ids || [];
+                            scoreIds.forEach(id => consideredScoreIds.add(id));
                         });
-                    });
-                    
 
-                    recentTableHtml = `
+
+                        // Map score IDs to their corresponding considered differential
+                        let convertedTo8Holes = {};
+                        scoreDifferentials.forEach(diff => {
+                            const scoreIds = diff.score_ids || [];
+                            scoreIds.forEach(id => {
+                                convertedTo8Holes[id] = diff;
+                            });
+                        });
+
+
+                        console.log('Converted to 8 Holes Mapping:', convertedTo8Holes);
+
+
+                        recentTableHtml = `
                         <div class="mt-2">
                             <h6 class="mb-2" style="color: #304c40; font-weight: 600; font-size: 0.85rem;">All Recent Scores (${recentScores.length})</h6>
                             <div class="table-responsive" style="max-height: 250px; overflow-y: auto;">
@@ -533,17 +614,37 @@
                                             }
                                             
                                             
-                                            return `
-                                                <tr style="background: ${rowBackground};">
-                                                    <td style="color: #304c40; padding: 5px 6px; border-bottom: 1px solid #e8ede8; font-size: 0.75rem;">${score.date_played}</td>
-                                                    <td style="color: #6b8e4e; font-weight: 600; padding: 5px 6px; border-bottom: 1px solid #e8ede8; font-size: 0.75rem;">${scoreDiff}</td>
-                                                    <td style="color: #212529; padding: 5px 6px; border-bottom: 1px solid #e8ede8; font-size: 0.75rem;">${score.adjusted_gross_score}${scoreMark}</td>
-                                                    <td style="color: #212529; padding: 5px 6px; border-bottom: 1px solid #e8ede8; text-align: center; font-size: 0.75rem;">${score.holes_played}</td>
-                                                    <td style="color: #212529; padding: 5px 6px; border-bottom: 1px solid #e8ede8; font-size: 0.75rem;">${parseInt(score.slope_rating)}/${score.course_rating}</td>
-                                                    <td style="color: #212529; padding: 5px 6px; border-bottom: 1px solid #e8ede8; font-size: 0.75rem;">${score.course_name}</td>
-                                                    <td style="color: #212529; padding: 5px 6px; border-bottom: 1px solid #e8ede8; font-size: 0.75rem;">${score.tee_name}</td>
-                                                </tr>
-                                            `;
+                                            return ` <
+                            tr style = "background: ${rowBackground};" >
+                            <
+                            td style = "color: #304c40; padding: 5px 6px; border-bottom: 1px solid #e8ede8; font-size: 0.75rem;" > $ {
+                                score.date_played
+                            } < /td> <
+                            td style = "color: #6b8e4e; font-weight: 600; padding: 5px 6px; border-bottom: 1px solid #e8ede8; font-size: 0.75rem;" > $ {
+                                scoreDiff
+                            } < /td> <
+                            td style = "color: #212529; padding: 5px 6px; border-bottom: 1px solid #e8ede8; font-size: 0.75rem;" > $ {
+                                score.adjusted_gross_score
+                            }
+                        $ {
+                            scoreMark
+                        } < /td> <
+                        td style = "color: #212529; padding: 5px 6px; border-bottom: 1px solid #e8ede8; text-align: center; font-size: 0.75rem;" > $ {
+                                score.holes_played
+                            } < /td> <
+                            td style = "color: #212529; padding: 5px 6px; border-bottom: 1px solid #e8ede8; font-size: 0.75rem;" > $ {
+                                parseInt(score.slope_rating)
+                            }
+                        /${score.course_rating}</td >
+                        <
+                        td style = "color: #212529; padding: 5px 6px; border-bottom: 1px solid #e8ede8; font-size: 0.75rem;" > $ {
+                                score.course_name
+                            } < /td> <
+                            td style = "color: #212529; padding: 5px 6px; border-bottom: 1px solid #e8ede8; font-size: 0.75rem;" > $ {
+                                score.tee_name
+                            } < /td> <
+                            /tr>
+                        `;
                                         }).join('')}
                                     </tbody>
                                 </table>
@@ -551,9 +652,9 @@
                             <small style="color: #6c757d; margin-top: 4px; display: block;"><span style="color: #6b8e4e; font-weight: bold;">*</span> = Considered in calculation</small>
                         </div>
                     `;
-                }
+                    }
 
-                modalBody.innerHTML = `
+                    modalBody.innerHTML = `
                     <style>
                         .handicap-card {
                             background: linear-gradient(135deg, #f5f7f4 0%, #ffffff 100%);
@@ -689,24 +790,24 @@
                         ${recentTableHtml}
                     </div>
                 `;
-            } else if (!data.success) {
-                modalBody.innerHTML = `
+                } else if (!data.success) {
+                    modalBody.innerHTML = `
                     <div class="alert alert-danger border-0">
                         <i class="fas fa-exclamation-triangle me-2"></i>
                         <strong>Error</strong> - ${data.message || 'Failed to load handicap information.'}
                     </div>
                 `;
-            }
-        })
-        .catch(error => {
-            console.error('Error fetching handicap info:', error);
-            modalBody.innerHTML = `
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching handicap info:', error);
+                modalBody.innerHTML = `
                 <div class="alert alert-danger border-0">
                     <i class="fas fa-exclamation-triangle me-2"></i>
                     <strong>Connection Error</strong> - Failed to load handicap information. Please try again.
                 </div>
             `;
-        });
+            });
     }
 
     function viewRecord(id) {
@@ -743,13 +844,28 @@
         }
     }
 
-    // Export Users Function (placeholder)
+    function exportUsers() {
+        console.log('Export players functionality');
+        // Implement export logic here
+    }
 
-    // Search functionality - triggers server-side search
+    // Search functionality
     document.getElementById('tableSearch').addEventListener('input', function() {
-        if (typeof table !== 'undefined') {
-            table.draw();
-        }
+        const searchTerm = this.value.toLowerCase();
+        const rows = document.querySelectorAll('#mainTableBody tr');
+        let visibleCount = 0;
+
+        rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            if (text.includes(searchTerm)) {
+                row.style.display = '';
+                visibleCount++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        document.getElementById('showing-count').textContent = visibleCount;
     });
 
     // Enhanced context menu button functionality
@@ -757,7 +873,7 @@
 
         table = $('#mainTable').DataTable({
 
-           processing: true,
+            processing: true,
             serverSide: true,
             responsive: true,
             ajax: {
@@ -767,110 +883,52 @@
                     d.search.value = $('#tableSearch').val();
                 }
             },
-            columns: [
-                { 
-                    data: 'first_name', 
+            columns: [{
+                    data: 'name',
                     name: 'name',
                     render: function(data, type, row) {
-                        const firstInitial = row.first_name ? row.first_name.charAt(0).toUpperCase() : '';
-                        const lastInitial = row.last_name ? row.last_name.charAt(0).toUpperCase() : '';
-                        const initials = firstInitial + lastInitial || 'U';
-                        const fullName = `${row.last_name || ''}, ${row.first_name || ''}`.replace(/(^, |, $)/g, '');
-                        
-                        const avatar = row.avatar 
-                            ? `<img src="${row.avatar}" alt="Avatar" class="avatar-img">`
-                            : `<div class="avatar-placeholder">${initials}</div>`;
-
-                        // Check if player is active (status is 1 or "1" or true)
-                        const isActive = row.active == 1 || row.active === true || row.active === '1';
-                        const statusClass = isActive ? 'status-online' : 'status-offline';
-                        const statusTitle = isActive ? 'Active Player' : 'Inactive Player';
-
-                        return `
-                            <div class="d-flex align-items-center">
-                                <div class="user-avatar me-3">
-                                    ${avatar}
-                                    <div class="status-indicator ${statusClass}" title="${statusTitle}"></div>
-                                </div>
-                                <div>
-                                    <div class="user-name">${fullName}</div>
-                                </div>
-                            </div>
-                        `;
+                        return '<span class="fw-bold">' + data + '</span>';
                     }
                 },
-                { data: 'whs_no', name: 'whs_no',
-                    render: function(data, type, row) {
-                        return `<span class="whs-no-text fw-semibold">${data || 'N/A'}</span>`;
-                    }
+                {
+                    data: 'whs_no',
+                    name: 'whs_no'
                 },
-                { data: 'account_no', name: 'account_no', 
-                    render: function(data, type, row) {
-                        return `<span class="account-no-text fw-semibold">${data || 'N/A'}</span>`;
-                    }
+                {
+                    data: 'account_no',
+                    name: 'account_no'
                 },
-                { data: 'email', name: 'email', 
-                    render: function(data, type, row) {
-                        return `<a href="mailto:${data}" class="email-link">${data || 'N/A'}</a>`;
-                    }
+                {
+                    data: 'email',
+                    name: 'email'
                 },
-                { data: 'birthdate', name: 'birthdate', 
-                    render: function(data, type, row) {
-                        return data;
-                    }
+                {
+                    data: 'birthdate',
+                    name: 'birthdate'
                 },
-                { data: 'sex', name: 'sex', 
-                    render: function(data, type, row) {
-
-                       return data === 'M' ? '<span class="badge bg-primary">Male</span>' : (data === 'F' ? '<span class="badge bg-danger">Female</span>' : '<span class="badge bg-secondary">N/A</span>');
-                    }
+                {
+                    data: 'sex',
+                    name: 'sex'
                 },
-                { data: 'status', name: 'status', 
-                    render: function(data, type, row) {
-                         return data ===  1 ? '<span class="badge bg-success">Active</span>' : '<span class="badge bg-secondary">Inactive</span>';
-                    }
-                 },
-                 {
-                    data: 'no_of_scores',
-                    name: 'no_of_scores',
-                    render: function(data, type, row) {
-                        return data > 0 ? `<span class="font-weight-bold">${data}</span>` : '-';
-                    }
+                {
+                    data: 'status',
+                    name: 'status'
                 },
-                { data: 'created_at', name: 'created_at' },
-                { data: 'actions', name: 'actions', orderable: false, searchable: false,
-                    render: function(data, type, row) {
-
-
-                    let playerId = row.player_profile_id;
-                    let fullName = `${row.first_name ?? ''} ${row.last_name ?? ''}`.trim();
-                        return `
-                    <div class="action-wrapper">
-                        <button class="btn btn-outline-info btn-sm btn-handicap-info"
-                            type="button"
-                            onclick="openHandicapModal(${playerId})"
-                            title="Handicap Info">
-                            <i class="fas fa-golf-ball"></i>
-                        </button>
-                        <button class="btn btn-outline-secondary btn-context-menu"
-                            type="button"
-                            onclick="showUserContextMenu(${playerId}, '${fullName}', event)"
-                            title="Actions"
-                            data-label="Actions">
-                            <i class="fas fa-ellipsis-v me-1"></i>
-                            <span class="action-text">Actions</span>
-                        </button>
-                        <span class="action-label">Actions</span>
-                    </div>
-                        `;
-
-
-                        
-                    }
+                {
+                    data: 'created_at',
+                    name: 'created_at'
                 },
+                {
+                    data: 'actions',
+                    name: 'actions',
+                    orderable: false,
+                    searchable: false
+                }
             ],
-            pageLength: 10,
-            order: [[6, 'desc']],
+            pageLength: 25,
+            order: [
+                [6, 'desc']
+            ],
             language: {
                 search: "Search formulas:",
                 lengthMenu: "Show _MENU_ entries",
@@ -924,7 +982,32 @@
     `;
     document.head.appendChild(style);
 
-    // Server-side DataTable handles sorting; remove client-side DOM sort handlers
+    // Sort functionality
+    document.querySelectorAll('.sortable').forEach(header => {
+        header.addEventListener('click', function() {
+            const column = parseInt(this.dataset.column);
+            const tbody = document.getElementById('mainTableBody');
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+            const isAscending = !this.classList.contains('sort-asc');
+
+            // Reset all sort icons
+            document.querySelectorAll('.sortable').forEach(h => {
+                h.classList.remove('sort-asc', 'sort-desc');
+            });
+
+            // Set current sort direction
+            this.classList.add(isAscending ? 'sort-asc' : 'sort-desc');
+
+            rows.sort((a, b) => {
+                const aVal = a.cells[column].textContent.trim();
+                const bVal = b.cells[column].textContent.trim();
+
+                return isAscending ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+            });
+
+            rows.forEach(row => tbody.appendChild(row));
+        });
+    });
 
     // Import Players Functionality
     function importUsers() {

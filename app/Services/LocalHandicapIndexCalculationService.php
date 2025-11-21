@@ -50,11 +50,6 @@ class LocalHandicapIndexCalculationService
             $config = $this->loadBracketConfiguration();
 
 
-            echo '<pre>';
-            print_r($config);
-            echo '</pre>';
-
-
 
 
 
@@ -62,12 +57,12 @@ class LocalHandicapIndexCalculationService
 
 
 
-            echo '<pre>';
-            print_r($scores->toArray());
-            echo '</pre>';
+
+
+            $handicaps = $this->calculateHandicapsForUsers($scores, $config);
+
 
             return;
-            $handicaps = $this->calculateHandicapsForUsers($scores);
             $updated = $this->updateParticipantHandicaps($handicaps);
 
 
@@ -164,7 +159,7 @@ class LocalHandicapIndexCalculationService
     /**
      * Fetch latest 20 scores per user using optimized SQL window function
      */
-    private function fetchLatestScoresPerUser($config)
+    private function fetchLatestScoresPerUser($config): array
     {
         $subquery = DB::table('scores')
             ->leftJoin('courses', 'scores.course_id', '=', 'courses.course_id')
@@ -184,7 +179,14 @@ class LocalHandicapIndexCalculationService
             ->orderBy('date_played')
             ->get();
 
-        return $scores;
+
+        $scoresGroupByUser = [];
+
+        foreach ($scores as $score) {
+            $scoresGroupByUser[$score->user_id][] = (array) $score;
+        }
+
+        return $scoresGroupByUser;
     }
 
     /**
@@ -218,12 +220,16 @@ class LocalHandicapIndexCalculationService
     /**
      * Calculate handicap indices for all users
      */
-    private function calculateHandicapsForUsers($userScores): array
+    private function calculateHandicapsForUsers($userScores, $config): array
     {
         $handicaps = [];
 
+        $localHandicapIndexService = new LocalHandicapIndexService();
+
+
+
         foreach ($userScores as $userId => $scores) {
-            $handicap = $this->calculateUserHandicap($userId, $scores);
+            $handicap = $localHandicapIndexService->calculate((object)($scores), $config);
             if ($handicap) {
                 $handicaps[$userId] = $handicap;
             } else {
