@@ -18,23 +18,12 @@ class LocalHandicapIndexCalculationService
     private $tournamentId;
     private $nullHandicapCount = 0;
     private const CHUNK_SIZE = 100;
-    private $maxScoresPerUser;
-
-
-
-
     protected $bracket = [];
     protected $maxScorePerUser;
     protected $minScoresPerUser;
 
     protected $handicapConfig;
     protected PlayerProfile $playerProfile;
-
-    
-
-
-    //////////////////////////
-
 
 
     /**
@@ -45,49 +34,21 @@ class LocalHandicapIndexCalculationService
         $this->tournamentId = $tournamentId ?? request()->tournament_id;
 
         try {
-            Log::info('Starting local handicap calculation', ['tournament_id' => $this->tournamentId]);
 
             $config = $this->loadBracketConfiguration();
-
-
-
-
-
             $scores = $this->fetchLatestScoresPerUser($config);
-
-
-
-
-
-            $handicaps = $this->calculateHandicapsForUsers($scores, $config);
-
-
-            return;
+            $scoresGroupedByUser = $this->groupScoresByUser($scores);
+            $handicaps = $this->calculateHandicapsForUsers($scoresGroupedByUser, $config);
             $updated = $this->updateParticipantHandicaps($handicaps);
-
-
-
-            // echo '<pre>';
-            // print_r($scores);
-
-            // echo '</pre>';
-            Log::info('Local handicap calculation completed', [
-                'tournament_id' => $this->tournamentId,
-                'participants_updated' => $updated,
-                'total_handicaps' => count($handicaps),
-                'null_handicap_count' => $this->nullHandicapCount
-            ]);
 
             return [
                 'success' => true,
-                'updated' => $updated,
+                'updated_count' => $updated,
                 'handicaps' => $handicaps,
                 'null_handicap_count' => $this->nullHandicapCount,
                 'pending' => $this->nullHandicapCount
             ];
         } catch (HandicapCalculationException $e) {
-
-
 
             Log::error('Local handicap calculation failed', [
                 'tournament_id' => $this->tournamentId,
@@ -95,10 +56,24 @@ class LocalHandicapIndexCalculationService
                 'file' => $e->getFile(),
                 'line' => $e->getLine()
             ]);
+
             return response()->json([
                 'success' => false,
                 'error' => $e->getUserMessage()
             ], 400);
+        } catch (Exception $e) {
+
+            Log::error('Unexpected error during local handicap calculation', [
+                'tournament_id' => $this->tournamentId,
+                'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'error' => 'An unexpected error occurred during handicap calculation. Please try again later.'
+            ], 500);
         }
     }
 
@@ -157,18 +132,18 @@ class LocalHandicapIndexCalculationService
     }
 
     /**
-     * Fetch latest 20 scores per user using optimized SQL window function
+     * Fetch latest scores per user within date range
      */
-    private function fetchLatestScoresPerUser($config): array
+    private function fetchLatestScoresPerUser($config)
     {
         $subquery = DB::table('scores')
             ->leftJoin('courses', 'scores.course_id', '=', 'courses.course_id')
             ->leftJoin('tees', 'scores.tee_id', '=', 'tees.tee_id')
             ->select('score_id', 'user_id', 'score_differential', 'holes_played', 'date_played', 'adjusted_gross_score', 'scores.course_id', 'tees.tee_id', 'slope_rating', 'course_rating', 'courses.course_name', 'tees.tee_name')
-            // ->whereBetween('date_played', [
-            //     $config['score_date']['start'],
-            //     $config['score_date']['end']
-            // ])
+            ->whereBetween('date_played', [
+                $config['score_date']['start'],
+                $config['score_date']['end']
+            ])
             ->selectRaw('ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY date_played DESC) as rn')
             ->whereIn('user_id', $this->getParticipantUserIds());
 
@@ -179,14 +154,7 @@ class LocalHandicapIndexCalculationService
             ->orderBy('date_played')
             ->get();
 
-
-        $scoresGroupByUser = [];
-
-        foreach ($scores as $score) {
-            $scoresGroupByUser[$score->user_id][] = (array) $score;
-        }
-
-        return $scoresGroupByUser;
+        return $scores;
     }
 
     /**
@@ -204,17 +172,13 @@ class LocalHandicapIndexCalculationService
      */
     private function groupScoresByUser($scores): array
     {
-        $grouped = [];
+        $scoresGroupByUser = [];
 
         foreach ($scores as $score) {
-            $grouped[$score->user_id][] = [
-                'score_id' => $score->score_id,
-                'score_differential' => (float)$score->score_differential,
-                'round' => ($score->holes_played === 'F9' || $score->holes_played === 'B9') ? 0.5 : 1,
-            ];
+            $scoresGroupByUser[$score->user_id][] = (array) $score;
         }
 
-        return $grouped;
+        return $scoresGroupByUser;
     }
 
     /**
@@ -229,7 +193,7 @@ class LocalHandicapIndexCalculationService
 
 
         foreach ($userScores as $userId => $scores) {
-            $handicap = $localHandicapIndexService->calculate((object)($scores), $config);
+            $handicap = $localHandicapIndexService->calculate($scores, $config);
             if ($handicap) {
                 $handicaps[$userId] = $handicap;
             } else {
@@ -248,78 +212,8 @@ class LocalHandicapIndexCalculationService
         return $handicaps;
     }
 
-    /**
-     * Calculate handicap for a single user
-     */
-    private function calculateUserHandicap($userId, $scores)
-    {
-        // $roundCount = count($scores);
-
-        $roundCount = floor(array_sum(array_column($scores, 'round')));
-
-        // Find matching bracket based on round count
-        foreach ($this->bracket as $config) {
-
-            $minRoundCount = min($roundCount, (int)$config['max']);
 
 
-            if ($roundCount >= (int)$config['min'] && $minRoundCount <= (int)$config['max']) {
-                return $this->applyCalculationMethod($userId, $scores, $config, $roundCount);
-            }
-        }
-
-        Log::debug("No bracket match for user {$userId} with {$roundCount} rounds");
-        return null;
-    }
-
-    /**
-     * Apply the configured calculation method (LOWEST, HIGHEST, AVERAGE_OF_LOWEST)
-     */
-    private function applyCalculationMethod($userId, $scores, $config, $roundCount)
-    {
-        $count = (int)$config['count'];
-        $method = $config['method'];
-        $adjustment = (float)$config['adjustment'];
-
-        // Sort based on method
-        $sorted = $scores;
-        if ($method === 'HIGHEST') {
-            usort($sorted, fn($a, $b) => $b['score_differential'] <=> $a['score_differential']);
-        } else {
-            usort($sorted, fn($a, $b) => $a['score_differential'] <=> $b['score_differential']);
-        }
-
-        $selected = array_slice($sorted, 0, $count);
-
-        // Calculate score differential based on method
-        $scoreDiff = match ($method) {
-            'LOWEST' => $selected[0]['score_differential'] ?? 0,
-            'HIGHEST' => $selected[0]['score_differential'] ?? 0,
-            'AVERAGE_OF_LOWEST' => count($selected) > 0
-                ? array_sum(array_column($selected, 'score_differential')) / count($selected)
-                : 0,
-            default => 0,
-        };
-
-        $handicapIndex = round($scoreDiff + $adjustment, 2);
-
-        Log::debug("Calculated handicap for user {$userId}", [
-            'rounds' => $roundCount,
-            'method' => $method,
-            'handicap_index' => $handicapIndex,
-            'selected_count' => count($selected)
-        ]);
-
-        return [
-            'local_handicap_index' => $handicapIndex,
-            'details' => [
-                'scores_considered' => $roundCount,
-                'method' => $method,
-                'count_used' => $count,
-                'adjustment' => $adjustment,
-            ]
-        ];
-    }
 
     /**
      * Update participant handicaps in database (bulk update)
@@ -327,7 +221,6 @@ class LocalHandicapIndexCalculationService
     private function updateParticipantHandicaps($handicaps): int
     {
         if (empty($handicaps)) {
-            Log::warning('No handicaps to update');
             return 0;
         }
 
@@ -336,16 +229,21 @@ class LocalHandicapIndexCalculationService
         $now = now();
         $userId = Auth::id();
 
-        // Batch updates in chunks to avoid memory issues
-        collect($handicaps)
+        $participants = Participant::where('tournament_id', $this->tournamentId)->get();
+
+        DB::beginTransaction();
+        collect($participants)
             ->chunk(self::CHUNK_SIZE)
-            ->each(function ($chunk) use (&$updated, $now) {
-                foreach ($chunk as $userId => $handicap) {
+            ->each(function ($chunk) use (&$updated, &$pending, $now, $handicaps, $userId) {
+                foreach ($chunk as $participant) {
+                    $pUserId = $participant->user_id;
+                    $localHandicapIndex = $handicaps[$pUserId]['local_handicap_index'] ?? null;
+
                     $updated += Participant::where('tournament_id', $this->tournamentId)
-                        ->where('user_id', $userId)
+                        ->where('user_id', $pUserId)
                         ->update([
-                            'local_handicap_index' => $handicap['local_handicap_index'],
-                            'final_local_handicap_index' => $handicap['local_handicap_index'],
+                            'local_handicap_index' => $localHandicapIndex,
+                            'final_local_handicap_index' => $localHandicapIndex,
                             'tournament_handicap_index' => null,
                             'final_tournament_handicap_index' => null,
                             'updated_by' => $userId,
@@ -353,6 +251,8 @@ class LocalHandicapIndexCalculationService
                         ]);
                 }
             });
+
+        DB::commit();
 
         return $updated;
     }

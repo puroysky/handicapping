@@ -12,6 +12,7 @@ use App\Models\Rating;
 use App\Models\WhsHandicapIndex;
 use App\Services\LocalHandicapIndexCalculationService;
 use App\Services\ParticipantImportService;
+use App\Services\TournamentHandicapCalculationService;
 use Brick\Math\Exception\MathException;
 use Exception;
 use Illuminate\Auth\Events\Validated;
@@ -253,9 +254,6 @@ class ParticipantController extends Controller
             'type' => 'required|in:tournament,local',
         ]);
 
-
-
-
         $tournamentId = $validatedData['tournament_id'];
         $type = $validatedData['type'];
 
@@ -281,209 +279,14 @@ class ParticipantController extends Controller
 
     private function calculateTournamentHandicap($tournament)
     {
-        try {
-            DB::beginTransaction();
 
-            $participants = $this->getParticipantData($tournament->tournament_id);
-
-            if ($participants->isEmpty()) {
-                return response()->json([
-                    'success' => true,
-                    'message' => 'No participants found for this tournament',
-                    'updated_count' => 0
-                ]);
-            }
-
-
-
-            $courseHandicapFormula = [];
-            $ratingsArr = [];
-
-
-
-
-            foreach ($tournament->tournamentCourses as $course) {
-                foreach ($course->scorecard->ratings as $rating) {
-                    $ratingsArr[$course->course_id][$rating->tee_id] = [
-                        'slope_rating' => $rating->slope_rating,
-                        'course_rating' => $rating->course_rating,
-                        'par' => $course->scorecard->scorecardHoles->sum('par')
-                    ];
-                }
-
-                $courseHandicapFormula[$course->course_id] = $course->scorecard->courseHandicapFormula->formula_expression;
-            }
-
-
-            Log::debug('Course Handicap Formula', ['formula' => $courseHandicapFormula]);
-
-
-
-            $executor = new MathExecutor();
-
-            // Register custom math helpers
-            $executor->addFunction('ROUND', fn($value, $precision = 0) => round($value, $precision));
-            $executor->addFunction('MIN', fn(...$args) => min($args));
-            $executor->addFunction('MAX', fn(...$args) => max($args));
-            $executor->addFunction('AVG', fn(...$args) => array_sum($args) / count($args));
-
-            $updatedCount = 0;
-            $skippedCount = 0;
-            $errors = [];
-
-            foreach ($participants as $participant) {
-
-                $whsHandicapIndex = $participant->final_whs_handicap_index;
-                $localHandicapIndex = $participant->final_local_handicap_index;
-                $expression = null;
-
-                // Determine which formula to use based on available data
-                if ($whsHandicapIndex === null && $localHandicapIndex === null) {
-                    $expression = $tournament->tournament_handicap_formula_4;
-                } elseif ($whsHandicapIndex !== null && $localHandicapIndex !== null) {
-                    $expression = $tournament->tournament_handicap_formula_1;
-                } elseif ($whsHandicapIndex !== null && $localHandicapIndex === null) {
-                    $expression = $tournament->tournament_handicap_formula_2;
-                } elseif ($localHandicapIndex !== null && $whsHandicapIndex === null) {
-                    $expression = $tournament->tournament_handicap_formula_3;
-                }
-
-                if (empty($expression)) {
-                    $skippedCount++;
-                    Log::warning('No formula available for participant', [
-                        'participant_id' => $participant->participant_id,
-                        'whs_handicap_index' => $whsHandicapIndex,
-                        'local_handicap_index' => $localHandicapIndex
-                    ]);
-                    continue;
-                }
-
-                $executor->setVar('WHS_HANDICAP_INDEX', (float) ($whsHandicapIndex ?? 0));
-                $executor->setVar('LOCAL_HANDICAP_INDEX', (float) ($localHandicapIndex ?? 0));
-
-                // Execute the formula
-                $tournamentHandicap = $executor->execute($expression);
-
-                // Update participant with calculated handicap
-                // Log the SQL query before executing
-                DB::enableQueryLog();
-
-                Participant::where($participant->particpant_id)->update([
-                    'tournament_handicap_index' => $tournamentHandicap,
-                    'final_tournament_handicap_index' => $tournamentHandicap,
-                    'updated_by' => Auth::id()
-                ]);
-
-
-                $updatedCount++;
-
-
-
-
-
-                $participantCourses = ParticipantCourse::with('course')->where('participant_id', $participant->participant_id)
-                    ->where('tournament_id', $tournament->tournament_id)
-                    ->get();
-
-                // $participantCourseHandicaps = ParticipantCourseHandicap::where('participant_id', $participant->participant_id);
-
-                foreach ($participantCourses as $participantCourse) {
-
-
-                    $courseRatingFormula = $courseHandicapFormula[$participantCourse->course_id] ?? null;
-
-
-                    Log::debug('participantCoursecheck', ['data' => $participantCourse->course]);
-                    foreach ($participant->participantCourseHandicaps as $teeHandicap) {
-
-                        Log::debug('teeHandicapcheck', ['ratings' => $ratingsArr, 'course_id' => $participantCourse->course_id, 'tee_id' => $teeHandicap->tee_id]);
-
-                        $slopeRating = $ratingsArr[$teeHandicap->course_id][$teeHandicap->tee_id]['slope_rating'];
-                        $courseRating = $ratingsArr[$teeHandicap->course_id][$teeHandicap->tee_id]['course_rating'];
-                        $par = $ratingsArr[$teeHandicap->course_id][$teeHandicap->tee_id]['par'];
-                        $courseHandicap = $this->calculateCourseHandicap($courseRatingFormula, $tournamentHandicap, $slopeRating, $courseRating, $par);
-                        ParticipantCourseHandicap::where([
-                            'tournament_id' => $tournament->tournament_id,
-                            'participant_id' => $participant->participant_id,
-                            'course_id' => $participantCourse->course_id,
-                            'tee_id' => $teeHandicap->tee_id,
-                        ])
-                            ->update([
-                                'course_handicap' => $courseHandicap,
-                                'final_course_handicap' => $courseHandicap,
-                                'updated_by' => Auth::id()
-                            ]);
-
-                        Log::debug('Updated course handicap', [
-                            'participant_id' => $participant->participant_id,
-                            'course_id' => $participantCourse->course_id,
-                            'tee_id' => $teeHandicap->tee_id,
-                            'slope_rating' => $slopeRating,
-                            'course_rating' => $courseRating,
-                            'par' => $par,
-                            'course_handicap' => $courseHandicap
-                        ]);
-                    }
-                }
-            }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            DB::commit();
-
-            return response()->json([
-                'success' => true,
-                'message' => "Tournament handicaps calculated successfully. Updated: $updatedCount, Skipped: $skippedCount",
-                'updated_count' => $updatedCount,
-                'skipped_count' => $skippedCount,
-                'errors' => !empty($errors) ? $errors : null
-            ]);
-        } catch (Exception $e) {
-            DB::rollBack();
-            Log::error('Error calculating tournament handicaps', [
-                'tournament_id' => $tournament->tournament_id,
-                'error' => $e->getMessage(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine(),
-            ]);
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Error: ' . $e->getMessage()
-            ], 500);
-        }
+        $handicap = new TournamentHandicapCalculationService();
+        return $handicap->calculate($tournament);
     }
 
 
-    private function getParticipantData($tournamentId)
-    {
 
-        $participants = Participant::with('user.profile', 'user.player', 'tournament', 'participantCourseHandicaps.course', 'participantCourseHandicaps.tee')
-            ->leftJoin('users', 'participants.user_id', '=', 'users.id')
-            ->leftJoin('tournaments', 'participants.tournament_id', '=', 'tournaments.tournament_id')
-            ->leftJoin('player_profiles', 'participants.player_profile_id', '=', 'player_profiles.player_profile_id')
-            ->leftJoin('whs_handicap_indexes', function ($join) {
-                $join->on('participants.tournament_id', '=', 'whs_handicap_indexes.tournament_id')
-                    ->on('tournaments.whs_handicap_import_id', '=', 'whs_handicap_indexes.whs_handicap_import_id')
-                    ->on('player_profiles.whs_no', '=', 'whs_handicap_indexes.whs_no');
-            })
-            ->select('participants.*', 'users.*', 'tournaments.*', 'player_profiles.*', 'whs_handicap_indexes.whs_handicap_index', 'whs_handicap_indexes.final_whs_handicap_index')
-            ->where('participants.tournament_id', $tournamentId)
-            ->get();
 
-        return $participants;
-    }
 
     private function calculateLocalHandicap()
     {
@@ -689,65 +492,5 @@ class ParticipantController extends Controller
                 'message' => 'Error: ' . $e->getMessage()
             ], 500);
         }
-    }
-
-
-
-    public function calculateCourseHandicap($formula, $handicapIndex, $slopeRating, $courseRating, $par)
-    {
-
-        $validator = Validator::make([
-            'formula' => $formula,
-            'handicap_index' => $handicapIndex,
-            'slope_rating' => $slopeRating,
-            'course_rating' => $courseRating,
-            'par' => $par,
-        ], [
-            'formula' => 'required|string',
-            'handicap_index' => 'required|numeric',
-            'slope_rating' => 'required|numeric:min:1',
-            'course_rating' => 'required|numeric:min:1',
-            'par' => 'required|integer',
-        ]);
-
-
-        if ($validator->fails()) {
-            throw new \InvalidArgumentException("Invalid input data: " . implode(", ", $validator->errors()->all()));
-        }
-
-
-        $executor = new MathExecutor();
-
-
-        $this->registerMathFunctions($executor);
-
-
-
-
-        // Add variables to the executor
-        $executor->setVar('HANDICAP_INDEX', (float) ($handicapIndex));
-        $executor->setVar('SLOPE_RATING', (float) ($slopeRating));
-        $executor->setVar('COURSE_RATING', (float) ($courseRating));
-        $executor->setVar('PAR', (int) ($par));
-
-        // Execute the formula
-        return $executor->execute($formula);
-    }
-
-    private function registerMathFunctions(MathExecutor $executor)
-    {
-
-        $executor->addFunction('ROUND', fn($value, $precision = 0) => round($value, $precision));
-        $executor->addFunction('MIN', fn(...$args) => min($args));
-        $executor->addFunction('MAX', fn(...$args) => max($args));
-        $executor->addFunction('CEIL', fn($value) => ceil($value));
-        $executor->addFunction('FLOOR', fn($value) => floor($value));
-
-        $executor->addFunction('AVG', function (...$args) {
-            if (count($args) === 0) {
-                throw new MathException("AVG requires at least one argument.");
-            }
-            return array_sum($args) / count($args);
-        });
     }
 }

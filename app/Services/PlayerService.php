@@ -218,7 +218,7 @@ class PlayerService
 
 
         $handicapService = new LocalHandicapIndexService();
-        $scores = $handicapService->calculate($scores, $config);
+        $scores = $handicapService->calculate($scores->toArray(), $config);
 
 
         return array_merge($scores, [
